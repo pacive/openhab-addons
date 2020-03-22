@@ -233,6 +233,7 @@
     <module>org.openhab.binding.networkupstools</module>
     <module>org.openhab.binding.nibeheatpump</module>
     <module>org.openhab.binding.nibeuplink</module>
+    <module>org.openhab.binding.nibeuplinkrest</module>
     <module>org.openhab.binding.nikobus</module>
     <module>org.openhab.binding.nikohomecontrol</module>
     <module>org.openhab.binding.novafinedust</module>
