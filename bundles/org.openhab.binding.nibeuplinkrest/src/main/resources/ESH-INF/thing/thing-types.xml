@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="nibeuplinkrest"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Sample Thing Type -->
+	<bridge-type id="apibridge">
+		<label>NibeUplink Rest API Bridge</label>
+		<description>Connection to the Nibe Uplink Rest API</description>
+
+		<config-description>
+			<parameter name="clientId" type="text" required="true">
+				<label>OAuth Client Identifier</label>
+				<description>OAuth Client Identifier</description>
+			</parameter>
+			<parameter name="clientSecret" type="text" required="true">
+				<label>OAuth Client Secret</label>
+				<description>OAuth Client Secret</description>
+			</parameter>
+			<parameter name="updateInterval" type="integer" min="20" max="300" required="true">
+				<label>Update interval</label>
+				<description>Update interval</description>
+				<default>60</default>
+			</parameter>
+		</config-description>
+
+	</bridge-type>
+
+	<!-- Sample Channel Type
+	<channel-type id="sample-channel">
+		<item-type>nibeuplinkrestItem</item-type>
+		<label>NibeUplinkRest Binding Channel</label>
+		<description>Sample channel for NibeUplinkRest Binding</description>
+	</channel-type> -->
+
+</thing:thing-descriptions>
