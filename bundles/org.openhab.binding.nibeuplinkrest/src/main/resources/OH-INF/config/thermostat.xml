@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0
+	https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<!-- The thing updates at intervals the High and Medium priority channels, defined in channel configuration file. This parameters
+		specify how often (time in seconds) these channels should be updated. -->
+
+	<config-description uri="thing-type:nibeuplinkrest:thermostat">
+		<parameter name="id" type="integer" required="true">
+			<label>Id</label>
+			<description>Identifier for the thermostat</description>
+		</parameter>
+		<parameter name="systemId" type="integer" required="true">
+			<label>System Id</label>
+			<description>Id of the Nibe Uplink system this thermostat belongs to.</description>
+		</parameter>
+		<parameter name="name" type="text" required="true">
+			<label>Thermostat name</label>
+			<description>A short descriptive name of the thermostat (e.g. "Ground Floor" or "Bedroom")</description>
+		</parameter>
+		<parameter name="climateSystems" type="integer" multiple="true">
+			<label>ClimateSystems</label>
+			<description>Select the heating systems this thermostat controls (optional)</description>
+			<multipleLimit>8</multipleLimit>
+			<options>
+				<option value="1">Climate system 1</option>
+				<option value="2">Climate system 2</option>
+				<option value="3">Climate system 3</option>
+				<option value="4">Climate system 4</option>
+				<option value="5">Climate system 5</option>
+				<option value="6">Climate system 6</option>
+				<option value="7">Climate system 7</option>
+				<option value="8">Climate system 8</option>
+			</options>
+		</parameter>
+	</config-description>
+</config-description:config-descriptions>
