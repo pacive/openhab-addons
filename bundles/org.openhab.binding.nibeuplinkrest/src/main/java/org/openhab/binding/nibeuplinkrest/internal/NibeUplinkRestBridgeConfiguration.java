@@ -12,7 +12,6 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * The {@link NibeUplinkRestBridgeConfiguration} class contains fields mapping thing configuration parameters.

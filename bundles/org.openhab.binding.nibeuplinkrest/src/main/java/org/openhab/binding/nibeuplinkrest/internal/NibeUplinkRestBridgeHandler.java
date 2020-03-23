@@ -26,6 +26,8 @@ import org.eclipse.smarthome.core.types.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
  * The {@link NibeUplinkRestBridgeHandler} is responsible for handling commands, which are
  * sent to one of the channels.
@@ -72,38 +74,20 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
         config = getConfigAs(NibeUplinkRestBridgeConfiguration.class);
         oAuthService = oAuthFactory.createOAuthClientService(thing.getUID().getAsString(), TOKEN_ENDPOINT,
                 AUTH_ENDPOINT, config.clientId, config.clientSecret, SCOPE, false);
-
-
-
-        // TODO: Initialize the handler.
-        // The framework requires you to return from this method quickly. Also, before leaving this method a thing
-        // status from one of ONLINE, OFFLINE or UNKNOWN must be set. This might already be the real thing status in
-        // case you can decide it directly.
-        // In case you can not decide the thing status directly (e.g. for long running connection handshake using WAN
-        // access or similar) you should set status UNKNOWN here and then decide the real status asynchronously in the
-        // background.
-
-        // set the thing status to UNKNOWN temporarily and let the background task decide for the real status.
-        // the framework is then able to reuse the resources from the thing handler initialization.
-        // we set this upfront to reliably check status updates in unit tests.
         updateStatus(ThingStatus.UNKNOWN);
-
-        // Example for background initialization:
-        scheduler.execute(() -> {
-            try {
-                String url = oAuthService.getAuthorizationUrl("http://openhab.alfredsson.info", SCOPE, "state");
-                logger.debug("url: {}", url);
-            } catch (OAuthException e) {
-                logger.error("Error:", e);
-            }
-        });
-
         logger.debug("Finished initializing!");
+    }
 
-        // Note: When initialization can NOT be done set the status with more details for further
-        // analysis. See also class ThingStatusDetail for all available status details.
-        // Add a description to give user information to understand why thing does not work as expected. E.g.
-        // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
-        // "Can not access device as username and/or password are invalid");
+    public void authorize(String authCode, String baseURL) throws OAuthException, OAuthResponseException, IOException {
+        oAuthService.getAccessTokenResponseByAuthorizationCode(authCode, baseURL);
+    }
+
+    public String getAuthorizationUrl(String baseURL) {
+        try {
+            return oAuthService.getAuthorizationUrl(baseURL, SCOPE, thing.getUID().getAsString());
+        } catch (OAuthException e) {
+            logger.warn("Error constructing Authorization URL");
+            return "";
+        }
     }
 }

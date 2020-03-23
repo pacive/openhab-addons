@@ -37,5 +37,14 @@ public class NibeUplinkRestBindingConstants {
     public static final String AUTH_ENDPOINT = OAUTH_ENDPOINT + "authorize";
     public static final String TOKEN_ENDPOINT = OAUTH_ENDPOINT + "token";
     private static final String API_ENDPOINT = BASE_URL + "api/v1/";
-    public static final String SCOPE = "READSYSTEM+WRITESYSTEM";
+    public static final String SCOPE = "READSYSTEM WRITESYSTEM";
+
+    public static final String SERVLET_PATH = "/nibeuplinkconnect";
+    public static final String SERVLET_IMG_PATH = SERVLET_PATH + "/img";
+    public static final String SERVLET_RESOURCE_DIR = "web/";
+    public static final String SERVLET_RESOURCE_IMG_DIR = SERVLET_RESOURCE_DIR + "img";
+    public static final String SERVLET_TEMPLATE_INDEX = "index";
+    public static final String SERVLET_TEMPLATE_INDEX_FILE = SERVLET_RESOURCE_DIR + SERVLET_TEMPLATE_INDEX + ".html";
+    public static final String SERVLET_TEMPLATE_ACCOUNT = "account";
+    public static final String SERVLET_TEMPLATE_ACCOUNT_FILE = SERVLET_RESOURCE_DIR + SERVLET_TEMPLATE_ACCOUNT + ".html";
 }

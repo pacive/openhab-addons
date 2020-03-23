@@ -28,6 +28,7 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.eclipse.smarthome.io.net.http.HttpClientFactory;
+import org.openhab.binding.nibeuplinkrest.internal.auth.NibeUplinkRestOAuthService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -44,6 +45,7 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_APIBRIDGE);
 
     private @NonNullByDefault({}) OAuthFactory oAuthFactory;
+    private @NonNullByDefault({}) NibeUplinkRestOAuthService oAuthService;
     private @NonNullByDefault({}) HttpClient httpClient;
 
     @Override
@@ -56,7 +58,10 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (THING_TYPE_APIBRIDGE.equals(thingTypeUID)) {
-            return new NibeUplinkRestBridgeHandler((Bridge) thing, oAuthFactory, httpClient);
+            final NibeUplinkRestBridgeHandler handler = new NibeUplinkRestBridgeHandler
+                    ((Bridge) thing, oAuthFactory, httpClient);
+            oAuthService.addBridgeHandler(handler);
+            return handler;
         }
 
         return null;
@@ -79,4 +84,9 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
     protected void unsetHttpClientFactory(HttpClientFactory httpClientFactory) {
         this.httpClient = null;
     }
+
+    @Reference
+    protected void setOAuthService(NibeUplinkRestOAuthService oAuthService) { this.oAuthService = oAuthService; }
+
+    protected void unsetOAuthService(NibeUplinkRestOAuthService oAuthService) { this.oAuthService = null; }
 }
