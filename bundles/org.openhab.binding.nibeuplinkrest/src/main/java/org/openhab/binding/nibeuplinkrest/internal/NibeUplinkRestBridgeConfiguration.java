@@ -12,7 +12,6 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal;
 
-
 /**
  * The {@link NibeUplinkRestBridgeConfiguration} class contains fields mapping thing configuration parameters.
  *
