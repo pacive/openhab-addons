@@ -16,6 +16,8 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -42,7 +44,8 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = ThingHandlerFactory.class, configurationPid = "binding.nibeuplinkrest")
 public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_APIBRIDGE);
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections
+            .unmodifiableSet(Stream.of(THING_TYPE_APIBRIDGE, THING_TYPE_SYSTEM).collect(Collectors.toSet()));
 
     private @NonNullByDefault({}) OAuthFactory oAuthFactory;
     private @NonNullByDefault({}) NibeUplinkRestOAuthService oAuthService;
@@ -61,6 +64,10 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
             final NibeUplinkRestBridgeHandler handler = new NibeUplinkRestBridgeHandler
                     ((Bridge) thing, oAuthFactory, httpClient);
             oAuthService.addBridgeHandler(handler);
+            return handler;
+        }
+        if (THING_TYPE_SYSTEM.equals(thingTypeUID)) {
+            final NibeUplinkRestBaseSystemHandler handler = new NibeUplinkRestBaseSystemHandler(thing);
             return handler;
         }
 

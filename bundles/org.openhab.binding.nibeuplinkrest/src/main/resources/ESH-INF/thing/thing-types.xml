@@ -27,6 +27,28 @@
 
 	</bridge-type>
 
+	<thing-type id="system">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="apibridge"/>
+		</supported-bridge-type-refs>
+		<label>System</label>
+		<properties>
+			<property name="name" />
+			<property name="productName" />
+			<property name="securityLevel" />
+			<property name="serialNumber" />
+		</properties>
+
+		<representation-property>systemId</representation-property>
+
+		<config-description>
+			<parameter name="systemId" type="integer" required="true">
+				<label>System Id</label>
+				<description>The system Id given by Nibe Uplink</description>
+			</parameter>
+		</config-description>
+	</thing-type>
+
 	<!-- Sample Channel Type
 	<channel-type id="sample-channel">
 		<item-type>nibeuplinkrestItem</item-type>

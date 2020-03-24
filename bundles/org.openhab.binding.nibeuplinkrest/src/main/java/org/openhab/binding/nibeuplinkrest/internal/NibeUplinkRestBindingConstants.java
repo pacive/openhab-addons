@@ -28,6 +28,17 @@ public class NibeUplinkRestBindingConstants {
 
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_APIBRIDGE = new ThingTypeUID(BINDING_ID, "apibridge");
+    public static final ThingTypeUID THING_TYPE_SYSTEM = new ThingTypeUID(BINDING_ID, "system");
+
+    public static final String PROPERTY_SYSTEM_ID = "systemId";
+    public static final String PROPERTY_SYSTEM_NAME = "name";
+    public static final String PROPERTY_SYSTEM_PRODUCT_NAME = "productName";
+    public static final String PROPERTY_SYSTEM_SECURITY_LEVEL = "securityLevel";
+    public static final String PROPERTY_LAST_ACTIVITY = "lastActivityDate";
+    public static final String PROPERTY_CONNECTION_STATUS = "connectionStatus";
+    public static final String PROPERTY_SYSTEM_SERIAL_NUMBER = "serialNumber";
+    public static final String PROPERTY_SYSTEM_ADDRESS = "address";
+    public static final String PROPERTY_SYSTEM_HAS_ALARMED = "hasAlarmed";
 
     // List of all Channel ids
     //public static final String CHANNEL_1 = "channel1";
@@ -36,7 +47,8 @@ public class NibeUplinkRestBindingConstants {
     private static final String OAUTH_ENDPOINT = BASE_URL + "oauth/";
     public static final String AUTH_ENDPOINT = OAUTH_ENDPOINT + "authorize";
     public static final String TOKEN_ENDPOINT = OAUTH_ENDPOINT + "token";
-    private static final String API_ENDPOINT = BASE_URL + "api/v1/";
+    public static final String API_ENDPOINT = BASE_URL + "api/v1/";
+    public static final String SYSTEM = API_ENDPOINT + "systems";
     public static final String SCOPE = "READSYSTEM WRITESYSTEM";
 
     public static final String SERVLET_PATH = "/nibeuplinkconnect";
