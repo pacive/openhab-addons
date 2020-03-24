@@ -13,8 +13,9 @@
 package org.openhab.binding.nibeuplinkrest.internal.api;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.System;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
 
 import java.util.List;
 
@@ -24,23 +25,23 @@ import java.util.List;
 @NonNullByDefault
 public interface NibeUplinkRestApi {
 
-    List<System> getConnectedSystems();
+    List<NibeSystem> getConnectedSystems();
 
-    System getSystem(int systemId);
+    NibeSystem getSystem(int systemId);
 
-    List<Category> getCategories();
+    @Nullable List<Category> getCategories();
 
-    Category getCategory(String categoryId);
+    @Nullable Category getCategory(String categoryId);
 
-    List<Parameter> getParameters(List<Integer> parameterIds);
+    @Nullable List<Parameter> getParameters(List<Integer> parameterIds);
 
-    List<Queue> setParameters(List<Parameter> parameters);
+    @Nullable List<Queue> setParameters(List<Parameter> parameters);
 
-    Mode getMode();
+    @Nullable Mode getMode();
 
     void setMode(Mode mode);
 
-    List<Thermostat> getThermostats();
+    @Nullable List<Thermostat> getThermostats();
 
     void setThermostat(Thermostat thermostat);
 }

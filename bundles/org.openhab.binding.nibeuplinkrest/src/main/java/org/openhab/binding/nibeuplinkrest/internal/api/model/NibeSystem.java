@@ -22,7 +22,7 @@ import java.util.Objects;
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault
-public class System {
+public class NibeSystem {
     private final int systemId;
     private String name;
     private String productName;
@@ -30,12 +30,11 @@ public class System {
     private String serialNumber;
     private ZonedDateTime lastSeen;
     private ConnectionStatus connectionStatus;
-    private String address;
     private boolean hasAlarmed;
     private @Nullable SystemConfig config;
 
-    public System(int systemId, String name, String productName, String securityLevel, String serialNumber,
-                  ZonedDateTime lastSeen, ConnectionStatus connectionStatus, String address, boolean hasAlarmed) {
+    public NibeSystem(int systemId, String name, String productName, String securityLevel, String serialNumber,
+                      ZonedDateTime lastSeen, ConnectionStatus connectionStatus, boolean hasAlarmed) {
         this.systemId = systemId;
         this.name = name;
         this.productName = productName;
@@ -43,7 +42,6 @@ public class System {
         this.serialNumber = serialNumber;
         this.lastSeen = lastSeen;
         this.connectionStatus = connectionStatus;
-        this.address = address;
         this.hasAlarmed = hasAlarmed;
     }
 
@@ -58,8 +56,6 @@ public class System {
     public void setLastSeen(ZonedDateTime lastSeen) { this.lastSeen = lastSeen; }
 
     public void setConnectionStatus(ConnectionStatus connectionStatus) { this.connectionStatus = connectionStatus; }
-
-    public void setAddress(String address) { this.address = address; }
 
     public void setHasAlarmed(boolean hasAlarmed) { this.hasAlarmed = hasAlarmed; }
 
@@ -79,24 +75,22 @@ public class System {
 
     public ConnectionStatus getConnectionStatus() { return connectionStatus; }
 
-    public String getAddress() { return address; }
-
     public boolean hasAlarmed() { return hasAlarmed; }
 
-    public boolean hasCooling() { return config != null ? config.hasCooling() : false; }
+    public boolean hasCooling() { return config != null && config.hasCooling(); }
 
-    public boolean hasHeating() { return config != null ? config.hasHeating() : false; }
+    public boolean hasHeating() { return config != null && config.hasHeating(); }
 
-    public boolean hasHotWater() { return config != null ? config.hasHotWater() : false; }
+    public boolean hasHotWater() { return config != null && config.hasHotWater(); }
 
-    public boolean hasVentilation() { return config != null ? config.hasVentilation() : false; }
+    public boolean hasVentilation() { return config != null && config.hasVentilation(); }
 
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        System system = (System) o;
-        return systemId == system.systemId;
+        NibeSystem nibeSystem = (NibeSystem) o;
+        return systemId == nibeSystem.systemId;
     }
 
     @Override
