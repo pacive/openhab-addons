@@ -33,7 +33,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 
@@ -96,10 +95,10 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
         final ThingUID bridgeUID = bridgeHandler.getThing().getUID();
 
         properties.put(PROPERTY_SYSTEM_ID, system.getSystemId());
-        properties.put(PROPERTY_SYSTEM_NAME, system.getName());
-        properties.put(PROPERTY_SYSTEM_PRODUCT_NAME, system.getProductName());
-        properties.put(PROPERTY_SYSTEM_SECURITY_LEVEL, system.getSecurityLevel());
-        properties.put(PROPERTY_SYSTEM_SERIAL_NUMBER, system.getSerialNumber());
+        properties.put(PROPERTY_NAME, system.getName());
+        properties.put(PROPERTY_PRODUCT_NAME, system.getProductName());
+        properties.put(PROPERTY_SECURITY_LEVEL, system.getSecurityLevel());
+        properties.put(PROPERTY_SERIAL_NUMBER, system.getSerialNumber());
 
         ThingUID thingUID = new ThingUID(THING_TYPE_SYSTEM, bridgeUID,
                 Integer.toString(system.getSystemId()));

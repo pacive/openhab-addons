@@ -31,9 +31,9 @@ public class NibeUplinkRestBindingConstants {
     public static final ThingTypeUID THING_TYPE_SYSTEM = new ThingTypeUID(BINDING_ID, "system");
 
     public static final String PROPERTY_SYSTEM_ID = "systemId";
-    public static final String PROPERTY_SYSTEM_NAME = "name";
-    public static final String PROPERTY_SYSTEM_PRODUCT_NAME = "productName";
-    public static final String PROPERTY_SYSTEM_SECURITY_LEVEL = "securityLevel";
+    public static final String PROPERTY_NAME = "name";
+    public static final String PROPERTY_PRODUCT_NAME = "productName";
+    public static final String PROPERTY_SECURITY_LEVEL = "securityLevel";
     public static final String PROPERTY_SERIAL_NUMBER = "serialNumber";
     public static final String PROPERTY_HAS_COOLING = "hasCooling";
     public static final String PROPERTY_HAS_HEATING = "hasHeating";
@@ -43,9 +43,6 @@ public class NibeUplinkRestBindingConstants {
     public static final String SYSTEM_LAST_ACTIVITY = "lastActivityDate";
     public static final String SYSTEM_CONNECTION_STATUS = "connectionStatus";
     public static final String SYSTEM_HAS_ALARMED = "hasAlarmed";
-
-    // List of all Channel ids
-    //public static final String CHANNEL_1 = "channel1";
 
     private static final String BASE_URL = "https://api.nibeuplink.com/";
     private static final String OAUTH_ENDPOINT = BASE_URL + "oauth/";

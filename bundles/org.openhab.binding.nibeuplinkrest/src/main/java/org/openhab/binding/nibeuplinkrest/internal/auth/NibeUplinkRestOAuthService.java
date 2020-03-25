@@ -61,7 +61,8 @@ public class NibeUplinkRestOAuthService {
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
-
+        httpService.unregister(SERVLET_PATH);
+        httpService.unregister(SERVLET_IMG_PATH);
     }
 
     private HttpServlet createServlet() throws IOException {

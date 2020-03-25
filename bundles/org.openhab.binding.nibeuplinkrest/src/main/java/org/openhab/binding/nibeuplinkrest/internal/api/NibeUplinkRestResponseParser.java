@@ -58,9 +58,9 @@ public class NibeUplinkRestResponseParser {
             final JsonObject systemObject = tree.getAsJsonObject();
             try {
                 systemId = systemObject.get(PROPERTY_SYSTEM_ID).getAsInt();
-                name = systemObject.get(PROPERTY_SYSTEM_NAME).getAsString();
-                productName = systemObject.get(PROPERTY_SYSTEM_PRODUCT_NAME).getAsString();
-                securityLevel = systemObject.get(PROPERTY_SYSTEM_SECURITY_LEVEL).getAsString();
+                name = systemObject.get(PROPERTY_NAME).getAsString();
+                productName = systemObject.get(PROPERTY_PRODUCT_NAME).getAsString();
+                securityLevel = systemObject.get(PROPERTY_SECURITY_LEVEL).getAsString();
                 serialNumber = systemObject.get(PROPERTY_SERIAL_NUMBER).getAsString();
                 lastActivityDate = ZonedDateTime.parse(systemObject.get(SYSTEM_LAST_ACTIVITY).getAsString());
                 connectionStatus = ConnectionStatus.from(systemObject.get(SYSTEM_CONNECTION_STATUS).getAsString());
