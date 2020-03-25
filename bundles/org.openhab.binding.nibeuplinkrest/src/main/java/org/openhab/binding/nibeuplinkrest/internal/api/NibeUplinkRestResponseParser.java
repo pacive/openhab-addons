@@ -22,6 +22,8 @@ import com.google.gson.JsonParser;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.ConnectionStatus;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.SoftwareInfo;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.SystemConfig;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +52,6 @@ public class NibeUplinkRestResponseParser {
         String serialNumber = "";
         ZonedDateTime lastActivityDate = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
         ConnectionStatus connectionStatus = ConnectionStatus.OFFLINE;
-        String address = "";
         boolean hasAlarmed = false;
 
         if (tree.isJsonObject()) {
@@ -61,10 +61,10 @@ public class NibeUplinkRestResponseParser {
                 name = systemObject.get(PROPERTY_SYSTEM_NAME).getAsString();
                 productName = systemObject.get(PROPERTY_SYSTEM_PRODUCT_NAME).getAsString();
                 securityLevel = systemObject.get(PROPERTY_SYSTEM_SECURITY_LEVEL).getAsString();
-                serialNumber = systemObject.get(PROPERTY_SYSTEM_SERIAL_NUMBER).getAsString();
-                lastActivityDate = ZonedDateTime.parse(systemObject.get(PROPERTY_LAST_ACTIVITY).getAsString());
-                connectionStatus = ConnectionStatus.from(systemObject.get(PROPERTY_CONNECTION_STATUS).getAsString());
-                hasAlarmed = systemObject.get(PROPERTY_SYSTEM_HAS_ALARMED).getAsBoolean();
+                serialNumber = systemObject.get(PROPERTY_SERIAL_NUMBER).getAsString();
+                lastActivityDate = ZonedDateTime.parse(systemObject.get(SYSTEM_LAST_ACTIVITY).getAsString());
+                connectionStatus = ConnectionStatus.from(systemObject.get(SYSTEM_CONNECTION_STATUS).getAsString());
+                hasAlarmed = systemObject.get(SYSTEM_HAS_ALARMED).getAsBoolean();
             } catch (RuntimeException e) {
                 logger.warn("Error parsing system: ", e);
             }
@@ -91,4 +91,37 @@ public class NibeUplinkRestResponseParser {
         return systems;
     }
 
+    public static SystemConfig parseSystemConfig(String json) {
+        boolean hasCooling = false;
+        boolean hasHeating = false;
+        boolean hasHotWater = false;
+        boolean hasVentilation = false;
+
+        final JsonObject tree = (JsonObject) parser.parse(json);
+        try {
+            hasCooling = tree.get(PROPERTY_HAS_COOLING).getAsBoolean();
+            hasHeating = tree.get(PROPERTY_HAS_HEATING).getAsBoolean();
+            hasHotWater = tree.get(PROPERTY_HAS_HOT_WATER).getAsBoolean();
+            hasVentilation = tree.get(PROPERTY_HAS_VENTILATION).getAsBoolean();
+        } catch (RuntimeException e) {
+            logger.warn("Error parsing system config: ", e);
+        }
+        return new SystemConfig(hasCooling, hasHeating, hasHotWater, hasVentilation);
+    }
+
+    public static SoftwareInfo parseSoftwareInfo(String json) {
+        String currentVersion = "";
+        String upgradeAvailable = null;
+
+        final JsonObject tree = (JsonObject) parser.parse(json);
+        try {
+            currentVersion = tree.get("current").getAsJsonObject().get("name").getAsString();
+            if(tree.has("upgrade") && !tree.get("upgrade").isJsonNull()) {
+                upgradeAvailable = tree.get("upgrade").getAsJsonObject().get("name").getAsString();
+            }
+        } catch (RuntimeException e) {
+            logger.warn("Error parsing system config: ", e);
+        }
+        return new SoftwareInfo(currentVersion, upgradeAvailable);
+    }
 }

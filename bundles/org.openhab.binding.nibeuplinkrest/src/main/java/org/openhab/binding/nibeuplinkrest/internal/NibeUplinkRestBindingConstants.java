@@ -34,11 +34,15 @@ public class NibeUplinkRestBindingConstants {
     public static final String PROPERTY_SYSTEM_NAME = "name";
     public static final String PROPERTY_SYSTEM_PRODUCT_NAME = "productName";
     public static final String PROPERTY_SYSTEM_SECURITY_LEVEL = "securityLevel";
-    public static final String PROPERTY_LAST_ACTIVITY = "lastActivityDate";
-    public static final String PROPERTY_CONNECTION_STATUS = "connectionStatus";
-    public static final String PROPERTY_SYSTEM_SERIAL_NUMBER = "serialNumber";
-    public static final String PROPERTY_SYSTEM_ADDRESS = "address";
-    public static final String PROPERTY_SYSTEM_HAS_ALARMED = "hasAlarmed";
+    public static final String PROPERTY_SERIAL_NUMBER = "serialNumber";
+    public static final String PROPERTY_HAS_COOLING = "hasCooling";
+    public static final String PROPERTY_HAS_HEATING = "hasHeating";
+    public static final String PROPERTY_HAS_HOT_WATER = "hasHotWater";
+    public static final String PROPERTY_HAS_VENTILATION = "hasVentilation";
+    public static final String PROPERTY_SOFTWARE_VERSION = "softwareVersion";
+    public static final String SYSTEM_LAST_ACTIVITY = "lastActivityDate";
+    public static final String SYSTEM_CONNECTION_STATUS = "connectionStatus";
+    public static final String SYSTEM_HAS_ALARMED = "hasAlarmed";
 
     // List of all Channel ids
     //public static final String CHANNEL_1 = "channel1";
@@ -48,7 +52,10 @@ public class NibeUplinkRestBindingConstants {
     public static final String AUTH_ENDPOINT = OAUTH_ENDPOINT + "authorize";
     public static final String TOKEN_ENDPOINT = OAUTH_ENDPOINT + "token";
     public static final String API_ENDPOINT = BASE_URL + "api/v1/";
-    public static final String SYSTEM = API_ENDPOINT + "systems";
+    public static final String SYSTEMS = API_ENDPOINT + "systems";
+    public static final String SYSTEM_WITH_ID = SYSTEMS + "/%s";
+    public static final String SYSTEM_CONFIG = SYSTEM_WITH_ID + "/config";
+    public static final String SYSTEM_SOFTWARE = SYSTEM_WITH_ID + "/software";
     public static final String SCOPE = "READSYSTEM WRITESYSTEM";
 
     public static final String SERVLET_PATH = "/nibeuplinkconnect";

@@ -28,19 +28,20 @@ public class NibeSystem {
     private String productName;
     private String securityLevel;
     private String serialNumber;
-    private ZonedDateTime lastSeen;
+    private ZonedDateTime lastActivityDate;
     private ConnectionStatus connectionStatus;
     private boolean hasAlarmed;
     private @Nullable SystemConfig config;
+    private @Nullable SoftwareInfo softwareInfo;
 
     public NibeSystem(int systemId, String name, String productName, String securityLevel, String serialNumber,
-                      ZonedDateTime lastSeen, ConnectionStatus connectionStatus, boolean hasAlarmed) {
+                      ZonedDateTime lastActivityDate, ConnectionStatus connectionStatus, boolean hasAlarmed) {
         this.systemId = systemId;
         this.name = name;
         this.productName = productName;
         this.securityLevel = securityLevel;
         this.serialNumber = serialNumber;
-        this.lastSeen = lastSeen;
+        this.lastActivityDate = lastActivityDate;
         this.connectionStatus = connectionStatus;
         this.hasAlarmed = hasAlarmed;
     }
@@ -53,13 +54,15 @@ public class NibeSystem {
 
     public void setSerialNumber(String serialNumber) { this.serialNumber = serialNumber; }
 
-    public void setLastSeen(ZonedDateTime lastSeen) { this.lastSeen = lastSeen; }
+    public void setLastActivityDate(ZonedDateTime lastActivityDate) { this.lastActivityDate = lastActivityDate; }
 
     public void setConnectionStatus(ConnectionStatus connectionStatus) { this.connectionStatus = connectionStatus; }
 
     public void setHasAlarmed(boolean hasAlarmed) { this.hasAlarmed = hasAlarmed; }
 
     public void setConfig(SystemConfig config) { this.config = config; }
+
+    public void setSoftwareInfo(SoftwareInfo softwareInfo) { this.softwareInfo = softwareInfo; }
 
     public int getSystemId() { return systemId; }
 
@@ -71,11 +74,17 @@ public class NibeSystem {
 
     public String getSerialNumber() { return serialNumber; }
 
-    public ZonedDateTime getLastSeen() { return lastSeen; }
+    public ZonedDateTime getLastActivityDate() { return lastActivityDate; }
 
     public ConnectionStatus getConnectionStatus() { return connectionStatus; }
 
     public boolean hasAlarmed() { return hasAlarmed; }
+
+    public @Nullable SystemConfig getConfig() { return config; }
+
+    public @Nullable SoftwareInfo getSoftwareInfo() { return softwareInfo; }
+
+    public boolean isConfigSet() { return config != null; }
 
     public boolean hasCooling() { return config != null && config.hasCooling(); }
 

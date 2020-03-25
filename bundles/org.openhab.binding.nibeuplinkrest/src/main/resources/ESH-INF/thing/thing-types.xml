@@ -6,22 +6,17 @@
 
 	<!-- Sample Thing Type -->
 	<bridge-type id="apibridge">
-		<label>NibeUplink Rest API Bridge</label>
+		<label>NibeUplink REST API Bridge</label>
 		<description>Connection to the Nibe Uplink Rest API</description>
 
 		<config-description>
 			<parameter name="clientId" type="text" required="true">
-				<label>OAuth Client Identifier</label>
-				<description>OAuth Client Identifier</description>
+				<label>Client Identifier</label>
+				<description>OAuth Client Identifier obtained from Nibe Uplink</description>
 			</parameter>
 			<parameter name="clientSecret" type="text" required="true">
-				<label>OAuth Client Secret</label>
-				<description>OAuth Client Secret</description>
-			</parameter>
-			<parameter name="updateInterval" type="integer" min="20" max="300" required="true">
-				<label>Update interval</label>
-				<description>Update interval</description>
-				<default>60</default>
+				<label>Client Secret</label>
+				<description>OAuth Client Secret obtained from Nibe Uplink</description>
 			</parameter>
 		</config-description>
 
@@ -37,6 +32,11 @@
 			<property name="productName" />
 			<property name="securityLevel" />
 			<property name="serialNumber" />
+			<property name="hasCooling" />
+			<property name="hasHeating" />
+			<property name="hasHotWater" />
+			<property name="hasVentilation" />
+			<property name="softwareVersion" />
 		</properties>
 
 		<representation-property>systemId</representation-property>
@@ -45,6 +45,11 @@
 			<parameter name="systemId" type="integer" required="true">
 				<label>System Id</label>
 				<description>The system Id given by Nibe Uplink</description>
+			</parameter>
+			<parameter name="updateInterval" type="integer" min="30" max="3600" required="true">
+				<label>Update interval</label>
+				<description>Update interval</description>
+				<default>60</default>
 			</parameter>
 		</config-description>
 	</thing-type>

@@ -13,12 +13,12 @@
 package org.openhab.binding.nibeuplinkrest.internal;
 
 /**
- * The {@link NibeUplinkRestBridgeConfiguration} class contains fields mapping thing configuration parameters.
+ * The {@link NibeUplinkRestBaseSystemConfiguration} class contains fields mapping thing configuration parameters.
  *
  * @author Anders Alfredsson - Initial contribution
  */
 
-public class NibeUplinkRestBridgeConfiguration {
-    public String clientId;
-    public String clientSecret;
+public class NibeUplinkRestBaseSystemConfiguration {
+    public int systemId;
+    public int updateInterval;
 }
