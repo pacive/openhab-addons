@@ -18,6 +18,8 @@ import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -29,19 +31,23 @@ public interface NibeUplinkRestApi {
 
     NibeSystem getSystem(int systemId);
 
-    @Nullable List<Category> getCategories();
+    List<Category> getCategories(int systemId, boolean includeParameters);
 
-    @Nullable Category getCategory(String categoryId);
+    Category getCategory(int systemId, String categoryId);
 
-    @Nullable List<Parameter> getParameters(List<Integer> parameterIds);
+    @Nullable List<Parameter> getParameters(int systemId, Set<Integer> parameterIds);
 
-    @Nullable List<Queue> setParameters(List<Parameter> parameters);
+    @Nullable List<QueuedUpdate> setParameters(int systemId, Map<Integer, Integer> parameters);
 
-    @Nullable Mode getMode();
+    Mode getMode(int systemId);
 
-    void setMode(Mode mode);
+    void setMode(int systemId, Mode mode);
 
-    @Nullable List<Thermostat> getThermostats();
+    @Nullable List<Thermostat> getThermostats(int systemId);
 
-    void setThermostat(Thermostat thermostat);
+    void setThermostat(int systemId, Thermostat thermostat);
+
+    void addCallbackListener(int systemId, NibeUplinkRestCallbackListener listener);
+
+    void removeCallbackListener(int SystemId);
 }
