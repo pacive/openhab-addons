@@ -23,8 +23,8 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
 import org.eclipse.smarthome.core.types.Command;
+import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestConnector;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
 import org.openhab.binding.nibeuplinkrest.internal.discovery.NibeUplinkRestDiscoveryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * The {@link NibeUplinkRestBridgeHandler} is responsible for handling commands, which are
@@ -49,7 +48,7 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
     private final HttpClient httpClient;
 
     private @NonNullByDefault({}) OAuthClientService oAuthClient;
-    private @NonNullByDefault({}) NibeUplinkRestConnector nibeUplinkRestConnector;
+    private @NonNullByDefault({}) NibeUplinkRestApi nibeUplinkRestApi;
     private @NonNullByDefault({}) NibeUplinkRestBridgeConfiguration config;
 
     public NibeUplinkRestBridgeHandler(Bridge bridge, OAuthFactory oAuthFactory, HttpClient httpClient) {
@@ -85,8 +84,8 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
         config = getConfigAs(NibeUplinkRestBridgeConfiguration.class);
         oAuthClient = oAuthFactory.createOAuthClientService(thing.getUID().getAsString(), TOKEN_ENDPOINT,
                 AUTH_ENDPOINT, config.clientId, config.clientSecret, SCOPE, false);
-        nibeUplinkRestConnector = new NibeUplinkRestConnector(oAuthClient, httpClient);
-        oAuthClient.addAccessTokenRefreshListener(nibeUplinkRestConnector);
+        nibeUplinkRestApi = new NibeUplinkRestConnector(oAuthClient, httpClient);
+        oAuthClient.addAccessTokenRefreshListener((NibeUplinkRestConnector) nibeUplinkRestApi);
         updateStatus(ThingStatus.UNKNOWN);
         scheduler.execute(() -> {
             if (isAuthorized()) {
@@ -98,7 +97,7 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
 
     @Override
     public void dispose() {
-        oAuthClient.removeAccessTokenRefreshListener(nibeUplinkRestConnector);
+        oAuthClient.removeAccessTokenRefreshListener((NibeUplinkRestConnector) nibeUplinkRestApi);
     }
 
     public void authorize(String authCode, String baseURL) throws OAuthException, OAuthResponseException, IOException {
@@ -126,11 +125,7 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
         }
     }
 
-    public NibeUplinkRestConnector getConnector() {
-        return nibeUplinkRestConnector;
-    }
-
-    public List<NibeSystem> getSystems() {
-        return nibeUplinkRestConnector.getConnectedSystems();
+    public NibeUplinkRestApi getApiConnection() {
+        return nibeUplinkRestApi;
     }
 }
