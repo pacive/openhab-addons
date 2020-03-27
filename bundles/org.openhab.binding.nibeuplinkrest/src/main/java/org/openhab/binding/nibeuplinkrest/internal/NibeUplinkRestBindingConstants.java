@@ -29,6 +29,10 @@ public class NibeUplinkRestBindingConstants {
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_APIBRIDGE = new ThingTypeUID(BINDING_ID, "apibridge");
     public static final ThingTypeUID THING_TYPE_SYSTEM = new ThingTypeUID(BINDING_ID, "system");
+    public static final ThingTypeUID THING_TYPE_THERMOSTAT = new ThingTypeUID(BINDING_ID, "thermostat");
+
+    public static final String CHANNEL_THERMOSTAT_CURRENT = "currentTemperature";
+    public static final String CHANNEL_THERMOSTAT_TARGET = "targetTemperature";
 
     public static final String PROPERTY_SYSTEM_ID = "systemId";
     public static final String PROPERTY_NAME = "name";

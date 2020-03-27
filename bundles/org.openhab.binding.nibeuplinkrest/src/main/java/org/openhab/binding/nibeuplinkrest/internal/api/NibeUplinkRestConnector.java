@@ -67,7 +67,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi, AccessTokenRe
     private final HttpClient httpClient;
     private final Map<Integer, NibeSystem> cachedSystems = new ConcurrentHashMap<>();
     private final Map<Integer, Map<String, Category>> cachedCategories = new ConcurrentHashMap<>();
-    private final Map<Integer, Set<Integer>> trackedParameters = new HashMap<>();
+    private final Map<Integer, Set<Thermostat>> thermostats = new ConcurrentHashMap<>();
+    private final Map<Integer, Set<Integer>> trackedParameters = new ConcurrentHashMap<>();
     private final Deque<Request> queuedRequests = new ConcurrentLinkedDeque<>();
     private final Map<Integer, NibeUplinkRestCallbackListener> listeners = new ConcurrentHashMap<>();
 
@@ -147,6 +148,15 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi, AccessTokenRe
 
     @Override
     public void setThermostat(int systemId, Thermostat thermostat) {
+        Set<Thermostat> systemThermostats = thermostats.get(systemId);
+        if (systemThermostats != null) {
+            systemThermostats.remove(thermostat);
+            systemThermostats.add(thermostat);
+        } else {
+            systemThermostats = new HashSet<>();
+            systemThermostats.add(thermostat);
+            thermostats.put(systemId, systemThermostats);
+        }
         Request req = createSetThermostatRequest(systemId, thermostat);
         makeRequest(req);
     }

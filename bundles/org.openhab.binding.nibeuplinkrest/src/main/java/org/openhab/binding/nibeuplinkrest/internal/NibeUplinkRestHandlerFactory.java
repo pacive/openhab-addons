@@ -33,6 +33,7 @@ import org.eclipse.smarthome.io.net.http.HttpClientFactory;
 import org.openhab.binding.nibeuplinkrest.internal.auth.NibeUplinkRestOAuthService;
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBaseSystemHandler;
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
+import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestThermostatHandler;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -47,7 +48,8 @@ import org.osgi.service.component.annotations.Reference;
 public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections
-            .unmodifiableSet(Stream.of(THING_TYPE_APIBRIDGE, THING_TYPE_SYSTEM).collect(Collectors.toSet()));
+            .unmodifiableSet(Stream.of(THING_TYPE_APIBRIDGE, THING_TYPE_SYSTEM, THING_TYPE_THERMOSTAT)
+                    .collect(Collectors.toSet()));
 
     private @NonNullByDefault({}) OAuthFactory oAuthFactory;
     private @NonNullByDefault({}) NibeUplinkRestOAuthService oAuthService;
@@ -70,6 +72,10 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
         }
         if (THING_TYPE_SYSTEM.equals(thingTypeUID)) {
             final NibeUplinkRestBaseSystemHandler handler = new NibeUplinkRestBaseSystemHandler(thing);
+            return handler;
+        }
+        if (THING_TYPE_THERMOSTAT.equals(thingTypeUID)) {
+            final NibeUplinkRestThermostatHandler handler = new NibeUplinkRestThermostatHandler(thing);
             return handler;
         }
 

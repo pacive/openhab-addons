@@ -64,23 +64,12 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        //if (CHANNEL_1.equals(channelUID.getId())) {
-            //if (command instanceof RefreshType) {
-                // TODO: handle data refresh
-            //}
 
-            // TODO: handle command
-
-            // Note: if communication with thing fails for some reason,
-            // indicate that by setting the status with detail information:
-            // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-            // "Could not control device at IP address x.x.x.x");
-        //}
     }
 
     @Override
     public void initialize() {
-        logger.debug("Start initializing!");
+        logger.debug("Initializing Rest Api Bridge");
         config = getConfigAs(NibeUplinkRestBridgeConfiguration.class);
         oAuthClient = oAuthFactory.createOAuthClientService(thing.getUID().getAsString(), TOKEN_ENDPOINT,
                 AUTH_ENDPOINT, config.clientId, config.clientSecret, SCOPE, false);
@@ -92,7 +81,6 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
                 updateStatus(ThingStatus.ONLINE);
             }
         });
-        logger.debug("Finished initializing!");
     }
 
     @Override

@@ -14,8 +14,10 @@ package org.openhab.binding.nibeuplinkrest.internal.api.model;
 
 import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -27,15 +29,15 @@ public class Thermostat {
     private final int id;
     private final String name;
     private Set<Integer> climateSystems = new HashSet<>();
-    private double currentTemperature;
-    private double targetTemperature;
+    private int currentTemperature;
+    private int targetTemperature;
 
-    public Thermostat(int id, String name, Set<Integer> climateSystems) {
+    public Thermostat(int id, String name, Set<Integer> climateSystems, double currentTemperature, double targetTemperature) {
         this.id = id;
         this.name = name;
         this.climateSystems.addAll(climateSystems);
-        currentTemperature = 0;
-        targetTemperature = 0;
+        this.currentTemperature = (int) (currentTemperature * 10);
+        this.targetTemperature = (int) (targetTemperature * 10);
     }
 
     public int getId() { return id; }
@@ -44,11 +46,28 @@ public class Thermostat {
 
     public Set<Integer> getClimateSystems() { return climateSystems; }
 
-    public double getCurrentTemperature() { return currentTemperature; }
+    public int getCurrentTemperature() { return currentTemperature; }
 
-    public double getTargetTemperature() { return targetTemperature; }
+    public int getTargetTemperature() { return targetTemperature; }
+
+    public double getCurrentTemperatureAsDouble() { return (double) currentTemperature / 10; }
+
+    public double getTargetTemperatureAsDouble() { return (double) targetTemperature / 10; }
 
     public void setCurrentTemperature(int currentTemperature) { this.currentTemperature = currentTemperature; }
 
     public void setTargetTemperature(int targetTemperature) { this.targetTemperature = targetTemperature; }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Thermostat that = (Thermostat) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
 }
