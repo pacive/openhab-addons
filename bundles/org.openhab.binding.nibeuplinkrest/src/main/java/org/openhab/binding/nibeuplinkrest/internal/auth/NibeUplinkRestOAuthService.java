@@ -15,7 +15,7 @@ package org.openhab.binding.nibeuplinkrest.internal.auth;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.ThingUID;
-import org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBridgeHandler;
+import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;

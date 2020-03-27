@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
-import org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBridgeHandler;
+import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
 import org.slf4j.Logger;

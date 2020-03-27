@@ -55,6 +55,9 @@
 	</thing-type>
 
 	<thing-type id="thermostat">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="apibridge"/>
+		</supported-bridge-type-refs>
 		<label>Thermostat</label>
 		<description>A virtual thermostat connected to your Nibe system</description>
 		<representation-property>id</representation-property>

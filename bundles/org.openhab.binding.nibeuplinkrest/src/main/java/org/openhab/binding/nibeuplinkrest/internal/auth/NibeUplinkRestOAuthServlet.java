@@ -20,7 +20,7 @@ import org.eclipse.jetty.util.MultiMap;
 import org.eclipse.jetty.util.UrlEncoded;
 import org.eclipse.smarthome.core.auth.client.oauth2.OAuthException;
 import org.eclipse.smarthome.core.auth.client.oauth2.OAuthResponseException;
-import org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBridgeHandler;
+import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

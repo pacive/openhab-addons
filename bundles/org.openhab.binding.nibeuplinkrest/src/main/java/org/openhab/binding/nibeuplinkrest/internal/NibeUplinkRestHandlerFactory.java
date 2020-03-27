@@ -31,6 +31,8 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.eclipse.smarthome.io.net.http.HttpClientFactory;
 import org.openhab.binding.nibeuplinkrest.internal.auth.NibeUplinkRestOAuthService;
+import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBaseSystemHandler;
+import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
