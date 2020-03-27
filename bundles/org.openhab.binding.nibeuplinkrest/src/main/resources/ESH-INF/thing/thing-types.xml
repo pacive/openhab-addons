@@ -54,11 +54,33 @@
 		</config-description>
 	</thing-type>
 
-	<!-- Sample Channel Type
-	<channel-type id="sample-channel">
-		<item-type>nibeuplinkrestItem</item-type>
-		<label>NibeUplinkRest Binding Channel</label>
-		<description>Sample channel for NibeUplinkRest Binding</description>
-	</channel-type> -->
+	<thing-type id="thermostat">
+		<label>Thermostat</label>
+		<description>A virtual thermostat connected to your Nibe system</description>
+		<representation-property>id</representation-property>
+		<config-description>
+			<parameter name="id" type="integer" required="true">
+				<label>Id</label>
+				<description>Identifier for the thermostat</description>
+			</parameter>
+			<parameter name="thermostatName" type="text" required="true">
+				<label>Thermostat name</label>
+				<description>A descriptive name of the thermostat (e.g. "Ground Floor" or "Bedroom")</description>
+			</parameter>
+			<parameter name="systemId" type="integer">
+				<label>System id</label>
+				<description>Id of the system this thermostat belongs to</description>
+			</parameter>
+			<parameter name="climateSystems" type="text">
+				<label>ClimateSystems</label>
+				<description>A comma-separated list of the heating systems this thermostat controls</description>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+	<channel-group-type id="STATUS">
+		<label>Status</label>
+		<description>General status channels</description>
+	</channel-group-type>
 
 </thing:thing-descriptions>
