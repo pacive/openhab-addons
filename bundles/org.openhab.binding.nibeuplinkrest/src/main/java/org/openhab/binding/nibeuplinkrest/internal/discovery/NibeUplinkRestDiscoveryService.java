@@ -25,6 +25,7 @@ import org.eclipse.smarthome.core.thing.ThingUID;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
 import org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBridgeHandler;
+import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
         implements DiscoveryService, ThingHandlerService {
 
-    private static final Logger logger = LoggerFactory.getLogger(NibeUplinkRestDiscoveryService.class);
+    private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestDiscoveryService.class);
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Collections.singleton(THING_TYPE_SYSTEM);
     private static final int TIMEOUT = 10;
@@ -83,9 +84,10 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
     }
 
     private void findSystems() {
-        logger.debug("Starting discovery");
         if (bridgeHandler.getThing().getStatus() == ThingStatus.ONLINE) {
-            bridgeHandler.getSystems().forEach(this::thingDiscovered);
+            logger.debug("Starting discovery");
+            NibeUplinkRestApi connection = bridgeHandler.getApiConnection();
+            connection.getConnectedSystems().forEach(this::thingDiscovered);
         }
     }
 
