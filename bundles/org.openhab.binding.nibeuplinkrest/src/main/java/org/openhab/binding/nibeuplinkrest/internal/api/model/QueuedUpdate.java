@@ -18,7 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault
-public class Queue {
+public class QueuedUpdate {
     private enum QueueStatus {
         SENDING,
         VERIFYING,
@@ -57,17 +57,17 @@ public class Queue {
     private final Parameter parameter;
     private QueueStatus status;
 
-    public Queue(Parameter parameter, QueueStatus status) {
+    public QueuedUpdate(Parameter parameter, QueueStatus status) {
         this.parameter = parameter;
         this.status = status;
     }
 
-    public Queue(Parameter parameter, String status) {
+    public QueuedUpdate(Parameter parameter, String status) {
         this.parameter = parameter;
         this.status = QueueStatus.from(status);
     }
 
-    public Queue(Parameter parameter, int status) {
+    public QueuedUpdate(Parameter parameter, int status) {
         this.parameter = parameter;
         this.status = QueueStatus.from(status);
     }

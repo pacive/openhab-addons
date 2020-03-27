@@ -23,16 +23,12 @@ import java.util.Objects;
 @NonNullByDefault
 public class Parameter {
     private final int parameterId;
-    private @Nullable String name;
-    private @Nullable String title;
-    private @Nullable String designation;
-    private @Nullable String unit;
-    private @Nullable String displayValue;
+    private String name;
+    private String title;
+    private String designation;
+    private String unit;
+    private String displayValue;
     private int rawValue;
-
-    public Parameter(int parameterId) {
-        this.parameterId = parameterId;
-    }
 
     public Parameter(int parameterId, String name, String title, String designation, String unit,
                      String displayValue, int rawValue) {
@@ -47,15 +43,15 @@ public class Parameter {
 
     public int getParameterId() { return parameterId; }
 
-    public @Nullable String getName() { return name; }
+    public String getName() { return name; }
 
-    public @Nullable String getTitle() { return title; }
+    public String getTitle() { return title; }
 
-    public @Nullable String getDesignation() { return designation; }
+    public String getDesignation() { return designation; }
 
-    public @Nullable String getUnit() { return unit; }
+    public String getUnit() { return unit; }
 
-    public @Nullable String getDisplayValue() { return displayValue; }
+    public String getDisplayValue() { return displayValue; }
 
     public int getRawValue() { return rawValue; }
 

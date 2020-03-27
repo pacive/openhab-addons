@@ -23,7 +23,7 @@ public enum Mode {
     AWAY_FROM_HOME,
     VACATION;
 
-    public Mode from(String mode) {
+    public static Mode from(String mode) {
         switch (mode.toUpperCase()) {
             case "DEFAULT_OPERATION":
                 return DEFAULT_OPERATION;
@@ -35,7 +35,7 @@ public enum Mode {
         throw new IllegalArgumentException();
     }
 
-    public Mode from(int mode) {
+    public static Mode from(int mode) {
         switch (mode) {
             case 0:
                 return DEFAULT_OPERATION;

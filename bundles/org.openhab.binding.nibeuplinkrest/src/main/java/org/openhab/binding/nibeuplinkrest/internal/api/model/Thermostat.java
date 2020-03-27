@@ -23,7 +23,6 @@ import java.util.Set;
 @NonNullByDefault
 public class Thermostat {
     private final int id;
-    private final String systemName;
     private final String thermostatName;
     private Set<Integer> climateSystems = new HashSet<>();
     private int currentTemperature;
@@ -31,7 +30,6 @@ public class Thermostat {
 
     public Thermostat(int id, String systemName, String thermostatName, Set<Integer> climateSystems) {
         this.id = id;
-        this.systemName = systemName;
         this.thermostatName = thermostatName;
         this.climateSystems.addAll(climateSystems);
         currentTemperature = 0;
@@ -39,8 +37,6 @@ public class Thermostat {
     }
 
     public int getId() { return id; }
-
-    public String getSystemName() { return systemName; }
 
     public String getThermostatName() { return thermostatName; }
 
