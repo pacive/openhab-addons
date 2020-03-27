@@ -20,10 +20,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.ConnectionStatus;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.SoftwareInfo;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.SystemConfig;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +41,7 @@ public class NibeUplinkRestResponseParser {
 
     private static final Logger logger = LoggerFactory.getLogger(NibeUplinkRestResponseParser.class);
 
-    public static NibeSystem parseSystem(JsonElement tree) throws NibeUplinkParseException {
+    public static NibeSystem parseSystem(JsonObject tree) throws NibeUplinkParseException {
         int systemId = 0;
         String name = "";
         String productName = "";
@@ -54,21 +51,19 @@ public class NibeUplinkRestResponseParser {
         ConnectionStatus connectionStatus = ConnectionStatus.OFFLINE;
         boolean hasAlarmed = false;
 
-        if (tree.isJsonObject()) {
-            final JsonObject systemObject = tree.getAsJsonObject();
-            try {
-                systemId = systemObject.get(PROPERTY_SYSTEM_ID).getAsInt();
-                name = systemObject.get(PROPERTY_NAME).getAsString();
-                productName = systemObject.get(PROPERTY_PRODUCT_NAME).getAsString();
-                securityLevel = systemObject.get(PROPERTY_SECURITY_LEVEL).getAsString();
-                serialNumber = systemObject.get(PROPERTY_SERIAL_NUMBER).getAsString();
-                lastActivityDate = ZonedDateTime.parse(systemObject.get(SYSTEM_LAST_ACTIVITY).getAsString());
-                connectionStatus = ConnectionStatus.from(systemObject.get(SYSTEM_CONNECTION_STATUS).getAsString());
-                hasAlarmed = systemObject.get(SYSTEM_HAS_ALARMED).getAsBoolean();
-            } catch (RuntimeException e) {
-                logger.warn("Error parsing system: ", e);
-            }
+       try {
+            systemId = tree.get(PROPERTY_SYSTEM_ID).getAsInt();
+            name = tree.get(PROPERTY_NAME).getAsString();
+            productName = tree.get(PROPERTY_PRODUCT_NAME).getAsString();
+            securityLevel = tree.get(PROPERTY_SECURITY_LEVEL).getAsString();
+            serialNumber = tree.get(PROPERTY_SERIAL_NUMBER).getAsString();
+            lastActivityDate = ZonedDateTime.parse(tree.get(SYSTEM_LAST_ACTIVITY).getAsString());
+            connectionStatus = ConnectionStatus.from(tree.get(SYSTEM_CONNECTION_STATUS).getAsString());
+            hasAlarmed = tree.get(SYSTEM_HAS_ALARMED).getAsBoolean();
+        } catch (RuntimeException e) {
+           throw new NibeUplinkParseException("Error parsing system: ", e);
         }
+
         if (systemId == 0) {
             throw new NibeUplinkParseException("Error parsing system.");
         }
@@ -77,16 +72,15 @@ public class NibeUplinkRestResponseParser {
     }
 
     public static NibeSystem parseSystem(String json) {
-        final JsonElement tree = parser.parse(json);
-        return parseSystem(tree);
+        return parseSystem(parser.parse(json).getAsJsonObject());
     }
 
     public static List<NibeSystem> parseSystemList(String json) {
         final List<NibeSystem> systems = new ArrayList<>();
-        final JsonObject tree = (JsonObject) parser.parse(json);
+        final JsonObject tree = parser.parse(json).getAsJsonObject();
         JsonArray arr = tree.get("objects").getAsJsonArray();
         for (JsonElement e : arr) {
-            systems.add(parseSystem(e));
+            systems.add(parseSystem(e.getAsJsonObject()));
         }
         return systems;
     }
@@ -97,14 +91,14 @@ public class NibeUplinkRestResponseParser {
         boolean hasHotWater = false;
         boolean hasVentilation = false;
 
-        final JsonObject tree = (JsonObject) parser.parse(json);
+        final JsonObject tree = parser.parse(json).getAsJsonObject();
         try {
             hasCooling = tree.get(PROPERTY_HAS_COOLING).getAsBoolean();
             hasHeating = tree.get(PROPERTY_HAS_HEATING).getAsBoolean();
             hasHotWater = tree.get(PROPERTY_HAS_HOT_WATER).getAsBoolean();
             hasVentilation = tree.get(PROPERTY_HAS_VENTILATION).getAsBoolean();
         } catch (RuntimeException e) {
-            logger.warn("Error parsing system config: ", e);
+            throw new NibeUplinkParseException("Error parsing system config", e);
         }
         return new SystemConfig(hasCooling, hasHeating, hasHotWater, hasVentilation);
     }
@@ -115,13 +109,85 @@ public class NibeUplinkRestResponseParser {
 
         final JsonObject tree = (JsonObject) parser.parse(json);
         try {
-            currentVersion = tree.get("current").getAsJsonObject().get("name").getAsString();
-            if(tree.has("upgrade") && !tree.get("upgrade").isJsonNull()) {
-                upgradeAvailable = tree.get("upgrade").getAsJsonObject().get("name").getAsString();
+            currentVersion = tree.get(SOFTWARE_CURRENT).getAsJsonObject().get(SOFTWARE_NAME).getAsString();
+            if(tree.has(SOFTWARE_UPGRADE) && !tree.get(SOFTWARE_UPGRADE).isJsonNull()) {
+                upgradeAvailable = tree.get(SOFTWARE_UPGRADE).getAsJsonObject().get(SOFTWARE_NAME).getAsString();
             }
         } catch (RuntimeException e) {
-            logger.warn("Error parsing system config: ", e);
+            throw new NibeUplinkParseException("Error parsing software info: ", e);
         }
         return new SoftwareInfo(currentVersion, upgradeAvailable);
+    }
+
+    public static List<Category> parseCategoryList(String json) {
+        final List<Category> categories = new ArrayList<>();
+        final JsonArray tree = parser.parse(json).getAsJsonArray();
+        try {
+            for (JsonElement e : tree) {
+                categories.add(parseCategory(e.getAsJsonObject()));
+            }
+        } catch (RuntimeException e) {
+            throw new NibeUplinkParseException("Error parsing category list: ", e);
+        }
+        return categories;
+    }
+
+    public static Category parseCategory(JsonObject tree) {
+        String categoryId = "";
+        String name = "";
+        List<Parameter> parameters;
+        try {
+            categoryId = tree.get("categoryId").getAsString();
+            name = tree.get("name").getAsString();
+            JsonArray parameterArray = tree.get("parameters").getAsJsonArray();
+            parameters = parseParameterList(parameterArray);
+        } catch (RuntimeException e) {
+            throw new NibeUplinkParseException("Error parsing category: ", e);
+        }
+        return new Category(categoryId, name, parameters);
+    }
+
+    public static List<Parameter> parseParameterList(String json) {
+        return parseParameterList(parser.parse(json).getAsJsonArray());
+    }
+
+    public static List<Parameter> parseParameterList(JsonArray tree) {
+        List<Parameter> parameters = new ArrayList<>();
+        for (JsonElement e : tree) {
+            parameters.add(parseParameter(e.getAsJsonObject()));
+        }
+        return parameters;
+    }
+
+    public static Parameter parseParameter(JsonObject tree) {
+        int parameterId = 0;
+        String name = "";
+        String title = "";
+        String designation = "";
+        String unit = "";
+        String displayValue = "";
+        int rawValue = 0;
+
+        try {
+            parameterId = tree.get("parameterId").getAsInt();
+            name = tree.get("name").isJsonNull() ? "" : tree.get("name").getAsString();
+            title = tree.get("title").getAsString();
+            designation = tree.get("designation").getAsString();
+            unit = tree.get("unit").getAsString();
+            displayValue = tree.get("displayValue").getAsString();
+            rawValue = tree.get("rawValue").getAsInt();
+        } catch (RuntimeException e) {
+            throw new NibeUplinkParseException("Error parsing parameter: ", e);
+        }
+        return new Parameter(parameterId, name, title, designation, unit, displayValue, rawValue);
+    }
+
+    public static Parameter parseParameter(String json) {
+        return parseParameter(parser.parse(json).getAsJsonObject());
+    }
+
+    public static Mode parseMode(String json) {
+        JsonObject tree = (JsonObject) parser.parse(json);
+        return Mode.from(tree.get("mode").getAsString());
     }
 }
