@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 @NonNullByDefault
 public class NibeUplinkRestBindingConstants {
 
-    private static final String BINDING_ID = "nibeuplinkrest";
+    public static final String BINDING_ID = "nibeuplinkrest";
 
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_APIBRIDGE = new ThingTypeUID(BINDING_ID, "apibridge");
@@ -44,16 +44,27 @@ public class NibeUplinkRestBindingConstants {
     public static final String SYSTEM_CONNECTION_STATUS = "connectionStatus";
     public static final String SYSTEM_HAS_ALARMED = "hasAlarmed";
 
+    public static final String SOFTWARE_CURRENT = "current";
+    public static final String SOFTWARE_UPGRADE = "upgrade";
+    public static final String SOFTWARE_NAME = PROPERTY_NAME;
+
     private static final String BASE_URL = "https://api.nibeuplink.com/";
     private static final String OAUTH_ENDPOINT = BASE_URL + "oauth/";
     public static final String AUTH_ENDPOINT = OAUTH_ENDPOINT + "authorize";
     public static final String TOKEN_ENDPOINT = OAUTH_ENDPOINT + "token";
-    public static final String API_ENDPOINT = BASE_URL + "api/v1/";
-    public static final String SYSTEMS = API_ENDPOINT + "systems";
-    public static final String SYSTEM_WITH_ID = SYSTEMS + "/%s";
-    public static final String SYSTEM_CONFIG = SYSTEM_WITH_ID + "/config";
-    public static final String SYSTEM_SOFTWARE = SYSTEM_WITH_ID + "/software";
     public static final String SCOPE = "READSYSTEM WRITESYSTEM";
+
+    public static final String API_ENDPOINT = BASE_URL + "api/v1/";
+    public static final String API_SYSTEMS = API_ENDPOINT + "systems";
+    public static final String API_SYSTEM_WITH_ID = API_SYSTEMS + "/%s";
+    public static final String API_CONFIG = API_SYSTEM_WITH_ID + "/config";
+    public static final String API_SOFTWARE = API_SYSTEM_WITH_ID + "/software";
+    public static final String API_CATEGORIES = API_SYSTEM_WITH_ID + "/serviceinfo/categories";
+    public static final String API_CATEGORY_WITH_ID = API_SYSTEM_WITH_ID + "/serviceinfo/categories/%s";
+    public static final String API_PARAMETERS = API_SYSTEM_WITH_ID + "/parameters";
+    public static final String API_MODE = API_SYSTEM_WITH_ID + "/smarthome/mode";
+    public static final String API_QUERY_INCLUDE_PARAMETERS = "parameters";
+    public static final String API_QUERY_PARAMETER_IDS = "parameterIds";
 
     public static final String SERVLET_PATH = "/nibeuplinkconnect";
     public static final String SERVLET_IMG_PATH = SERVLET_PATH + "/img";
