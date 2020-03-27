@@ -14,6 +14,7 @@
 package org.openhab.binding.nibeuplinkrest.internal.util;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkException;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -37,7 +38,7 @@ public class StringConvert {
                 String firstLetter = match.group(1);
                 match.appendReplacement(output, firstLetter.toUpperCase(Locale.ROOT));
             } catch (RuntimeException e) {
-                e.printStackTrace();
+                throw new NibeUplinkException("Error converting string", e);
             }
         }
         match.appendTail(output);

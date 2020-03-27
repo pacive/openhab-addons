@@ -12,6 +12,7 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal.api.model;
 
+import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import java.util.HashSet;
@@ -22,15 +23,16 @@ import java.util.Set;
  */
 @NonNullByDefault
 public class Thermostat {
+    @SerializedName("externalId")
     private final int id;
-    private final String thermostatName;
+    private final String name;
     private Set<Integer> climateSystems = new HashSet<>();
-    private int currentTemperature;
-    private int targetTemperature;
+    private double currentTemperature;
+    private double targetTemperature;
 
-    public Thermostat(int id, String systemName, String thermostatName, Set<Integer> climateSystems) {
+    public Thermostat(int id, String name, Set<Integer> climateSystems) {
         this.id = id;
-        this.thermostatName = thermostatName;
+        this.name = name;
         this.climateSystems.addAll(climateSystems);
         currentTemperature = 0;
         targetTemperature = 0;
@@ -38,13 +40,13 @@ public class Thermostat {
 
     public int getId() { return id; }
 
-    public String getThermostatName() { return thermostatName; }
+    public String getName() { return name; }
 
     public Set<Integer> getClimateSystems() { return climateSystems; }
 
-    public int getCurrentTemperature() { return currentTemperature; }
+    public double getCurrentTemperature() { return currentTemperature; }
 
-    public int getTargetTemperature() { return targetTemperature; }
+    public double getTargetTemperature() { return targetTemperature; }
 
     public void setCurrentTemperature(int currentTemperature) { this.currentTemperature = currentTemperature; }
 

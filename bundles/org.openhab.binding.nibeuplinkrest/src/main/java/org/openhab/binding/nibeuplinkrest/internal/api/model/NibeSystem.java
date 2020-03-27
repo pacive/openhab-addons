@@ -32,7 +32,6 @@ public class NibeSystem {
     private ConnectionStatus connectionStatus;
     private boolean hasAlarmed;
     private @Nullable SystemConfig config;
-    private @Nullable SoftwareInfo softwareInfo;
 
     public NibeSystem(int systemId, String name, String productName, String securityLevel, String serialNumber,
                       ZonedDateTime lastActivityDate, ConnectionStatus connectionStatus, boolean hasAlarmed) {
@@ -60,9 +59,7 @@ public class NibeSystem {
 
     public void setHasAlarmed(boolean hasAlarmed) { this.hasAlarmed = hasAlarmed; }
 
-    public void setConfig(SystemConfig config) { this.config = config; }
-
-    public void setSoftwareInfo(SoftwareInfo softwareInfo) { this.softwareInfo = softwareInfo; }
+    public void setConfig(@Nullable SystemConfig config) { this.config = config; }
 
     public int getSystemId() { return systemId; }
 
@@ -81,8 +78,6 @@ public class NibeSystem {
     public boolean hasAlarmed() { return hasAlarmed; }
 
     public @Nullable SystemConfig getConfig() { return config; }
-
-    public @Nullable SoftwareInfo getSoftwareInfo() { return softwareInfo; }
 
     public boolean isConfigSet() { return config != null; }
 

@@ -17,7 +17,6 @@ package org.openhab.binding.nibeuplinkrest.internal;
  *
  * @author Anders Alfredsson - Initial contribution
  */
-
 public class NibeUplinkRestBridgeConfiguration {
     public String clientId;
     public String clientSecret;

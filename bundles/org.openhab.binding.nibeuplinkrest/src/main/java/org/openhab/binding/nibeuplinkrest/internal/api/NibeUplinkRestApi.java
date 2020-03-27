@@ -13,13 +13,11 @@
 package org.openhab.binding.nibeuplinkrest.internal.api;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -33,17 +31,17 @@ public interface NibeUplinkRestApi {
 
     List<Category> getCategories(int systemId, boolean includeParameters);
 
-    Category getCategory(int systemId, String categoryId);
+    SystemConfig getSystemConfig(int systemId);
 
-    @Nullable List<Parameter> getParameters(int systemId, Set<Integer> parameterIds);
+    SoftwareInfo getSoftwareInfo(int systemId);
 
-    @Nullable List<QueuedUpdate> setParameters(int systemId, Map<Integer, Integer> parameters);
+    void addTrackedParameter(int systemId, int parameterId);
 
-    Mode getMode(int systemId);
+    void removeTrackedParameter(int systemId, int parameterId);
+
+    void setParameters(int systemId, Map<Integer, Integer> parameters);
 
     void setMode(int systemId, Mode mode);
-
-    @Nullable List<Thermostat> getThermostats(int systemId);
 
     void setThermostat(int systemId, Thermostat thermostat);
 

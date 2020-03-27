@@ -54,7 +54,7 @@ public class NibeUplinkRestBindingConstants {
     public static final String TOKEN_ENDPOINT = OAUTH_ENDPOINT + "token";
     public static final String SCOPE = "READSYSTEM WRITESYSTEM";
 
-    public static final String API_ENDPOINT = BASE_URL + "api/v1/";
+    private static final String API_ENDPOINT = BASE_URL + "api/v1/";
     public static final String API_SYSTEMS = API_ENDPOINT + "systems";
     public static final String API_SYSTEM_WITH_ID = API_SYSTEMS + "/%s";
     public static final String API_CONFIG = API_SYSTEM_WITH_ID + "/config";
@@ -63,6 +63,7 @@ public class NibeUplinkRestBindingConstants {
     public static final String API_CATEGORY_WITH_ID = API_SYSTEM_WITH_ID + "/serviceinfo/categories/%s";
     public static final String API_PARAMETERS = API_SYSTEM_WITH_ID + "/parameters";
     public static final String API_MODE = API_SYSTEM_WITH_ID + "/smarthome/mode";
+    public static final String API_THERMOSTATS = API_SYSTEM_WITH_ID + "/smarthome/thermostats";
     public static final String API_QUERY_INCLUDE_PARAMETERS = "parameters";
     public static final String API_QUERY_PARAMETER_IDS = "parameterIds";
 

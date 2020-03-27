@@ -20,10 +20,7 @@ import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
 import org.eclipse.smarthome.core.thing.type.*;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.ConnectionStatus;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.Parameter;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +53,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler {
         config = getConfigAs(NibeUplinkRestBaseSystemConfiguration.class);
         systemId = config.systemId;
         Bridge bridge = getBridge();
-        if (bridge != null) {
+        if (bridge != null && bridge.getHandler() != null) {
             NibeUplinkRestBridgeHandler bridgeHandler = (NibeUplinkRestBridgeHandler) bridge.getHandler();
             nibeUplinkRestApi = bridgeHandler.getApiConnection();
         } else {
@@ -79,12 +76,13 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler {
     }
 
     private void updateProperties() {
-        NibeSystem system = nibeUplinkRestApi.getSystem(config.systemId);
-        thing.setProperty(PROPERTY_HAS_COOLING, Boolean.toString(system.hasCooling()));
-        thing.setProperty(PROPERTY_HAS_HEATING, Boolean.toString(system.hasHeating()));
-        thing.setProperty(PROPERTY_HAS_HOT_WATER, Boolean.toString(system.hasHotWater()));
-        thing.setProperty(PROPERTY_HAS_VENTILATION, Boolean.toString(system.hasVentilation()));
-        thing.setProperty(PROPERTY_SOFTWARE_VERSION, system.getSoftwareInfo().getCurrentVersion());
+        SystemConfig systemConfig = nibeUplinkRestApi.getSystemConfig(systemId);
+        SoftwareInfo softwareInfo = nibeUplinkRestApi.getSoftwareInfo(systemId);
+        thing.setProperty(PROPERTY_HAS_COOLING, Boolean.toString(systemConfig.hasCooling()));
+        thing.setProperty(PROPERTY_HAS_HEATING, Boolean.toString(systemConfig.hasHeating()));
+        thing.setProperty(PROPERTY_HAS_HOT_WATER, Boolean.toString(systemConfig.hasHotWater()));
+        thing.setProperty(PROPERTY_HAS_VENTILATION, Boolean.toString(systemConfig.hasVentilation()));
+        thing.setProperty(PROPERTY_SOFTWARE_VERSION, softwareInfo.getCurrentVersion());
     }
 
     private void addChannels() {

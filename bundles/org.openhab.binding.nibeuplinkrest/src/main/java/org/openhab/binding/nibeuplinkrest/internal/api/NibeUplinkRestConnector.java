@@ -19,9 +19,7 @@ import static org.eclipse.jetty.http.HttpStatus.*;
 
 import com.google.gson.Gson;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentProvider;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.util.StringContentProvider;
@@ -30,7 +28,6 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.smarthome.core.auth.client.oauth2.*;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.QueuedUpdate;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkException;
 import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
 import org.slf4j.Logger;
@@ -43,7 +40,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -51,18 +47,27 @@ import java.util.stream.Collectors;
 @NonNullByDefault
 public class NibeUplinkRestConnector implements NibeUplinkRestApi, AccessTokenRefreshListener {
 
-    private final String ACCEPT = "application/json";
-    private final String BEARER = "Bearer ";
+    private static final String CONTENT_TYPE = "application/json";
+    private static final String BEARER = "Bearer ";
+    private static final String REQUEST_TYPE = "requestType";
+    private static final String SYSTEM_ID = "systemId";
+    private static final int REQUEST_TYPE_SYSTEM = 1;
+    private static final int REQUEST_TYPE_PARAMETER_GET = 2;
+    private static final int REQUEST_TYPE_SOFTWARE = 3;
+    private static final int REQUEST_TYPE_MODE_GET = 4;
+    private static final int REQUEST_TYPE_CONFIG = 5;
+    private static final int REQUEST_TYPE_CATEGORIES = 6;
+    private static final int REQUEST_TYPE_PARAMETER_SET = 7;
+    private static final int REQUEST_TYPE_MODE_SET = 8;
+    private static final int REQUEST_TYPE_THERMOSTAT = 9;
+    private static final int REQUEST_TYPE_SYSTEMS = 10;
+
 
     private final OAuthClientService oAuthClient;
     private final HttpClient httpClient;
     private final Map<Integer, NibeSystem> cachedSystems = new ConcurrentHashMap<>();
     private final Map<Integer, Map<String, Category>> cachedCategories = new ConcurrentHashMap<>();
-    private final Map<Integer, Map<Integer, Parameter>> cachedParameters = new HashMap<>();
     private final Map<Integer, Set<Integer>> trackedParameters = new HashMap<>();
-    private final Map<Integer, Mode> cachedModes = new HashMap<>();
-    private final Deque<Integer> systemsQueue = new ConcurrentLinkedDeque<>();
-    private final Map<Integer, Deque<Integer>> queuedParameters = new ConcurrentHashMap<>();
     private final Deque<Request> queuedRequests = new ConcurrentLinkedDeque<>();
     private final Map<Integer, NibeUplinkRestCallbackListener> listeners = new ConcurrentHashMap<>();
 
@@ -80,14 +85,11 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi, AccessTokenRe
     @Override
     public List<NibeSystem> getConnectedSystems() {
         cachedSystems.clear();
-        Request req = prepareRequest(API_SYSTEMS, HttpMethod.GET);
+        Request req = prepareRequest(HttpMethod.GET, API_SYSTEMS, 0, REQUEST_TYPE_SYSTEMS);
         String resp = makeRequest(req);
         List<NibeSystem> systems = parseSystemList(resp);
         for (NibeSystem system : systems) {
             cachedSystems.put(system.getSystemId(), system);
-            cachedCategories.putIfAbsent(system.getSystemId(), new HashMap<>());
-            cachedParameters.putIfAbsent(system.getSystemId(), new HashMap<>());
-            trackedParameters.putIfAbsent(system.getSystemId(), new HashSet<>());
         }
         return systems;
     }
@@ -97,9 +99,6 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi, AccessTokenRe
         if (cachedSystems.containsKey(systemId)) {
             return cachedSystems.get(systemId);
         }
-        cachedCategories.putIfAbsent(systemId, new HashMap<>());
-        cachedParameters.putIfAbsent(systemId, new HashMap<>());
-        trackedParameters.putIfAbsent(systemId, new HashSet<>());
         return updateSystem(systemId);
     }
 
@@ -113,84 +112,61 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi, AccessTokenRe
     }
 
     @Override
-    public Category getCategory(int systemId, String categoryId) {
-        Map<String, Category> cachedValues = cachedCategories.get(systemId);
-        if (cachedValues.get(categoryId) == null) {
-            updateCategories(systemId, true);
+    public void addTrackedParameter(int systemId, int parameterId) {
+        Set<Integer> systemTrackedParameters = trackedParameters.get(systemId);
+        if (systemTrackedParameters == null || listeners.get(systemId) == null) {
+            throw new NibeUplinkException("No listener for system " + systemId);
         }
-        return cachedCategories.get(systemId).get(categoryId);
-    }
-
-    @Override
-    public @Nullable List<Parameter> getParameters(int systemId, Set<Integer> parameterIds) {
-        Set<Integer> tracked = trackedParameters.get(systemId);
-        if (tracked.containsAll(parameterIds)) {
-            return cachedParameters.get(systemId).entrySet().stream()
-                    .filter(p -> parameterIds.contains(p.getKey()))
-                    .map(p -> p.getValue()).collect(Collectors.toList());
+        if (systemTrackedParameters.add(parameterId)) {
+            logger.trace("System {} is now tracking parameter {}", systemId, parameterId);
         }
-
-        HashSet<Integer> newParams = new HashSet(parameterIds);
-        newParams.removeAll(tracked);
-        tracked.addAll(newParams);
-        newParams.forEach(p -> queuedParameters.get(systemId).addFirst(p));
-
-        return cachedParameters.get(systemId).entrySet().stream()
-                .filter(p -> parameterIds.contains(p.getKey()))
-                .map(p -> p.getValue()).collect(Collectors.toList());
     }
 
     @Override
-    public @Nullable List<QueuedUpdate> setParameters(int systemId, Map<Integer, Integer> parameters) {
-        return null;
-    }
-
-    @Override
-    public Mode getMode(int systemId) {
-        if (cachedModes.get(systemId) == null) {
-            return updateMode(systemId);
+    public void removeTrackedParameter(int systemId, int parameterId) {
+        Set<Integer> systemTrackedParameters = trackedParameters.get(systemId);
+        if (systemTrackedParameters == null || listeners.get(systemId) == null) {
+            throw new NibeUplinkException("No listener for system " + systemId);
         }
-        return cachedModes.get(systemId);
+        if (systemTrackedParameters.remove(parameterId)) {
+            logger.trace("System {} is no longer tracking parameter {}", systemId, parameterId);
+        }
     }
 
     @Override
-    public void setMode(int systemId, Mode mode) {
-        Request req = prepareRequest(String.format(API_MODE, systemId), HttpMethod.PUT);
-        String body = serializer.toJson(Collections.singletonMap("map", mode));
-        req.content(new StringContentProvider(body));
+    public void setParameters(int systemId, Map<Integer, Integer> parameters) {
+        Request req = createSetParametersRequest(systemId, parameters);
         makeRequest(req);
     }
 
     @Override
-    public @Nullable List<Thermostat> getThermostats(int systemId) {
-        return null;
+    public void setMode(int systemId, Mode mode) {
+        Request req = createSetModeRequest(systemId, mode);
+        makeRequest(req);
     }
 
     @Override
     public void setThermostat(int systemId, Thermostat thermostat) {
-
+        Request req = createSetThermostatRequest(systemId, thermostat);
+        makeRequest(req);
     }
 
-    private SystemConfig getSystemConfig(int systemId) {
-        NibeSystem system = cachedSystems.get(systemId);
-        if (system == null) {
-            system = updateSystem(systemId);
+    @Override
+    public SystemConfig getSystemConfig(int systemId) {
+        Request req = createSystemConfigRequest(systemId);
+        String resp = makeRequest(req);
+        SystemConfig config = parseSystemConfig(resp);
+        if (cachedSystems.get(systemId) != null) {
+            cachedSystems.get(systemId).setConfig(config);
         }
-        if (system.getConfig() == null) {
-            return updateSystemConfig(systemId);
-        }
-        return system.getConfig();
+        return config;
     }
 
-    private SoftwareInfo getSoftwareInfo(int systemId) {
-        NibeSystem system = cachedSystems.get(systemId);
-        if (system == null) {
-            system = updateSystem(systemId);
-        }
-        if (system.getSoftwareInfo() == null) {
-            return updateSoftwareVersion(systemId);
-        }
-        return system.getSoftwareInfo();
+    @Override
+    public SoftwareInfo getSoftwareInfo(int systemId) {
+        Request req = createSoftwareRequest(systemId);
+        String resp = makeRequest(req);
+        return parseSoftwareInfo(resp);
     }
 
     @Override
@@ -198,104 +174,113 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi, AccessTokenRe
         bearerToken = accessTokenResponse.getAccessToken();
     }
 
+    private Request createSystemRequest(int systemId) {
+        return prepareRequest(HttpMethod.GET, API_SYSTEM_WITH_ID, systemId, REQUEST_TYPE_SYSTEM);
+    }
+
+    private Request createSystemConfigRequest(int systemId) {
+        return prepareRequest(HttpMethod.GET, API_CONFIG, systemId, REQUEST_TYPE_CONFIG);
+    }
+
+    private Request createSoftwareRequest(int systemId) {
+        return prepareRequest(HttpMethod.GET, API_SOFTWARE, systemId, REQUEST_TYPE_SOFTWARE);
+    }
+
+    private Request createCategoriesRequest(int systemId, boolean includeParameters) {
+        Request req = prepareRequest(HttpMethod.GET, API_CATEGORIES, systemId, REQUEST_TYPE_CATEGORIES);
+        req.param(API_QUERY_INCLUDE_PARAMETERS, Boolean.toString(includeParameters));
+        return req;
+    }
+
+    private Request createGetParametersRequest(int systemId, Set<Integer> parameterIds) {
+        Request req = prepareRequest(HttpMethod.GET, API_PARAMETERS, systemId, REQUEST_TYPE_PARAMETER_GET);
+        req.param(API_QUERY_PARAMETER_IDS, StringConvert.toCommaList(parameterIds));
+        return req;
+    }
+
+    private Request createSetParametersRequest(int systemId, Map<Integer, Integer> parameters) {
+        Request req = prepareRequest(HttpMethod.PUT, API_PARAMETERS, systemId, REQUEST_TYPE_PARAMETER_SET);
+        Map<String, Map<Integer, Integer>> wrapper = Collections.singletonMap("settings", parameters);
+        req.content(new StringContentProvider(serializer.toJson(wrapper)), CONTENT_TYPE);
+        return req;
+    }
+
+    private Request createGetModeRequest(int systemId) {
+        return prepareRequest(HttpMethod.GET, API_MODE, systemId, REQUEST_TYPE_MODE_GET);
+    }
+
+    private Request createSetModeRequest(int systemId, Mode mode) {
+        Request req = prepareRequest(HttpMethod.PUT, API_MODE, systemId, REQUEST_TYPE_MODE_SET);
+        String body = serializer.toJson(Collections.singletonMap("mode", mode));
+        req.content(new StringContentProvider(body), CONTENT_TYPE);
+        return req;
+    }
+
+    private Request createSetThermostatRequest(int systemId, Thermostat thermostat) {
+        Request req = prepareRequest(HttpMethod.POST, API_THERMOSTATS, systemId, REQUEST_TYPE_THERMOSTAT);
+        req.content(new StringContentProvider(serializer.toJson(thermostat)), CONTENT_TYPE);
+        return req;
+    }
+
     private NibeSystem updateSystem(int systemId) {
-        logger.debug("Updating system");
-        Request req = prepareRequest(String.format(API_SYSTEM_WITH_ID, systemId), HttpMethod.GET);
+        Request req = createSystemRequest(systemId);
         String resp = makeRequest(req);
         NibeSystem system = parseSystem(resp);
-        system.setConfig(getSystemConfig(systemId));
-        system.setSoftwareInfo(getSoftwareInfo(systemId));
+        if (cachedSystems.containsKey(systemId)) {
+            system.setConfig(cachedSystems.get(systemId).getConfig());
+        }
         cachedSystems.put(systemId, system);
         return system;
     }
 
     private SystemConfig updateSystemConfig(int systemId) {
-        Request req = prepareRequest(String.format(API_CONFIG, systemId), HttpMethod.GET);
+        Request req = createSystemConfigRequest(systemId);
         String resp = makeRequest(req);
         return parseSystemConfig(resp);
     }
 
-    private SoftwareInfo updateSoftwareVersion(int systemId) {
-        Request req = prepareRequest(String.format(API_SOFTWARE, systemId), HttpMethod.GET);
-        String resp = makeRequest(req);
-        return parseSoftwareInfo(resp);
-    }
-
     private List<Category> updateCategories(int systemId, boolean includeParameters) {
-        Request req = prepareRequest(String.format(API_CATEGORIES, systemId), HttpMethod.GET);
-        req.param(API_QUERY_INCLUDE_PARAMETERS, Boolean.toString(includeParameters));
+        Request req = createCategoriesRequest(systemId, includeParameters);
         String resp = makeRequest(req);
         List<Category> categories = parseCategoryList(resp);
         Map<String, Category> categoryCache = cachedCategories.get(systemId);
-        Map<Integer, Parameter> parameterCache = cachedParameters.get(systemId);
-        for (Category category : categories) {
-            categoryCache.putIfAbsent(category.getCategoryId(), category);
-            for (Parameter parameter : category.getParameters()) {
-                parameterCache.put(parameter.getParameterId(), parameter);
+            for (Category category : categories) {
+                categoryCache.putIfAbsent(category.getCategoryId(), category);
             }
-        }
         return categories;
-    }
-
-    private void updateCategory(int systemId, String categoryId) {
-        Request req = prepareRequest(String.format(API_CATEGORY_WITH_ID, systemId, categoryId), HttpMethod.GET);
-        String resp = makeRequest(req);
-        List<Parameter> parameters = parseParameterList(resp);
-        Map<Integer, Parameter> parameterCache = cachedParameters.get(systemId);
-        for (Parameter parameter : parameters) {
-            parameterCache.put(parameter.getParameterId(), parameter);
-        }
-    }
-
-    private List<Parameter> updateParameters(int systemId, Set<Integer> parameterIds) {
-        Request req = prepareRequest(String.format(API_PARAMETERS, systemId), HttpMethod.GET);
-        req.param(API_QUERY_PARAMETER_IDS, StringConvert.toCommaList(parameterIds));
-        String resp = makeRequest(req);
-        List<Parameter> parameters = parseParameterList(resp);
-        Map<Integer, Parameter> parameterCache = cachedParameters.get(systemId);
-        for (Parameter parameter : parameters) {
-            parameterCache.put(parameter.getParameterId(), parameter);
-        }
-        return parameters;
-    }
-
-    private Mode updateMode(int systemId) {
-        Request req = prepareRequest(String.format(API_MODE, systemId), HttpMethod.GET);
-        String resp = makeRequest(req);
-        Mode mode = parseMode(resp);
-        cachedModes.put(systemId, mode);
-        return mode;
     }
 
     @Override
     public void addCallbackListener(int systemId, NibeUplinkRestCallbackListener listener) {
-        queuedParameters.putIfAbsent(systemId, new ConcurrentLinkedDeque<>());
         listeners.putIfAbsent(systemId, listener);
         trackedParameters.putIfAbsent(systemId, new HashSet<>());
     }
 
     @Override
     public void removeCallbackListener(int systemId) {
-        queuedParameters.remove(systemId);
         listeners.remove(systemId);
         trackedParameters.remove(systemId);
     }
 
-    private Request prepareRequest(String uri, HttpMethod method) {
+    private Request prepareRequest(HttpMethod method, String endPoint, int systemId, int requestType) {
         try {
-            if (bearerToken.equals("") ||
-                    oAuthClient.getAccessTokenResponse() == null ||
-                    oAuthClient.getAccessTokenResponse().isExpired(LocalDateTime.now(), 5)) {
+            if (oAuthClient.getAccessTokenResponse() == null ||
+                    oAuthClient.getAccessTokenResponse().isExpired(LocalDateTime.now(), 5) ||
+                    bearerToken.equals("")) {
                 refreshToken();
             }
         } catch (OAuthException | OAuthResponseException | IOException e) {
             throw new NibeUplinkException("Error retrieving token", e);
         }
-        Request req = httpClient.newRequest(uri);
+        Request req = systemId == 0 ?
+                httpClient.newRequest(endPoint) :
+                httpClient.newRequest(String.format(endPoint, systemId));
         req.method(method);
-        req.accept(ACCEPT);
+        req.accept(CONTENT_TYPE);
         req.followRedirects(true);
         req.header(HttpHeader.AUTHORIZATION, BEARER + bearerToken);
+        req.attribute(SYSTEM_ID, systemId);
+        req.attribute(REQUEST_TYPE, requestType);
         return req;
     }
 

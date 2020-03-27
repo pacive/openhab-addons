@@ -22,8 +22,6 @@ import com.google.gson.JsonParser;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -37,9 +35,7 @@ import java.util.List;
 @NonNullByDefault
 public class NibeUplinkRestResponseParser {
 
-    private static final JsonParser parser = new JsonParser();
-
-    private static final Logger logger = LoggerFactory.getLogger(NibeUplinkRestResponseParser.class);
+    private static JsonParser parser = new JsonParser();
 
     public static NibeSystem parseSystem(JsonObject tree) throws NibeUplinkParseException {
         int systemId = 0;

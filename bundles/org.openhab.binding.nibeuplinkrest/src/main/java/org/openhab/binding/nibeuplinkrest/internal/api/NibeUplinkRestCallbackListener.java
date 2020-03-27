@@ -17,7 +17,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.SoftwareInfo;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
 
 import java.util.Map;
 
