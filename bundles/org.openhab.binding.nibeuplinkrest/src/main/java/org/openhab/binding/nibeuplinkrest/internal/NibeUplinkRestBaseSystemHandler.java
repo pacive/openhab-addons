@@ -16,13 +16,17 @@ package org.openhab.binding.nibeuplinkrest.internal;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
+import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
+import org.eclipse.smarthome.core.thing.type.*;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.ConnectionStatus;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Parameter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 
@@ -35,6 +39,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler {
 
     private @NonNullByDefault({}) NibeUplinkRestApi nibeUplinkRestApi;
     private @NonNullByDefault({}) NibeUplinkRestBaseSystemConfiguration config;
+    private @NonNullByDefault({}) int systemId;
 
     public NibeUplinkRestBaseSystemHandler(Thing thing) {
         super(thing);
@@ -49,15 +54,17 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler {
     public void initialize() {
         updateStatus(ThingStatus.UNKNOWN);
         config = getConfigAs(NibeUplinkRestBaseSystemConfiguration.class);
+        systemId = config.systemId;
         Bridge bridge = getBridge();
         if (bridge != null) {
             NibeUplinkRestBridgeHandler bridgeHandler = (NibeUplinkRestBridgeHandler) bridge.getHandler();
-            nibeUplinkRestApi = bridgeHandler.getConnector();
+            nibeUplinkRestApi = bridgeHandler.getApiConnection();
         } else {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_UNINITIALIZED, "No bridge found");
         }
         scheduler.execute(() -> {
             updateProperties();
+            addChannels();
             if (isOnline()) {
                 updateStatus(ThingStatus.ONLINE);
             } else {
@@ -71,16 +78,33 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler {
         return status != ConnectionStatus.OFFLINE;
     }
 
-    public void updateProperties() {
-        Map<String, String> properties = new HashMap<>();
-
+    private void updateProperties() {
         NibeSystem system = nibeUplinkRestApi.getSystem(config.systemId);
-        properties.put(PROPERTY_HAS_COOLING, Boolean.toString(system.hasCooling()));
-        properties.put(PROPERTY_HAS_HEATING, Boolean.toString(system.hasHeating()));
-        properties.put(PROPERTY_HAS_HOT_WATER, Boolean.toString(system.hasHotWater()));
-        properties.put(PROPERTY_HAS_VENTILATION, Boolean.toString(system.hasVentilation()));
-        properties.put(PROPERTY_SOFTWARE_VERSION, system.getSoftwareInfo().getCurrentVersion());
+        thing.setProperty(PROPERTY_HAS_COOLING, Boolean.toString(system.hasCooling()));
+        thing.setProperty(PROPERTY_HAS_HEATING, Boolean.toString(system.hasHeating()));
+        thing.setProperty(PROPERTY_HAS_HOT_WATER, Boolean.toString(system.hasHotWater()));
+        thing.setProperty(PROPERTY_HAS_VENTILATION, Boolean.toString(system.hasVentilation()));
+        thing.setProperty(PROPERTY_SOFTWARE_VERSION, system.getSoftwareInfo().getCurrentVersion());
+    }
 
-        thing.setProperties(properties);
+    private void addChannels() {
+        List<Category> categories = nibeUplinkRestApi.getCategories(config.systemId, true);
+        List<Channel> channels = new ArrayList<>();
+        for (Category category : categories) {
+            if (!category.getCategoryId().equals("SYSTEM_INFO")) {
+                ChannelGroupUID cgid = new ChannelGroupUID(thing.getUID(), category.getCategoryId());
+                ChannelGroupTypeUID cgtid = new ChannelGroupTypeUID(cgid.getAsString());
+                ChannelGroupType cgt = ChannelGroupTypeBuilder.instance(cgtid, category.getName()).build();
+                ChannelGroupDefinition definition = new ChannelGroupDefinition(category.getCategoryId(), cgtid);
+                for (Parameter parameter : category.getParameters()) {
+                    ChannelUID cid = new ChannelUID(cgid, parameter.getName());
+                    ChannelTypeUID ctid = new ChannelTypeUID(BINDING_ID, parameter.getName());
+                    Channel channel = ChannelBuilder.create(cid, "Number")
+                            .withLabel(parameter.getTitle()).withType(ctid).build();
+                    channels.add(channel);
+                }
+            }
+        }
+        updateThing(editThing().withChannels(channels).build());
     }
 }
