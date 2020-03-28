@@ -34,6 +34,9 @@ public class NibeUplinkRestBindingConstants {
     public static final String CHANNEL_THERMOSTAT_CURRENT = "currentTemperature";
     public static final String CHANNEL_THERMOSTAT_TARGET = "targetTemperature";
 
+    public static final long THERMOSTAT_UPDATE_INTERVAL = 15;
+    public static final long MODE_UPDATE_INTERVAL = THERMOSTAT_UPDATE_INTERVAL;
+
     public static final String PROPERTY_SYSTEM_ID = "systemId";
     public static final String PROPERTY_NAME = "name";
     public static final String PROPERTY_PRODUCT_NAME = "productName";

@@ -36,10 +36,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -65,12 +62,20 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi, AccessTokenRe
 
     private final OAuthClientService oAuthClient;
     private final HttpClient httpClient;
+    private final ScheduledExecutorService scheduler;
+    private long updateInterval;
+
     private final Map<Integer, NibeSystem> cachedSystems = new ConcurrentHashMap<>();
     private final Map<Integer, Map<String, Category>> cachedCategories = new ConcurrentHashMap<>();
     private final Map<Integer, Set<Thermostat>> thermostats = new ConcurrentHashMap<>();
     private final Map<Integer, Set<Integer>> trackedParameters = new ConcurrentHashMap<>();
     private final Deque<Request> queuedRequests = new ConcurrentLinkedDeque<>();
     private final Map<Integer, NibeUplinkRestCallbackListener> listeners = new ConcurrentHashMap<>();
+    private Future<?> standardRequestProducer;
+    private Future<?> softwareRequestProducer;
+    private Future<?> thermostatRequestProducer;
+    private Future<?> modeRequestProducer;
+    private Future<?> requestProcessor;
 
     private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestConnector.class);
     private final Gson serializer = new Gson();
@@ -78,15 +83,18 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi, AccessTokenRe
     private String bearerToken = "";
 
 
-    public NibeUplinkRestConnector(OAuthClientService oAuthClient, HttpClient httpClient) {
+    public NibeUplinkRestConnector(OAuthClientService oAuthClient, HttpClient httpClient,
+                                   ScheduledExecutorService scheduler, long updateInterval) {
         this.oAuthClient = oAuthClient;
         this.httpClient = httpClient;
+        this.scheduler = scheduler;
+        this.updateInterval = updateInterval;
     }
 
     @Override
     public List<NibeSystem> getConnectedSystems() {
         cachedSystems.clear();
-        Request req = prepareRequest(HttpMethod.GET, API_SYSTEMS, 0, REQUEST_TYPE_SYSTEMS);
+        Request req = createConnectedSystemsRequest();
         String resp = makeRequest(req);
         List<NibeSystem> systems = parseSystemList(resp);
         for (NibeSystem system : systems) {
@@ -159,6 +167,24 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi, AccessTokenRe
         }
         Request req = createSetThermostatRequest(systemId, thermostat);
         makeRequest(req);
+        if (thermostatRequestProducer == null || thermostatRequestProducer.isCancelled()) {
+            thermostatRequestProducer = scheduler.scheduleWithFixedDelay(this::queueThermostatRequests,
+                    THERMOSTAT_UPDATE_INTERVAL, THERMOSTAT_UPDATE_INTERVAL, TimeUnit.MINUTES);
+        }
+    }
+
+    @Override
+    public void removeThermostat(int systemId, Thermostat thermostat) {
+        Set<Thermostat> systemThermostats = thermostats.get(systemId);
+        if (systemThermostats != null) {
+            systemThermostats.remove(thermostat);
+            if (systemThermostats.isEmpty()) {
+                thermostats.remove(systemId);
+                if (thermostats.isEmpty()) {
+                    thermostatRequestProducer.cancel(false);
+                }
+            }
+        }
     }
 
     @Override
@@ -243,12 +269,6 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi, AccessTokenRe
         return system;
     }
 
-    private SystemConfig updateSystemConfig(int systemId) {
-        Request req = createSystemConfigRequest(systemId);
-        String resp = makeRequest(req);
-        return parseSystemConfig(resp);
-    }
-
     private List<Category> updateCategories(int systemId, boolean includeParameters) {
         Request req = createCategoriesRequest(systemId, includeParameters);
         String resp = makeRequest(req);
@@ -264,12 +284,29 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi, AccessTokenRe
     public void addCallbackListener(int systemId, NibeUplinkRestCallbackListener listener) {
         listeners.putIfAbsent(systemId, listener);
         trackedParameters.putIfAbsent(systemId, new HashSet<>());
+        standardRequestProducer = scheduler.scheduleWithFixedDelay(this::queueStandardRequests, 1,
+                updateInterval, TimeUnit.SECONDS);
     }
 
     @Override
     public void removeCallbackListener(int systemId) {
         listeners.remove(systemId);
+        if (listeners.isEmpty()) {
+            standardRequestProducer.cancel(false);
+        }
         trackedParameters.remove(systemId);
+    }
+
+    private void queueStandardRequests() {
+
+    }
+
+    private void queueThermostatRequests() {
+
+    }
+
+    private void queueModeRequests() {
+
     }
 
     private Request prepareRequest(HttpMethod method, String endPoint, int systemId, int requestType) {
