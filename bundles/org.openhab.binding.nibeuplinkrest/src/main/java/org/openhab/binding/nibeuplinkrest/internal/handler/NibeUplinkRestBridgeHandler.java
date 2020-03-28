@@ -63,9 +63,7 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
     }
 
     @Override
-    public void handleCommand(ChannelUID channelUID, Command command) {
-
-    }
+    public void handleCommand(ChannelUID channelUID, Command command) {}
 
     @Override
     public void initialize() {
@@ -74,7 +72,6 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
         oAuthClient = oAuthFactory.createOAuthClientService(thing.getUID().getAsString(), TOKEN_ENDPOINT,
                 AUTH_ENDPOINT, config.clientId, config.clientSecret, SCOPE, false);
         nibeUplinkRestApi = new NibeUplinkRestConnector(oAuthClient, httpClient, scheduler, config.updateInterval);
-        oAuthClient.addAccessTokenRefreshListener((NibeUplinkRestConnector) nibeUplinkRestApi);
         updateStatus(ThingStatus.UNKNOWN);
         scheduler.execute(() -> {
             if (isAuthorized()) {
@@ -85,7 +82,7 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
 
     @Override
     public void dispose() {
-        oAuthClient.removeAccessTokenRefreshListener((NibeUplinkRestConnector) nibeUplinkRestApi);
+        super.dispose();
     }
 
     public void authorize(String authCode, String baseURL) throws OAuthException, OAuthResponseException, IOException {
