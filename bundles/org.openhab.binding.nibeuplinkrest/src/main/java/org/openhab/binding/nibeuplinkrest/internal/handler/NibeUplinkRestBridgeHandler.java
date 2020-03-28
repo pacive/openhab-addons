@@ -73,7 +73,7 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
         config = getConfigAs(NibeUplinkRestBridgeConfiguration.class);
         oAuthClient = oAuthFactory.createOAuthClientService(thing.getUID().getAsString(), TOKEN_ENDPOINT,
                 AUTH_ENDPOINT, config.clientId, config.clientSecret, SCOPE, false);
-        nibeUplinkRestApi = new NibeUplinkRestConnector(oAuthClient, httpClient);
+        nibeUplinkRestApi = new NibeUplinkRestConnector(oAuthClient, httpClient, scheduler, config.updateInterval);
         oAuthClient.addAccessTokenRefreshListener((NibeUplinkRestConnector) nibeUplinkRestApi);
         updateStatus(ThingStatus.UNKNOWN);
         scheduler.execute(() -> {

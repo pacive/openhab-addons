@@ -20,4 +20,5 @@ package org.openhab.binding.nibeuplinkrest.internal.handler;
 public class NibeUplinkRestBridgeConfiguration {
     public String clientId;
     public String clientSecret;
+    public long updateInterval;
 }

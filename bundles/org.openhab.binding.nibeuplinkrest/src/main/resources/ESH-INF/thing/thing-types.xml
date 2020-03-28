@@ -18,6 +18,11 @@
 				<label>Client Secret</label>
 				<description>OAuth Client Secret obtained from Nibe Uplink</description>
 			</parameter>
+			<parameter name="updateInterval" type="integer" min="30" max="3600" required="true">
+				<label>Update interval</label>
+				<description>Update interval</description>
+				<default>60</default>
+			</parameter>
 		</config-description>
 
 	</bridge-type>
@@ -45,11 +50,6 @@
 			<parameter name="systemId" type="integer" required="true">
 				<label>System Id</label>
 				<description>The system Id given by Nibe Uplink</description>
-			</parameter>
-			<parameter name="updateInterval" type="integer" min="30" max="3600" required="true">
-				<label>Update interval</label>
-				<description>Update interval</description>
-				<default>60</default>
 			</parameter>
 		</config-description>
 	</thing-type>

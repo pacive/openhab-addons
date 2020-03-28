@@ -20,5 +20,4 @@ package org.openhab.binding.nibeuplinkrest.internal.handler;
 
 public class NibeUplinkRestBaseSystemConfiguration {
     public int systemId;
-    public int updateInterval;
 }
