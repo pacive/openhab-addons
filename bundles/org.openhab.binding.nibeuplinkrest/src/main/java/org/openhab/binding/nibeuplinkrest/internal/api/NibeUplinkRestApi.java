@@ -45,7 +45,7 @@ public interface NibeUplinkRestApi {
 
     void setThermostat(int systemId, Thermostat thermostat);
 
-    void removeThermostat(int systemId, Thermostat thermostat);
+    void removeThermostat(int systemId, int thermostatId);
 
     void addCallbackListener(int systemId, NibeUplinkRestCallbackListener listener);
 

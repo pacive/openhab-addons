@@ -41,7 +41,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
 
     private final Map<Integer, NibeSystem> cachedSystems = new ConcurrentHashMap<>();
     private final Map<Integer, Map<String, Category>> cachedCategories = new ConcurrentHashMap<>();
-    private final Map<Integer, Set<Thermostat>> thermostats = new ConcurrentHashMap<>();
+    private final Map<Integer, Map<Integer, Thermostat>> thermostats = new ConcurrentHashMap<>();
     private final Map<Integer, Set<Integer>> trackedParameters = new ConcurrentHashMap<>();
     private final Deque<Request> queuedRequests = new ConcurrentLinkedDeque<>();
     private final Map<Integer, NibeUplinkRestCallbackListener> listeners = new ConcurrentHashMap<>();
@@ -126,17 +126,18 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
 
     @Override
     public void setThermostat(int systemId, Thermostat thermostat) {
-        Set<Thermostat> systemThermostats = thermostats.get(systemId);
-        if (systemThermostats != null) {
-            systemThermostats.remove(thermostat);
-            systemThermostats.add(thermostat);
-        } else {
-            systemThermostats = new HashSet<>();
-            systemThermostats.add(thermostat);
-            thermostats.put(systemId, systemThermostats);
-        }
         Request req = requests.createSetThermostatRequest(systemId, thermostat);
         requests.makeRequest(req);
+
+        Map<Integer, Thermostat> systemThermostats = thermostats.get(systemId);
+        if (systemThermostats != null) {
+            systemThermostats.put(thermostat.getId(), thermostat);
+        } else {
+            systemThermostats = new HashMap<>();
+            systemThermostats.put(thermostat.getId(), thermostat);
+            thermostats.put(systemId, systemThermostats);
+        }
+
         if (thermostatRequestProducer == null || thermostatRequestProducer.isCancelled()) {
             thermostatRequestProducer = scheduler.scheduleWithFixedDelay(this::queueThermostatRequests,
                     THERMOSTAT_UPDATE_INTERVAL, THERMOSTAT_UPDATE_INTERVAL, TimeUnit.MINUTES);
@@ -144,10 +145,10 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     @Override
-    public void removeThermostat(int systemId, Thermostat thermostat) {
-        Set<Thermostat> systemThermostats = thermostats.get(systemId);
+    public void removeThermostat(int systemId, int thermostatId) {
+        Map<Integer, Thermostat> systemThermostats = thermostats.get(systemId);
         if (systemThermostats != null) {
-            systemThermostats.remove(thermostat);
+            systemThermostats.remove(thermostatId);
             if (systemThermostats.isEmpty()) {
                 thermostats.remove(systemId);
                 if (thermostats.isEmpty()) {
