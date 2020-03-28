@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
@@ -57,13 +58,20 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (command instanceof DecimalType) {
+        if (command instanceof State) {
+            handleUpdate(channelUID, (State) command);
+        }
+    }
+
+    @Override
+    public void handleUpdate(ChannelUID channelUID, State newState) {
+        if (newState instanceof DecimalType) {
             switch (channelUID.getId()) {
                 case CHANNEL_THERMOSTAT_CURRENT:
-                    currentTemperature = ((DecimalType) command).doubleValue();
+                    currentTemperature = ((DecimalType) newState).doubleValue();
                     break;
                 case CHANNEL_THERMOSTAT_TARGET:
-                    targetTemperature = ((DecimalType) command).doubleValue();
+                    targetTemperature = ((DecimalType) newState).doubleValue();
                     break;
             }
         }
