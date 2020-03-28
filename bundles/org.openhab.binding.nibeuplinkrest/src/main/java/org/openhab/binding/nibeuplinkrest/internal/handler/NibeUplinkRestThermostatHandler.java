@@ -14,6 +14,7 @@
 package org.openhab.binding.nibeuplinkrest.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
@@ -33,8 +34,8 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
     private @NonNullByDefault({}) NibeUplinkRestApi nibeUplinkRestApi;
     private @NonNullByDefault({}) NibeUplinkRestThermostatConfiguration config;
 
-    private double currentTemperature = Double.MIN_VALUE;
-    private double targetTemperature = Double.MIN_VALUE;
+    private @Nullable Double currentTemperature;
+    private @Nullable Double targetTemperature;
 
 
     public NibeUplinkRestThermostatHandler(Thing thing) {
@@ -66,10 +67,8 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
                     break;
             }
         }
-        if (currentTemperature > -100 && targetTemperature > -100) {
-            Thermostat thermostat = new Thermostat(config.id, config.name, config.getClimateSystems(),
+        Thermostat thermostat = new Thermostat(config.id, config.name, config.getClimateSystems(),
                     currentTemperature, targetTemperature);
-            nibeUplinkRestApi.setThermostat(config.systemId, thermostat);
-        }
+        nibeUplinkRestApi.setThermostat(config.systemId, thermostat);
     }
 }

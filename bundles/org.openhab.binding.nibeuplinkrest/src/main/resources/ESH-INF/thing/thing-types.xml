@@ -78,7 +78,7 @@
 				<label>System Id</label>
 				<description>Id of the Nibe Uplink system this thermostat belongs to.</description>
 			</parameter>
-			<parameter name="name" type="text">
+			<parameter name="name" type="text" required="true">
 				<label>Thermostat name</label>
 				<description>A short descriptive name of the thermostat (e.g. "Ground Floor" or "Bedroom")</description>
 			</parameter>

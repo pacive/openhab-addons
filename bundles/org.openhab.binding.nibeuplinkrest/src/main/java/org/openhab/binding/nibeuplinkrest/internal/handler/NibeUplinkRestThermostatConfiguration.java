@@ -12,8 +12,9 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal.handler;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,9 +28,10 @@ public class NibeUplinkRestThermostatConfiguration {
     public int id;
     public int systemId;
     public String name;
-    private String climateSystems;
+    private @Nullable String climateSystems;
 
-    public Set<Integer> getClimateSystems() {
+    public @Nullable Set<Integer> getClimateSystems() {
+        if (climateSystems == null) { return null; }
         return Arrays.asList(climateSystems.split(",")).stream()
                 .map(Integer::parseInt).collect(Collectors.toSet());
     }

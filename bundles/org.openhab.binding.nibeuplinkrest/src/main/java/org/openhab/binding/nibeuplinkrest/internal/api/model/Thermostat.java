@@ -16,8 +16,6 @@ import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -28,31 +26,28 @@ public class Thermostat {
     @SerializedName("externalId")
     private final int id;
     private final String name;
-    private Set<Integer> climateSystems = new HashSet<>();
-    private int currentTemperature;
-    private int targetTemperature;
+    private @Nullable Set<Integer> climateSystems;
+    private @Nullable Integer currentTemperature;
+    private @Nullable Integer targetTemperature;
 
-    public Thermostat(int id, String name, Set<Integer> climateSystems, double currentTemperature, double targetTemperature) {
+    public Thermostat(int id, String name, @Nullable Set<Integer> climateSystems, @Nullable Double currentTemperature,
+                      @Nullable Double targetTemperature) {
         this.id = id;
         this.name = name;
-        this.climateSystems.addAll(climateSystems);
-        this.currentTemperature = (int) (currentTemperature * 10);
-        this.targetTemperature = (int) (targetTemperature * 10);
+        this.climateSystems = climateSystems;
+        this.currentTemperature = currentTemperature == null ? null : (int) (currentTemperature * 10);
+        this.targetTemperature = targetTemperature == null ? null : (int) (targetTemperature * 10);
     }
 
     public int getId() { return id; }
 
     public String getName() { return name; }
 
-    public Set<Integer> getClimateSystems() { return climateSystems; }
+    public @Nullable Set<Integer> getClimateSystems() { return climateSystems; }
 
-    public int getCurrentTemperature() { return currentTemperature; }
+    public @Nullable Double getCurrentTemperature() { return currentTemperature == null ? null : (double) currentTemperature / 10; }
 
-    public int getTargetTemperature() { return targetTemperature; }
-
-    public double getCurrentTemperatureAsDouble() { return (double) currentTemperature / 10; }
-
-    public double getTargetTemperatureAsDouble() { return (double) targetTemperature / 10; }
+    public @Nullable Double getTargetTemperature() { return targetTemperature == null ? null : (double) targetTemperature / 10; }
 
     public void setCurrentTemperature(int currentTemperature) { this.currentTemperature = currentTemperature; }
 
