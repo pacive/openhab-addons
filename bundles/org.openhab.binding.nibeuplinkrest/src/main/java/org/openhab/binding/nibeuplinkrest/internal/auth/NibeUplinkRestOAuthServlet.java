@@ -40,12 +40,12 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
 
     private static final long serialVersionUID = 985091377740195L;
 
-    private final String REPLACE_CALLBACK = "callbackURL";
-    private final String REPLACE_ACCOUNTS = "accounts";
-    private final String REPLACE_ACCOUNT_LABEL = "account.thingLabel";
-    private final String REPLACE_ACCOUNT_REDIRECT = "account.redirectURI";
+    private static final String REPLACE_CALLBACK = "callbackURL";
+    private static final String REPLACE_ACCOUNTS = "accounts";
+    private static final String REPLACE_ACCOUNT_LABEL = "account.thingLabel";
+    private static final String REPLACE_ACCOUNT_REDIRECT = "account.redirectURI";
 
-    private final String CONTENT_TYPE = "text/html";
+    private static final String CONTENT_TYPE = "text/html";
 
     private NibeUplinkRestOAuthService oAuthService;
     private final Map<String, NibeUplinkRestOAuthServletTemplate> templates;

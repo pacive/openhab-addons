@@ -36,7 +36,7 @@ public class NibeUplinkRestOAuthServletTemplate  {
 
     private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestOAuthServletTemplate.class);
 
-    private final Pattern EXPANSION_PATTERN = Pattern.compile("\\$\\{([^\\}]+)\\}");
+    private static final Pattern EXPANSION_PATTERN = Pattern.compile("\\$\\{([^\\}]+)\\}");
 
     private final BundleContext bundleContext;
     private String template = "";
