@@ -25,7 +25,8 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.smarthome.core.auth.client.oauth2.*;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
-import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkException;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestHttpException;
 import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
 
 import java.io.IOException;
@@ -133,7 +134,7 @@ public class NibeUplinkRestRequestHandler {
                 refreshToken();
             }
         } catch (OAuthException | OAuthResponseException | IOException e) {
-            throw new NibeUplinkException("Error retrieving token", e);
+            throw new NibeUplinkRestException("Error retrieving token", e);
         }
         Request req = systemId == NO_SYSTEM_ID ?
                 httpClient.newRequest(endPoint) :
@@ -147,7 +148,7 @@ public class NibeUplinkRestRequestHandler {
         return req;
     }
 
-    public String makeRequest(Request req) throws NibeUplinkException {
+    public String makeRequest(Request req) throws NibeUplinkRestException {
         ContentResponse resp;
         resp = sendRequest(req);
         if (resp.getStatus() == UNAUTHORIZED_401) {
@@ -162,7 +163,7 @@ public class NibeUplinkRestRequestHandler {
         try {
             resp = req.send();
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
-            throw new NibeUplinkException("Failed to send HTTP request", e);
+            throw new NibeUplinkRestException("Failed to send HTTP request", e);
         }
         return resp;
     }
@@ -177,20 +178,24 @@ public class NibeUplinkRestRequestHandler {
             case UNAUTHORIZED_401:
             case FORBIDDEN_403:
             case NOT_FOUND_404:
-                throw new NibeUplinkException(
-                        String.format("Bad request: %s, message: %s", resp.getStatus(), resp.getContentAsString()));
+                throw new NibeUplinkRestHttpException(
+                        String.format("Bad request: %s, message: %s", resp.getStatus(), resp.getContentAsString()),
+                resp.getStatus());
             case TOO_MANY_REQUESTS_429:
-                throw new NibeUplinkException(
-                        String.format("Rate limit exceeded: %s", resp.getContentAsString()));
+                throw new NibeUplinkRestHttpException(
+                        String.format("Rate limit exceeded: %s", resp.getContentAsString()),
+                        resp.getStatus());
             case INTERNAL_SERVER_ERROR_500:
             case NOT_IMPLEMENTED_501:
             case BAD_GATEWAY_502:
             case SERVICE_UNAVAILABLE_503:
             case GATEWAY_TIMEOUT_504:
-                throw new NibeUplinkException(
-                        String.format("Server error: %s, message: %s", resp.getStatus(), resp.getContentAsString()));
+                throw new NibeUplinkRestHttpException(
+                        String.format("Server error: %s, message: %s", resp.getStatus(), resp.getContentAsString()),
+                        resp.getStatus());
             default:
-                throw new NibeUplinkException(String.format("Unhandled http response: %s", resp.getStatus()));
+                throw new NibeUplinkRestHttpException(String.format("Unhandled http response: %s", resp.getStatus()),
+                        resp.getStatus());
         }
     }
 
@@ -198,7 +203,7 @@ public class NibeUplinkRestRequestHandler {
         try {
             bearerToken = oAuthClient.refreshToken().getAccessToken();
         } catch (OAuthException | IOException | OAuthResponseException e) {
-            throw new NibeUplinkException("Unable to refresh token", e);
+            throw new NibeUplinkRestException("Unable to refresh token", e);
         }
     }
 }

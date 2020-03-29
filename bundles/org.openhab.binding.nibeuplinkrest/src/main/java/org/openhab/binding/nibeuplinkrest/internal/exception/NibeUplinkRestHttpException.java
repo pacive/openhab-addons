@@ -19,15 +19,19 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault
-public class NibeUplinkException extends RuntimeException {
+public class NibeUplinkRestHttpException extends NibeUplinkRestException {
 
-    private static final long serialVersionUID = 9409575184589375L;
+    private static final long serialVersionUID = 2688764916566565L;
 
-    public NibeUplinkException(String message) {
+    private final int responseCode;
+
+    public NibeUplinkRestHttpException(String message, int responseCode) {
         super(message);
+        this.responseCode = responseCode;
     }
 
-    public NibeUplinkException(String message, Throwable cause) {
+    public NibeUplinkRestHttpException(String message, int responseCode, Throwable cause) {
         super(message, cause);
+        this.responseCode = responseCode;
     }
 }

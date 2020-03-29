@@ -21,7 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
-import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkParseException;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestParseException;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -37,7 +37,7 @@ public class NibeUplinkRestResponseParser {
 
     private static JsonParser parser = new JsonParser();
 
-    public static NibeSystem parseSystem(JsonObject tree) throws NibeUplinkParseException {
+    public static NibeSystem parseSystem(JsonObject tree) throws NibeUplinkRestParseException {
         int systemId = 0;
         String name = "";
         String productName = "";
@@ -57,11 +57,11 @@ public class NibeUplinkRestResponseParser {
             connectionStatus = ConnectionStatus.from(tree.get(SYSTEM_CONNECTION_STATUS).getAsString());
             hasAlarmed = tree.get(SYSTEM_HAS_ALARMED).getAsBoolean();
         } catch (RuntimeException e) {
-           throw new NibeUplinkParseException("Error parsing system: ", e);
+           throw new NibeUplinkRestParseException("Error parsing system: ", e);
         }
 
         if (systemId == 0) {
-            throw new NibeUplinkParseException("Error parsing system.");
+            throw new NibeUplinkRestParseException("Error parsing system.");
         }
         return new NibeSystem(systemId, name, productName, securityLevel, serialNumber, lastActivityDate,
                 connectionStatus, hasAlarmed);
@@ -94,7 +94,7 @@ public class NibeUplinkRestResponseParser {
             hasHotWater = tree.get(PROPERTY_HAS_HOT_WATER).getAsBoolean();
             hasVentilation = tree.get(PROPERTY_HAS_VENTILATION).getAsBoolean();
         } catch (RuntimeException e) {
-            throw new NibeUplinkParseException("Error parsing system config", e);
+            throw new NibeUplinkRestParseException("Error parsing system config", e);
         }
         return new SystemConfig(hasCooling, hasHeating, hasHotWater, hasVentilation);
     }
@@ -110,7 +110,7 @@ public class NibeUplinkRestResponseParser {
                 upgradeAvailable = tree.get(SOFTWARE_UPGRADE).getAsJsonObject().get(SOFTWARE_NAME).getAsString();
             }
         } catch (RuntimeException e) {
-            throw new NibeUplinkParseException("Error parsing software info: ", e);
+            throw new NibeUplinkRestParseException("Error parsing software info: ", e);
         }
         return new SoftwareInfo(currentVersion, upgradeAvailable);
     }
@@ -123,7 +123,7 @@ public class NibeUplinkRestResponseParser {
                 categories.add(parseCategory(e.getAsJsonObject()));
             }
         } catch (RuntimeException e) {
-            throw new NibeUplinkParseException("Error parsing category list: ", e);
+            throw new NibeUplinkRestParseException("Error parsing category list: ", e);
         }
         return categories;
     }
@@ -138,7 +138,7 @@ public class NibeUplinkRestResponseParser {
             JsonArray parameterArray = tree.get("parameters").getAsJsonArray();
             parameters = parseParameterList(parameterArray);
         } catch (RuntimeException e) {
-            throw new NibeUplinkParseException("Error parsing category: ", e);
+            throw new NibeUplinkRestParseException("Error parsing category: ", e);
         }
         return new Category(categoryId, name, parameters);
     }
@@ -173,7 +173,7 @@ public class NibeUplinkRestResponseParser {
             displayValue = tree.get("displayValue").getAsString();
             rawValue = tree.get("rawValue").getAsInt();
         } catch (RuntimeException e) {
-            throw new NibeUplinkParseException("Error parsing parameter: ", e);
+            throw new NibeUplinkRestParseException("Error parsing parameter: ", e);
         }
         return new Parameter(parameterId, name, title, designation, unit, displayValue, rawValue);
     }

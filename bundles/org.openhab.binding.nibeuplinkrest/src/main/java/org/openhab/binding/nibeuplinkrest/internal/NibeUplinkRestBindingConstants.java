@@ -36,6 +36,8 @@ public class NibeUplinkRestBindingConstants {
 
     public static final long THERMOSTAT_UPDATE_INTERVAL = 15;
     public static final long MODE_UPDATE_INTERVAL = THERMOSTAT_UPDATE_INTERVAL;
+    public static final long REQUEST_INTERVAL = 5;
+    public static final int MAX_PARAMETERS_PER_REQUEST = 15;
 
     public static final String PROPERTY_SYSTEM_ID = "systemId";
     public static final String PROPERTY_NAME = "name";

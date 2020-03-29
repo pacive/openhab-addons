@@ -22,8 +22,7 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.smarthome.core.auth.client.oauth2.*;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
-import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkException;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +93,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public void addTrackedParameter(int systemId, int parameterId) {
         Set<Integer> systemTrackedParameters = trackedParameters.get(systemId);
         if (systemTrackedParameters == null || listeners.get(systemId) == null) {
-            throw new NibeUplinkException("No listener for system " + systemId);
+            throw new NibeUplinkRestException("No listener for system " + systemId);
         }
         if (systemTrackedParameters.add(parameterId)) {
             logger.trace("System {} is now tracking parameter {}", systemId, parameterId);
@@ -105,7 +104,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public void removeTrackedParameter(int systemId, int parameterId) {
         Set<Integer> systemTrackedParameters = trackedParameters.get(systemId);
         if (systemTrackedParameters == null || listeners.get(systemId) == null) {
-            throw new NibeUplinkException("No listener for system " + systemId);
+            throw new NibeUplinkRestException("No listener for system " + systemId);
         }
         if (systemTrackedParameters.remove(parameterId)) {
             logger.trace("System {} is no longer tracking parameter {}", systemId, parameterId);
