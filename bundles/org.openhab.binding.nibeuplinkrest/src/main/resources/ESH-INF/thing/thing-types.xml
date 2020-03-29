@@ -23,6 +23,11 @@
 				<description>Update interval</description>
 				<default>60</default>
 			</parameter>
+			<parameter name="softwareUpdateCheckInterval" type="integer" min="0" max="365" required="true">
+				<label>Update interval</label>
+				<description>Update interval</description>
+				<default>7</default>
+			</parameter>
 		</config-description>
 
 	</bridge-type>

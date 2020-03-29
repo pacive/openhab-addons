@@ -16,9 +16,10 @@ package org.openhab.binding.nibeuplinkrest.internal.api;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Parameter;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.SoftwareInfo;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -26,7 +27,7 @@ import java.util.Map;
 @NonNullByDefault
 public interface NibeUplinkRestCallbackListener {
 
-    void parametersUpdated(Map<Integer, Integer> parameterValues);
+    void parametersUpdated(List<Parameter> parameterValues);
 
     void systemUpdated(NibeSystem system);
 

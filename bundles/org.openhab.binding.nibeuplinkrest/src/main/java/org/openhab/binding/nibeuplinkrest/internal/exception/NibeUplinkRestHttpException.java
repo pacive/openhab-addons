@@ -34,4 +34,8 @@ public class NibeUplinkRestHttpException extends NibeUplinkRestException {
         super(message, cause);
         this.responseCode = responseCode;
     }
+
+    public int getResponseCode() {
+        return responseCode;
+    }
 }

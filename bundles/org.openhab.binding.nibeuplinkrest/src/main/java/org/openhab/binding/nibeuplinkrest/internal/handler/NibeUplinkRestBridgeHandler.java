@@ -20,6 +20,7 @@ import org.eclipse.smarthome.core.auth.client.oauth2.*;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.ThingStatus;
+import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
 import org.eclipse.smarthome.core.types.Command;
@@ -71,7 +72,8 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
         config = getConfigAs(NibeUplinkRestBridgeConfiguration.class);
         oAuthClient = oAuthFactory.createOAuthClientService(thing.getUID().getAsString(), TOKEN_ENDPOINT,
                 AUTH_ENDPOINT, config.clientId, config.clientSecret, SCOPE, false);
-        nibeUplinkRestApi = new NibeUplinkRestConnector(oAuthClient, httpClient, scheduler, config.updateInterval);
+        nibeUplinkRestApi = new NibeUplinkRestConnector(this, oAuthClient, httpClient, scheduler,
+                config.updateInterval, config.softwareUpdateCheckInterval);
         updateStatus(ThingStatus.UNKNOWN);
         scheduler.execute(() -> {
             if (isAuthorized()) {
@@ -112,5 +114,13 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
 
     public NibeUplinkRestApi getApiConnection() {
         return nibeUplinkRestApi;
+    }
+
+    public void signalServerError(int responseCode) {
+        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, String.valueOf(responseCode));
+    }
+
+    public void signalServerOnline() {
+        updateStatus(ThingStatus.ONLINE);
     }
 }

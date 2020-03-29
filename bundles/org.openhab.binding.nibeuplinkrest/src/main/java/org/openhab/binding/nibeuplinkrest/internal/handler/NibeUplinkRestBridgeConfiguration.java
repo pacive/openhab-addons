@@ -21,4 +21,5 @@ public class NibeUplinkRestBridgeConfiguration {
     public String clientId;
     public String clientSecret;
     public long updateInterval;
+    public long softwareUpdateCheckInterval;
 }

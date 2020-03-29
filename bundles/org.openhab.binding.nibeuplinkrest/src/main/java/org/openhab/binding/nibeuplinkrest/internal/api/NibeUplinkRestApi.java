@@ -50,4 +50,8 @@ public interface NibeUplinkRestApi {
     void addCallbackListener(int systemId, NibeUplinkRestCallbackListener listener);
 
     void removeCallbackListener(int SystemId);
+
+    void setUpdateInterval(int updateInterval);
+
+    void setSoftwareUpdateCheckInterval(int softwareUpdateCheckInterval);
 }

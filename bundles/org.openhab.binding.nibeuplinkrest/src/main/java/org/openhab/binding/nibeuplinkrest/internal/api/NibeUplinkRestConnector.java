@@ -15,6 +15,7 @@ package org.openhab.binding.nibeuplinkrest.internal.api;
 
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 import static org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestResponseParser.*;
+import static org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestRequestHandler.RequestType;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -23,6 +24,8 @@ import org.eclipse.jetty.client.api.Request;
 import org.eclipse.smarthome.core.auth.client.oauth2.*;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestHttpException;
+import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,29 +38,54 @@ import java.util.concurrent.*;
 @NonNullByDefault
 public class NibeUplinkRestConnector implements NibeUplinkRestApi {
 
-   private final ScheduledExecutorService scheduler;
+    private final NibeUplinkRestBridgeHandler bridgeHandler;
+    private final ScheduledExecutorService scheduler;
     private long updateInterval;
+    private long softwareUpdateCheckInterval;
 
     private final Map<Integer, NibeSystem> cachedSystems = new ConcurrentHashMap<>();
     private final Map<Integer, Map<String, Category>> cachedCategories = new ConcurrentHashMap<>();
     private final Map<Integer, Map<Integer, Thermostat>> thermostats = new ConcurrentHashMap<>();
     private final Map<Integer, Set<Integer>> trackedParameters = new ConcurrentHashMap<>();
+    private final Map<Integer, Mode> modes = new ConcurrentHashMap<>();
     private final Deque<Request> queuedRequests = new ConcurrentLinkedDeque<>();
     private final Map<Integer, NibeUplinkRestCallbackListener> listeners = new ConcurrentHashMap<>();
     private @Nullable Future<?> standardRequestProducer;
     private @Nullable Future<?> softwareRequestProducer;
     private @Nullable Future<?> thermostatRequestProducer;
     private @Nullable Future<?> modeRequestProducer;
+    private @Nullable Future<?> isAliveRequestProducer;
     private @Nullable Future<?> requestProcessor;
 
     private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestConnector.class);
     private final NibeUplinkRestRequestHandler requests;
 
-    public NibeUplinkRestConnector(OAuthClientService oAuthClient, HttpClient httpClient,
-                                   ScheduledExecutorService scheduler, long updateInterval) {
+    public NibeUplinkRestConnector(NibeUplinkRestBridgeHandler bridgeHandler, OAuthClientService oAuthClient, HttpClient httpClient,
+                                   ScheduledExecutorService scheduler, long updateInterval,
+                                   long softwareUpdateCheckInterval) {
+        this.bridgeHandler = bridgeHandler;
         this.scheduler = scheduler;
         this.updateInterval = updateInterval;
+        this.softwareUpdateCheckInterval = softwareUpdateCheckInterval;
         requests = new NibeUplinkRestRequestHandler(oAuthClient, httpClient);
+    }
+
+    @Override
+    public void setUpdateInterval(int updateInterval) {
+        this.updateInterval = updateInterval;
+        standardRequestProducer.cancel(false);
+        standardRequestProducer = scheduler.scheduleWithFixedDelay(this::queueStandardRequests, 1,
+                updateInterval, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void setSoftwareUpdateCheckInterval(int softwareUpdateCheckInterval) {
+        this.softwareUpdateCheckInterval = softwareUpdateCheckInterval;
+        softwareRequestProducer.cancel(false);
+        if (softwareUpdateCheckInterval > 0) {
+            softwareRequestProducer = scheduler.scheduleWithFixedDelay(this::queueSoftwareRequests, 0,
+                    softwareUpdateCheckInterval, TimeUnit.DAYS);
+        }
     }
 
     @Override
@@ -77,7 +105,29 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         if (cachedSystems.containsKey(systemId)) {
             return cachedSystems.get(systemId);
         }
-        return updateSystem(systemId);
+        Request req = requests.createSystemRequest(systemId);
+        String resp = requests.makeRequest(req);
+        NibeSystem system = parseSystem(resp);
+        cachedSystems.put(systemId, system);
+        return system;
+    }
+
+    @Override
+    public SystemConfig getSystemConfig(int systemId) {
+        Request req = requests.createSystemConfigRequest(systemId);
+        String resp = requests.makeRequest(req);
+        SystemConfig config = parseSystemConfig(resp);
+        if (cachedSystems.get(systemId) != null) {
+            cachedSystems.get(systemId).setConfig(config);
+        }
+        return config;
+    }
+
+    @Override
+    public SoftwareInfo getSoftwareInfo(int systemId) {
+        Request req = requests.createSoftwareRequest(systemId);
+        String resp = requests.makeRequest(req);
+        return parseSoftwareInfo(resp);
     }
 
     @Override
@@ -121,6 +171,11 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public void setMode(int systemId, Mode mode) {
         Request req = requests.createSetModeRequest(systemId, mode);
         requests.makeRequest(req);
+        if (mode != Mode.DEFAULT_OPERATION) {
+            modes.put(systemId, mode);
+        } else {
+            modes.remove(systemId);
+        }
     }
 
     @Override
@@ -136,11 +191,6 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             systemThermostats.put(thermostat.getId(), thermostat);
             thermostats.put(systemId, systemThermostats);
         }
-
-        if (thermostatRequestProducer == null || thermostatRequestProducer.isCancelled()) {
-            thermostatRequestProducer = scheduler.scheduleWithFixedDelay(this::queueThermostatRequests,
-                    THERMOSTAT_UPDATE_INTERVAL, THERMOSTAT_UPDATE_INTERVAL, TimeUnit.MINUTES);
-        }
     }
 
     @Override
@@ -150,40 +200,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             systemThermostats.remove(thermostatId);
             if (systemThermostats.isEmpty()) {
                 thermostats.remove(systemId);
-                if (thermostats.isEmpty()) {
-                    thermostatRequestProducer.cancel(false);
-                }
             }
         }
-    }
-
-    @Override
-    public SystemConfig getSystemConfig(int systemId) {
-        Request req = requests.createSystemConfigRequest(systemId);
-        String resp = requests.makeRequest(req);
-        SystemConfig config = parseSystemConfig(resp);
-        if (cachedSystems.get(systemId) != null) {
-            cachedSystems.get(systemId).setConfig(config);
-        }
-        return config;
-    }
-
-    @Override
-    public SoftwareInfo getSoftwareInfo(int systemId) {
-        Request req = requests.createSoftwareRequest(systemId);
-        String resp = requests.makeRequest(req);
-        return parseSoftwareInfo(resp);
-    }
-
-    private NibeSystem updateSystem(int systemId) {
-        Request req = requests.createSystemRequest(systemId);
-        String resp = requests.makeRequest(req);
-        NibeSystem system = parseSystem(resp);
-        if (cachedSystems.containsKey(systemId)) {
-            system.setConfig(cachedSystems.get(systemId).getConfig());
-        }
-        cachedSystems.put(systemId, system);
-        return system;
     }
 
     private List<Category> updateCategories(int systemId, boolean includeParameters) {
@@ -199,30 +217,165 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
 
     @Override
     public void addCallbackListener(int systemId, NibeUplinkRestCallbackListener listener) {
-        listeners.putIfAbsent(systemId, listener);
+        listeners.put(systemId, listener);
         trackedParameters.putIfAbsent(systemId, new HashSet<>());
-        standardRequestProducer = scheduler.scheduleWithFixedDelay(this::queueStandardRequests, 1,
-                updateInterval, TimeUnit.SECONDS);
+        if (standardRequestProducer == null || standardRequestProducer.isCancelled()) {
+            startPolling();
+        }
     }
 
     @Override
     public void removeCallbackListener(int systemId) {
         listeners.remove(systemId);
         if (listeners.isEmpty()) {
-            standardRequestProducer.cancel(false);
+            cancelPolling();
         }
         trackedParameters.remove(systemId);
     }
 
-    private void queueStandardRequests() {
+    private void startPolling() {
+        if (standardRequestProducer == null || standardRequestProducer.isCancelled()) {
+            standardRequestProducer = scheduler.scheduleWithFixedDelay(this::queueStandardRequests,
+                    REQUEST_INTERVAL - 1, updateInterval, TimeUnit.SECONDS);
+        }
+        if (softwareUpdateCheckInterval > 0) {
+            if (softwareRequestProducer == null || softwareRequestProducer.isCancelled()) {
+                softwareRequestProducer = scheduler.scheduleWithFixedDelay(this::queueSoftwareRequests,
+                        0, softwareUpdateCheckInterval, TimeUnit.DAYS);
+            }
+        }
+        if (thermostatRequestProducer == null || thermostatRequestProducer.isCancelled()) {
+            thermostatRequestProducer = scheduler.scheduleWithFixedDelay(this::queueThermostatRequests,
+                    THERMOSTAT_UPDATE_INTERVAL, THERMOSTAT_UPDATE_INTERVAL, TimeUnit.MINUTES);
+        }
+        if (modeRequestProducer == null || modeRequestProducer.isCancelled()) {
+            modeRequestProducer = scheduler.scheduleWithFixedDelay(this::queueModeRequests,
+                    MODE_UPDATE_INTERVAL / 2, MODE_UPDATE_INTERVAL, TimeUnit.MINUTES);
+        }
+        if (requestProcessor == null || requestProcessor.isCancelled()) {
+            requestProcessor = scheduler.scheduleWithFixedDelay(this::processRequests, REQUEST_INTERVAL,
+                    REQUEST_INTERVAL, TimeUnit.SECONDS);
+        }
+    }
 
+    private void cancelPolling() {
+        if (standardRequestProducer != null) { standardRequestProducer.cancel(false); }
+        if (softwareRequestProducer != null) { softwareRequestProducer.cancel(false); }
+        if (modeRequestProducer != null) { modeRequestProducer.cancel(false); }
+        if (thermostatRequestProducer != null) { thermostatRequestProducer.cancel(false); }
+        queuedRequests.clear();
+    }
+
+    private void queueStandardRequests() {
+        for (int systemId : listeners.keySet()) {
+            Request req = requests.createSystemRequest(systemId);
+            queuedRequests.add(req);
+        }
+        for (int systemId : trackedParameters.keySet()) {
+            Iterator<Integer> i = trackedParameters.get(systemId).iterator();
+            int counter = 0;
+            Set<Integer> parameters = new HashSet<>();
+            while (i.hasNext()) {
+                parameters.add(i.next());
+                counter++;
+                if (counter == MAX_PARAMETERS_PER_REQUEST) {
+                    Request req = requests.createGetParametersRequest(systemId, parameters);
+                    queuedRequests.add(req);
+                    parameters.clear();
+                    counter = 0;
+                }
+            }
+            if (!parameters.isEmpty()) {
+                Request req = requests.createGetParametersRequest(systemId, parameters);
+                queuedRequests.add(req);
+            }
+        }
     }
 
     private void queueThermostatRequests() {
-
+        for (int systemId : thermostats.keySet()) {
+            for (Thermostat thermostat : thermostats.get(systemId).values()) {
+                Request req = requests.createSetThermostatRequest(systemId, thermostat);
+                queuedRequests.add(req);
+            }
+        }
     }
 
     private void queueModeRequests() {
+        for (int systemId : modes.keySet()) {
+            if (modes.get(systemId) != Mode.DEFAULT_OPERATION) {
+                Request req = requests.createSetModeRequest(systemId, modes.get(systemId));
+                queuedRequests.add(req);
+            }
+        }
+    }
 
+    private void queueSoftwareRequests() {
+        for (int systemId : listeners.keySet()) {
+            Request req = requests.createSoftwareRequest(systemId);
+            queuedRequests.add(req);
+        }
+    }
+
+    private void processRequests() {
+        Request req = queuedRequests.poll();
+        int systemId;
+        RequestType requestType;
+        NibeUplinkRestCallbackListener listener;
+        String resp;
+
+        if (req == null) { return; }
+
+        if (queuedRequests.size() >= updateInterval / REQUEST_INTERVAL) {
+            logger.warn("Request queue too large, consider increasing update interval");
+        }
+
+        systemId = (int) req.getAttributes().get(NibeUplinkRestRequestHandler.SYSTEM_ID);
+        requestType = (RequestType) req.getAttributes().get(NibeUplinkRestRequestHandler.REQUEST_TYPE);
+        listener = listeners.get(systemId);
+
+        if (listener == null) {
+            logger.debug("No listener for systemId {}", systemId);
+            return;
+        }
+
+        try {
+            resp = requests.makeRequest(req);
+        } catch (NibeUplinkRestHttpException e) {
+            if (e.getResponseCode() >= 500) {
+                bridgeHandler.signalServerError(e.getResponseCode());
+            }
+            cancelPolling();
+            isAliveRequestProducer = scheduler.scheduleWithFixedDelay(() -> {
+                queuedRequests.add(requests.createConnectedSystemsRequest());
+            }, 1, 1, TimeUnit.MINUTES);
+            return;
+        } catch (NibeUplinkRestException e) {
+            logger.warn("Failed to get data from Nibe Uplink: {}", e.getMessage());
+            return;
+        }
+
+        if (isAliveRequestProducer != null) {
+            isAliveRequestProducer.cancel(false);
+            bridgeHandler.signalServerOnline();
+            startPolling();
+        }
+
+        switch (requestType) {
+            case SYSTEM:
+                listener.systemUpdated(parseSystem(resp));
+                break;
+            case PARAMETER_GET:
+                listener.parametersUpdated(parseParameterList(resp));
+                break;
+            case MODE_GET:
+                listener.modeUpdated(parseMode(resp));
+                break;
+            case SOFTWARE:
+                listener.softWareUpdateAvailable(parseSoftwareInfo(resp));
+                break;
+            default:
+                break;
+        }
     }
 }
