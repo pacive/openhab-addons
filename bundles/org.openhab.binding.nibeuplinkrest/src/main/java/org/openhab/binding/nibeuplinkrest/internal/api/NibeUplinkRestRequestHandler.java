@@ -46,21 +46,24 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 @NonNullByDefault
 public class NibeUplinkRestRequestHandler {
 
+    public enum RequestType {
+        SYSTEM,
+        PARAMETER_GET,
+        SOFTWARE,
+        MODE_GET,
+        CONFIG,
+        CATEGORIES,
+        PARAMETER_SET,
+        MODE_SET,
+        THERMOSTAT,
+        SYSTEMS
+    }
+
     private static final String CONTENT_TYPE = "application/json";
     private static final String BEARER = "Bearer ";
-    private static final String REQUEST_TYPE = "requestType";
-    private static final String SYSTEM_ID = "systemId";
-    private static final int REQUEST_TYPE_SYSTEM = 1;
-    private static final int REQUEST_TYPE_PARAMETER_GET = 2;
-    private static final int REQUEST_TYPE_SOFTWARE = 3;
-    private static final int REQUEST_TYPE_MODE_GET = 4;
-    private static final int REQUEST_TYPE_CONFIG = 5;
-    private static final int REQUEST_TYPE_CATEGORIES = 6;
-    private static final int REQUEST_TYPE_PARAMETER_SET = 7;
-    private static final int REQUEST_TYPE_MODE_SET = 8;
-    private static final int REQUEST_TYPE_THERMOSTAT = 9;
-    private static final int REQUEST_TYPE_SYSTEMS = 10;
-    private static final int NO_SYSTEM_ID = -1;
+    public static final String REQUEST_TYPE = "requestType";
+    public static final String SYSTEM_ID = "systemId";
+    public static final int NO_SYSTEM_ID = -1;
 
     private final Gson serializer = new Gson();
 
@@ -75,58 +78,58 @@ public class NibeUplinkRestRequestHandler {
     }
 
     public Request createConnectedSystemsRequest() {
-        return prepareRequest(HttpMethod.GET, API_SYSTEMS, NO_SYSTEM_ID, REQUEST_TYPE_SYSTEMS);
+        return prepareRequest(HttpMethod.GET, API_SYSTEMS, NO_SYSTEM_ID, RequestType.SYSTEMS);
     }
 
     public Request createSystemRequest(int systemId) {
-        return prepareRequest(HttpMethod.GET, API_SYSTEM_WITH_ID, systemId, REQUEST_TYPE_SYSTEM);
+        return prepareRequest(HttpMethod.GET, API_SYSTEM_WITH_ID, systemId, RequestType.SYSTEM);
     }
 
     public Request createSystemConfigRequest(int systemId) {
-        return prepareRequest(HttpMethod.GET, API_CONFIG, systemId, REQUEST_TYPE_CONFIG);
+        return prepareRequest(HttpMethod.GET, API_CONFIG, systemId, RequestType.CONFIG);
     }
 
     public Request createSoftwareRequest(int systemId) {
-        return prepareRequest(HttpMethod.GET, API_SOFTWARE, systemId, REQUEST_TYPE_SOFTWARE);
+        return prepareRequest(HttpMethod.GET, API_SOFTWARE, systemId, RequestType.SOFTWARE);
     }
 
     public Request createCategoriesRequest(int systemId, boolean includeParameters) {
-        Request req = prepareRequest(HttpMethod.GET, API_CATEGORIES, systemId, REQUEST_TYPE_CATEGORIES);
+        Request req = prepareRequest(HttpMethod.GET, API_CATEGORIES, systemId, RequestType.CATEGORIES);
         req.param(API_QUERY_INCLUDE_PARAMETERS, Boolean.toString(includeParameters));
         return req;
     }
 
     public Request createGetParametersRequest(int systemId, Set<Integer> parameterIds) {
-        Request req = prepareRequest(HttpMethod.GET, API_PARAMETERS, systemId, REQUEST_TYPE_PARAMETER_GET);
+        Request req = prepareRequest(HttpMethod.GET, API_PARAMETERS, systemId, RequestType.PARAMETER_GET);
         req.param(API_QUERY_PARAMETER_IDS, StringConvert.toCommaList(parameterIds));
         return req;
     }
 
     public Request createSetParametersRequest(int systemId, Map<Integer, Integer> parameters) {
-        Request req = prepareRequest(HttpMethod.PUT, API_PARAMETERS, systemId, REQUEST_TYPE_PARAMETER_SET);
+        Request req = prepareRequest(HttpMethod.PUT, API_PARAMETERS, systemId, RequestType.PARAMETER_SET);
         Map<String, Map<Integer, Integer>> wrapper = Collections.singletonMap("settings", parameters);
         req.content(new StringContentProvider(serializer.toJson(wrapper)), CONTENT_TYPE);
         return req;
     }
 
     public Request createGetModeRequest(int systemId) {
-        return prepareRequest(HttpMethod.GET, API_MODE, systemId, REQUEST_TYPE_MODE_GET);
+        return prepareRequest(HttpMethod.GET, API_MODE, systemId, RequestType.MODE_GET);
     }
 
     public Request createSetModeRequest(int systemId, Mode mode) {
-        Request req = prepareRequest(HttpMethod.PUT, API_MODE, systemId, REQUEST_TYPE_MODE_SET);
+        Request req = prepareRequest(HttpMethod.PUT, API_MODE, systemId, RequestType.MODE_SET);
         String body = serializer.toJson(Collections.singletonMap("mode", mode));
         req.content(new StringContentProvider(body), CONTENT_TYPE);
         return req;
     }
 
     public Request createSetThermostatRequest(int systemId, Thermostat thermostat) {
-        Request req = prepareRequest(HttpMethod.POST, API_THERMOSTATS, systemId, REQUEST_TYPE_THERMOSTAT);
+        Request req = prepareRequest(HttpMethod.POST, API_THERMOSTATS, systemId, RequestType.THERMOSTAT);
         req.content(new StringContentProvider(serializer.toJson(thermostat)), CONTENT_TYPE);
         return req;
     }
 
-    private Request prepareRequest(HttpMethod method, String endPoint, int systemId, int requestType) {
+    private Request prepareRequest(HttpMethod method, String endPoint, int systemId, RequestType requestType) {
         try {
             if (oAuthClient.getAccessTokenResponse() == null ||
                     oAuthClient.getAccessTokenResponse().isExpired(LocalDateTime.now(), 5) ||
