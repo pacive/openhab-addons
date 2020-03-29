@@ -131,8 +131,9 @@ public class NibeUplinkRestRequestHandler {
 
     private Request prepareRequest(HttpMethod method, String endPoint, int systemId, RequestType requestType) {
         try {
-            if (oAuthClient.getAccessTokenResponse() == null ||
-                    oAuthClient.getAccessTokenResponse().isExpired(LocalDateTime.now(), 5) ||
+            AccessTokenResponse response = oAuthClient.getAccessTokenResponse();
+            if (response == null ||
+                    response.isExpired(LocalDateTime.now(), 5) ||
                     bearerToken == null) {
                 refreshToken();
             }

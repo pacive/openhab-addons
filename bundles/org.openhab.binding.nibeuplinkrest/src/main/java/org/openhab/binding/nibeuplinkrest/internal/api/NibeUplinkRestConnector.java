@@ -43,13 +43,13 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     private long updateInterval;
     private long softwareUpdateCheckInterval;
 
-    private final Map<Integer, NibeSystem> cachedSystems = new ConcurrentHashMap<>();
-    private final Map<Integer, Map<String, Category>> cachedCategories = new ConcurrentHashMap<>();
-    private final Map<Integer, Map<Integer, Thermostat>> thermostats = new ConcurrentHashMap<>();
-    private final Map<Integer, Set<Integer>> trackedParameters = new ConcurrentHashMap<>();
-    private final Map<Integer, Mode> modes = new ConcurrentHashMap<>();
-    private final Deque<Request> queuedRequests = new ConcurrentLinkedDeque<>();
-    private final Map<Integer, NibeUplinkRestCallbackListener> listeners = new ConcurrentHashMap<>();
+    private final Map<Integer, @Nullable NibeSystem> cachedSystems = new ConcurrentHashMap<>();
+    private final Map<Integer, @Nullable Map<String, Category>> cachedCategories = new ConcurrentHashMap<>();
+    private final Map<Integer, @Nullable Map<Integer, Thermostat>> thermostats = new ConcurrentHashMap<>();
+    private final Map<Integer, @Nullable Set<Integer>> trackedParameters = new ConcurrentHashMap<>();
+    private final Map<Integer, @Nullable Mode> modes = new ConcurrentHashMap<>();
+    private final Deque<@Nullable Request> queuedRequests = new ConcurrentLinkedDeque<>();
+    private final Map<Integer, @Nullable NibeUplinkRestCallbackListener> listeners = new ConcurrentHashMap<>();
     private @Nullable Future<?> standardRequestProducer;
     private @Nullable Future<?> softwareRequestProducer;
     private @Nullable Future<?> thermostatRequestProducer;
@@ -73,7 +73,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     @Override
     public void setUpdateInterval(int updateInterval) {
         this.updateInterval = updateInterval;
-        standardRequestProducer.cancel(false);
+        if (standardRequestProducer != null) { standardRequestProducer.cancel(false); }
         standardRequestProducer = scheduler.scheduleWithFixedDelay(this::queueStandardRequests, 1,
                 updateInterval, TimeUnit.SECONDS);
     }
@@ -81,7 +81,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     @Override
     public void setSoftwareUpdateCheckInterval(int softwareUpdateCheckInterval) {
         this.softwareUpdateCheckInterval = softwareUpdateCheckInterval;
-        softwareRequestProducer.cancel(false);
+        if (softwareRequestProducer != null) { softwareRequestProducer.cancel(false); }
         if (softwareUpdateCheckInterval > 0) {
             softwareRequestProducer = scheduler.scheduleWithFixedDelay(this::queueSoftwareRequests, 0,
                     softwareUpdateCheckInterval, TimeUnit.DAYS);
@@ -102,12 +102,12 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
 
     @Override
     public NibeSystem getSystem(int systemId) {
-        if (cachedSystems.containsKey(systemId)) {
-            return cachedSystems.get(systemId);
+        NibeSystem system = cachedSystems.get(systemId);
+        if (system == null) {
+            Request req = requests.createSystemRequest(systemId);
+            String resp = requests.makeRequest(req);
+            system = parseSystem(resp);
         }
-        Request req = requests.createSystemRequest(systemId);
-        String resp = requests.makeRequest(req);
-        NibeSystem system = parseSystem(resp);
         cachedSystems.put(systemId, system);
         return system;
     }
@@ -117,8 +117,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         Request req = requests.createSystemConfigRequest(systemId);
         String resp = requests.makeRequest(req);
         SystemConfig config = parseSystemConfig(resp);
-        if (cachedSystems.get(systemId) != null) {
-            cachedSystems.get(systemId).setConfig(config);
+        NibeSystem system = cachedSystems.get(systemId);
+        if (system != null) {
+            system.setConfig(config);
         }
         return config;
     }
@@ -133,8 +134,16 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     @Override
     public List<Category> getCategories(int systemId, boolean includeParameters) {
         Map<String, Category> cachedValues = cachedCategories.get(systemId);
-        if (cachedValues.isEmpty()) {
-            return updateCategories(systemId, includeParameters);
+        if (cachedValues == null || cachedValues.isEmpty()) {
+            Request req = requests.createCategoriesRequest(systemId, includeParameters);
+            String resp = requests.makeRequest(req);
+            List<Category> categories = parseCategoryList(resp);
+            cachedValues = new HashMap<>();
+            for (Category category : categories) {
+                cachedValues.putIfAbsent(category.getCategoryId(), category);
+            }
+            cachedCategories.put(systemId, cachedValues);
+            return categories;
         }
         return new ArrayList<>(cachedValues.values());
     }
@@ -204,17 +213,6 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         }
     }
 
-    private List<Category> updateCategories(int systemId, boolean includeParameters) {
-        Request req = requests.createCategoriesRequest(systemId, includeParameters);
-        String resp = requests.makeRequest(req);
-        List<Category> categories = parseCategoryList(resp);
-        Map<String, Category> categoryCache = cachedCategories.get(systemId);
-            for (Category category : categories) {
-                categoryCache.putIfAbsent(category.getCategoryId(), category);
-            }
-        return categories;
-    }
-
     @Override
     public void addCallbackListener(int systemId, NibeUplinkRestCallbackListener listener) {
         listeners.put(systemId, listener);
@@ -267,47 +265,54 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     private void queueStandardRequests() {
-        for (int systemId : listeners.keySet()) {
-            Request req = requests.createSystemRequest(systemId);
-            queuedRequests.add(req);
-        }
-        for (int systemId : trackedParameters.keySet()) {
-            Iterator<Integer> i = trackedParameters.get(systemId).iterator();
-            int counter = 0;
-            Set<Integer> parameters = new HashSet<>();
-            while (i.hasNext()) {
-                parameters.add(i.next());
-                counter++;
-                if (counter == MAX_PARAMETERS_PER_REQUEST) {
-                    Request req = requests.createGetParametersRequest(systemId, parameters);
-                    queuedRequests.add(req);
-                    parameters.clear();
-                    counter = 0;
-                }
-            }
-            if (!parameters.isEmpty()) {
-                Request req = requests.createGetParametersRequest(systemId, parameters);
+        listeners.forEach((systemId, listener) -> {
+            if (listener != null) {
+                Request req = requests.createSystemRequest(systemId);
                 queuedRequests.add(req);
             }
-        }
+        });
+
+        trackedParameters.forEach((systemId, parameterSet) -> {
+            if (parameterSet != null && !parameterSet.isEmpty()) {
+                Iterator<Integer> i = parameterSet.iterator();
+                int counter = 0;
+                Set<Integer> parameters = new HashSet<>();
+                while (i.hasNext()) {
+                    parameters.add(i.next());
+                    counter++;
+                    if (counter == MAX_PARAMETERS_PER_REQUEST) {
+                        Request req = requests.createGetParametersRequest(systemId, parameters);
+                        queuedRequests.add(req);
+                        parameters.clear();
+                        counter = 0;
+                    }
+                }
+                if (!parameters.isEmpty()) {
+                    Request req = requests.createGetParametersRequest(systemId, parameters);
+                    queuedRequests.add(req);
+                }
+            }
+        });
     }
 
     private void queueThermostatRequests() {
-        for (int systemId : thermostats.keySet()) {
-            for (Thermostat thermostat : thermostats.get(systemId).values()) {
-                Request req = requests.createSetThermostatRequest(systemId, thermostat);
-                queuedRequests.add(req);
+        thermostats.forEach((systemId, thermostatMap) -> {
+            if (thermostatMap != null && !thermostatMap.isEmpty()) {
+                thermostatMap.values().forEach((thermostat) -> {
+                    Request req = requests.createSetThermostatRequest(systemId, thermostat);
+                    queuedRequests.add(req);
+                });
             }
-        }
+        });
     }
 
     private void queueModeRequests() {
-        for (int systemId : modes.keySet()) {
-            if (modes.get(systemId) != Mode.DEFAULT_OPERATION) {
-                Request req = requests.createSetModeRequest(systemId, modes.get(systemId));
+        modes.forEach((systemId, mode) -> {
+            if (mode != null && mode != Mode.DEFAULT_OPERATION) {
+                Request req = requests.createSetModeRequest(systemId, mode);
                 queuedRequests.add(req);
             }
-        }
+        });
     }
 
     private void queueSoftwareRequests() {

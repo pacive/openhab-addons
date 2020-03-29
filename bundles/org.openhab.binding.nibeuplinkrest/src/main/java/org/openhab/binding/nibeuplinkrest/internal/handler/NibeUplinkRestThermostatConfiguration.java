@@ -31,8 +31,10 @@ public class NibeUplinkRestThermostatConfiguration {
     private @Nullable String climateSystems;
 
     public @Nullable Set<Integer> getClimateSystems() {
-        if (climateSystems == null) { return null; }
-        return Arrays.asList(climateSystems.split(",")).stream()
-                .map(Integer::parseInt).collect(Collectors.toSet());
+        if (climateSystems != null) {
+            return Arrays.asList(climateSystems.split(",")).stream()
+                    .map(Integer::parseInt).collect(Collectors.toSet());
+        }
+        return null;
     }
 }
