@@ -49,7 +49,7 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
     private final HttpClient httpClient;
 
     private @NonNullByDefault({}) OAuthClientService oAuthClient;
-    private @NonNullByDefault({}) NibeUplinkRestApi nibeUplinkRestApi;
+    private @NonNullByDefault({}) NibeUplinkRestConnector nibeUplinkRestApi;
     private @NonNullByDefault({}) NibeUplinkRestBridgeConfiguration config;
 
     public NibeUplinkRestBridgeHandler(Bridge bridge, OAuthFactory oAuthFactory, HttpClient httpClient) {
@@ -84,7 +84,12 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
 
     @Override
     public void dispose() {
-        super.dispose();
+        if (nibeUplinkRestApi != null) {
+            nibeUplinkRestApi.cancelAllJobs();
+        }
+        nibeUplinkRestApi = null;
+        oAuthClient.close();
+        oAuthFactory.ungetOAuthService(thing.getUID().getAsString());
     }
 
     public void authorize(String authCode, String baseURL) throws OAuthException, OAuthResponseException, IOException {

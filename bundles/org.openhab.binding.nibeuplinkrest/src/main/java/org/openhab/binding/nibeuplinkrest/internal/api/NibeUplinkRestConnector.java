@@ -251,6 +251,13 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             cancelPolling();
         }
         trackedParameters.remove(systemId);
+        modes.remove(systemId);
+    }
+
+    public void cancelAllJobs() {
+        cancelPolling();
+        logger.debug("Stopping request processor");
+        requestProcessor.cancel(false);
     }
 
     private void startPolling() {
@@ -297,8 +304,12 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         listeners.forEach((systemId, listener) -> {
             if (listener != null) {
                 logger.trace("Queueing system request for {}", systemId);
-                Request req = requests.createSystemRequest(systemId);
-                queuedRequests.add(req);
+                try {
+                    Request req = requests.createSystemRequest(systemId);
+                    queuedRequests.add(req);
+                } catch (RuntimeException e) {
+                    logger.warn("{}", e.getMessage());
+                }
             }
         });
 
@@ -312,16 +323,24 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
                     counter++;
                     if (counter == MAX_PARAMETERS_PER_REQUEST) {
                         logger.trace("Queueing parameter request for {} with {} parameters", systemId, parameters.size());
-                        Request req = requests.createGetParametersRequest(systemId, parameters);
-                        queuedRequests.add(req);
+                        try {
+                            Request req = requests.createGetParametersRequest(systemId, parameters);
+                            queuedRequests.add(req);
+                        } catch (RuntimeException e) {
+                            logger.warn("{}", e.getMessage());
+                        }
                         parameters.clear();
                         counter = 0;
                     }
                 }
                 if (!parameters.isEmpty()) {
                     logger.trace("Queueing parameter request for {} with {} parameters", systemId, parameters.size());
-                    Request req = requests.createGetParametersRequest(systemId, parameters);
-                    queuedRequests.add(req);
+                    try {
+                        Request req = requests.createGetParametersRequest(systemId, parameters);
+                        queuedRequests.add(req);
+                    } catch (RuntimeException e) {
+                        logger.warn("{}", e.getMessage());
+                    }
                 }
             }
         });
@@ -332,8 +351,12 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             if (thermostatMap != null && !thermostatMap.isEmpty()) {
                 thermostatMap.values().forEach((thermostat) -> {
                     logger.trace("Queueing thermostat request for {}, thermostat {}", systemId, thermostat.getName());
-                    Request req = requests.createSetThermostatRequest(systemId, thermostat);
-                    queuedRequests.add(req);
+                    try {
+                        Request req = requests.createSetThermostatRequest(systemId, thermostat);
+                        queuedRequests.add(req);
+                    } catch (RuntimeException e) {
+                        logger.warn("{}", e.getMessage());
+                    }
                 });
             }
         });
@@ -343,8 +366,12 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         modes.forEach((systemId, mode) -> {
             if (mode != null && mode != Mode.DEFAULT_OPERATION) {
                 logger.trace("Queueing mode request for {} with mode {}", systemId, mode);
-                Request req = requests.createSetModeRequest(systemId, mode);
-                queuedRequests.add(req);
+                try {
+                    Request req = requests.createSetModeRequest(systemId, mode);
+                    queuedRequests.add(req);
+                } catch (RuntimeException e) {
+                    logger.warn("{}", e.getMessage());
+                }
             }
         });
     }
@@ -352,8 +379,12 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     private void queueSoftwareRequests() {
         for (int systemId : listeners.keySet()) {
             logger.trace("Queueing software update request for {}", systemId);
-            Request req = requests.createSoftwareRequest(systemId);
-            queuedRequests.add(req);
+            try {
+                Request req = requests.createSoftwareRequest(systemId);
+                queuedRequests.add(req);
+            } catch (RuntimeException e) {
+                logger.warn("{}", e.getMessage());
+            }
         }
     }
 
@@ -423,7 +454,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
                 listener.modeUpdated(parseMode(resp));
                 break;
             case SOFTWARE:
-                listener.softWareUpdateAvailable(parseSoftwareInfo(resp));
+                listener.softwareUpdateAvailable(parseSoftwareInfo(resp));
                 break;
             default:
                 break;

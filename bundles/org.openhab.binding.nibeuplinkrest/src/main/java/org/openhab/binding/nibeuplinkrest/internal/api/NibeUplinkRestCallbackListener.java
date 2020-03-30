@@ -31,7 +31,7 @@ public interface NibeUplinkRestCallbackListener {
 
     void systemUpdated(NibeSystem system);
 
-    void softWareUpdateAvailable(SoftwareInfo softwareInfo);
+    void softwareUpdateAvailable(SoftwareInfo softwareInfo);
 
     void modeUpdated(Mode mode);
 }
