@@ -16,26 +16,28 @@ package org.openhab.binding.nibeuplinkrest.internal.api.model;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import java.util.Map;
+
 /**
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault
 public class SoftwareInfo {
     private String currentVersion;
-    private @Nullable String upgradeAvailable;
+    private @Nullable Map<String, String> upgrade;
 
-    public SoftwareInfo(String currentVersion, @Nullable String upgradeAvailable) {
+    public SoftwareInfo(String currentVersion, @Nullable Map<String, String> upgrade) {
         this.currentVersion = currentVersion;
-        this.upgradeAvailable = upgradeAvailable;
+        this.upgrade = upgrade;
     }
 
     public void setCurrentVersion(String currentVersion) { this.currentVersion = currentVersion; }
 
-    public void setUpgradeAvailable(String upgradeAvailable) { this.upgradeAvailable = upgradeAvailable; }
+    public void setUpgradeAvailable(Map<String, String> upgrade) { this.upgrade = upgrade; }
 
     public String getCurrentVersion() { return currentVersion; }
 
-    public @Nullable String getUpgradeAvailable() { return upgradeAvailable; }
+    public @Nullable Map<String, String> getUpgradeAvailable() { return upgrade; }
 
-    public boolean isUpgradeAvailable() { return upgradeAvailable != null; }
+    public boolean isUpgradeAvailable() { return upgrade != null; }
 }
