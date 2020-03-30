@@ -138,7 +138,7 @@ public class NibeUplinkRestRequestHandler {
                 refreshToken();
             }
         } catch (OAuthException | OAuthResponseException | IOException e) {
-            throw new NibeUplinkRestException("Error retrieving token", e);
+            throw new NibeUplinkRestException("Error retrieving token:" + e.getClass() + ": " + e.getMessage(), e);
         }
         Request req = systemId == NO_SYSTEM_ID ?
                 httpClient.newRequest(endPoint) :

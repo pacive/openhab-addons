@@ -76,7 +76,11 @@ public class NibeUplinkRestResponseParser {
         final JsonObject tree = parser.parse(json).getAsJsonObject();
         JsonArray arr = tree.get("objects").getAsJsonArray();
         for (JsonElement e : arr) {
-            systems.add(parseSystem(e.getAsJsonObject()));
+            try {
+                systems.add(parseSystem(e.getAsJsonObject()));
+            } catch (NibeUplinkRestParseException ignored) {
+                continue;
+            }
         }
         return systems;
     }
@@ -118,13 +122,13 @@ public class NibeUplinkRestResponseParser {
     public static List<Category> parseCategoryList(String json) {
         final List<Category> categories = new ArrayList<>();
         final JsonArray tree = parser.parse(json).getAsJsonArray();
-        try {
             for (JsonElement e : tree) {
-                categories.add(parseCategory(e.getAsJsonObject()));
+                try {
+                    categories.add(parseCategory(e.getAsJsonObject()));
+                } catch (NibeUplinkRestParseException ignored) {
+                    continue;
+                }
             }
-        } catch (RuntimeException e) {
-            throw new NibeUplinkRestParseException("Error parsing category list: ", e);
-        }
         return categories;
     }
 
@@ -150,7 +154,11 @@ public class NibeUplinkRestResponseParser {
     public static List<Parameter> parseParameterList(JsonArray tree) {
         List<Parameter> parameters = new ArrayList<>();
         for (JsonElement e : tree) {
-            parameters.add(parseParameter(e.getAsJsonObject()));
+            try {
+                parameters.add(parseParameter(e.getAsJsonObject()));
+            } catch (NibeUplinkRestParseException ignored) {
+                continue;
+            }
         }
         return parameters;
     }
