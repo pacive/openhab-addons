@@ -257,7 +257,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public void cancelAllJobs() {
         cancelPolling();
         logger.debug("Stopping request processor");
-        requestProcessor.cancel(false);
+        if (requestProcessor != null) { requestProcessor.cancel(false); }
     }
 
     private void startPolling() {
