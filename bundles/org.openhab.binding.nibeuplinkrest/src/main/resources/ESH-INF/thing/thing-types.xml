@@ -37,6 +37,9 @@
 			<bridge-type-ref id="apibridge"/>
 		</supported-bridge-type-refs>
 		<label>System</label>
+		<channel-groups>
+			<channel-group id="control" typeId="control" />
+		</channel-groups>
 		<properties>
 			<property name="name" />
 			<property name="productName" />
@@ -109,10 +112,76 @@
 			channel the value is immediately sent to Nibe Uplink.</description>
 		<category>Heating</category>
 	</channel-type>
+	<channel-type id="mode">
+		<item-type>String</item-type>
+		<label>Mode</label>
+		<command>
+			<options>
+				<option value="DEFAULT_OPERATION">Normal</option>
+				<option value="AWAY_FROM_HOME">Away mode</option>
+				<option value="VACATION">Vacation mode</option>
+			</options>
+		</command>
+	</channel-type>
+	<channel-type id="hotWaterBoost">
+		<item-type>Number</item-type>
+		<label>Hot water boost</label>
+		<command>
+			<options>
+				<option value="0">Off</option>
+				<option value="1">3h</option>
+				<option value="2">6h</option>
+				<option value="3">12h</option>
+				<option value="4">One time</option>
+			</options>
+		</command>
+	</channel-type>
+	<channel-type id="ventilationBoost">
+		<item-type>Number</item-type>
+		<label>Ventilation boost</label>
+		<command>
+			<options>
+				<option value="0">Normal</option>
+				<option value="1">Speed 1</option>
+				<option value="2">Speed 2</option>
+				<option value="3">Speed 3</option>
+				<option value="4">Speed 4</option>
+			</options>
+		</command>
+	</channel-type>
+	<channel-type id="parallelAdjustmentHeating">
+		<item-type>Number</item-type>
+		<label>Parallel adjustment when heating</label>
+		<state min="-10" max="10" step="1" />
+	</channel-type>
+	<channel-type id="parallelAdjustmentCooling">
+		<item-type>Number</item-type>
+		<label>Parallel adjustment when cooling</label>
+		<state min="-10" max="10" step="1" />
+	</channel-type>
+	<channel-type id="targetTemperatureHeating">
+		<item-type>Number</item-type>
+		<label>Target temperature when heating</label>
+		<state min="5" max="30" step="0.5" />
+	</channel-type>
+	<channel-type id="targetTemperatureCooling">
+		<item-type>Number</item-type>
+		<label>Target temperature when cooling</label>
+		<state min="5" max="35" step="0.5" />
+	</channel-type>
 
 	<channel-group-type id="status">
 		<label>Status</label>
 		<description>General status channels</description>
+	</channel-group-type>
+	<channel-group-type id="control">
+		<label>Control</label>
+		<description>Channels to control the operation of the system</description>
+		<channels>
+			<channel id="mode" typeId="mode" />
+			<channel id="48132" typeId="hotWaterBoost" />
+			<channel id="47260" typeId="ventilationBoost" />
+		</channels>
 	</channel-group-type>
 
 </thing:thing-descriptions>
