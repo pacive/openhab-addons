@@ -130,6 +130,18 @@ public class NibeUplinkRestRequestHandler {
     }
 
     private Request prepareRequest(HttpMethod method, String endPoint, int systemId, RequestType requestType) {
+        Request req = systemId == NO_SYSTEM_ID ?
+                httpClient.newRequest(endPoint) :
+                httpClient.newRequest(String.format(endPoint, systemId));
+        req.method(method);
+        req.accept(CONTENT_TYPE);
+        req.followRedirects(true);
+        req.attribute(SYSTEM_ID, systemId);
+        req.attribute(REQUEST_TYPE, requestType);
+        return req;
+    }
+
+    public String makeRequest(Request req) throws NibeUplinkRestException {
         try {
             AccessTokenResponse response = oAuthClient.getAccessTokenResponse();
             if (response == null ||
@@ -140,19 +152,7 @@ public class NibeUplinkRestRequestHandler {
         } catch (OAuthException | OAuthResponseException | IOException e) {
             throw new NibeUplinkRestException("Error retrieving token:" + e.getClass() + ": " + e.getMessage(), e);
         }
-        Request req = systemId == NO_SYSTEM_ID ?
-                httpClient.newRequest(endPoint) :
-                httpClient.newRequest(String.format(endPoint, systemId));
-        req.method(method);
-        req.accept(CONTENT_TYPE);
-        req.followRedirects(true);
         req.header(HttpHeader.AUTHORIZATION, BEARER + bearerToken);
-        req.attribute(SYSTEM_ID, systemId);
-        req.attribute(REQUEST_TYPE, requestType);
-        return req;
-    }
-
-    public String makeRequest(Request req) throws NibeUplinkRestException {
         ContentResponse resp;
         resp = sendRequest(req);
         if (resp.getStatus() == UNAUTHORIZED_401) {
