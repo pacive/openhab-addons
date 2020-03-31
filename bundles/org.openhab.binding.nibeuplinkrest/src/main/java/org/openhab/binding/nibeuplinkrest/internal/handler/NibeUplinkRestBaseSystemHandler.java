@@ -124,11 +124,13 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     private void updateProperties() {
         SystemConfig systemConfig = nibeUplinkRestApi.getSystemConfig(systemId);
         SoftwareInfo softwareInfo = nibeUplinkRestApi.getSoftwareInfo(systemId);
-        thing.setProperty(PROPERTY_HAS_COOLING, Boolean.toString(systemConfig.hasCooling()));
-        thing.setProperty(PROPERTY_HAS_HEATING, Boolean.toString(systemConfig.hasHeating()));
-        thing.setProperty(PROPERTY_HAS_HOT_WATER, Boolean.toString(systemConfig.hasHotWater()));
-        thing.setProperty(PROPERTY_HAS_VENTILATION, Boolean.toString(systemConfig.hasVentilation()));
-        thing.setProperty(PROPERTY_SOFTWARE_VERSION, softwareInfo.getCurrentVersion());
+        Map<String, String> properties = editProperties();
+        properties.put(PROPERTY_HAS_COOLING, Boolean.toString(systemConfig.hasCooling()));
+        properties.put(PROPERTY_HAS_HEATING, Boolean.toString(systemConfig.hasHeating()));
+        properties.put(PROPERTY_HAS_HOT_WATER, Boolean.toString(systemConfig.hasHotWater()));
+        properties.put(PROPERTY_HAS_VENTILATION, Boolean.toString(systemConfig.hasVentilation()));
+        properties.put(PROPERTY_SOFTWARE_VERSION, softwareInfo.getCurrentVersion());
+        updateProperties(properties);
     }
 
     private void addChannels() {
