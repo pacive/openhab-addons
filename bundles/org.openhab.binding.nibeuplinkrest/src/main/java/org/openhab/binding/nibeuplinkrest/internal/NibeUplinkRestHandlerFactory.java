@@ -34,6 +34,8 @@ import org.openhab.binding.nibeuplinkrest.internal.auth.NibeUplinkRestOAuthServi
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBaseSystemHandler;
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestThermostatHandler;
+import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelGroupTypeProvider;
+import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelTypeProvider;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -51,6 +53,8 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
             .unmodifiableSet(Stream.of(THING_TYPE_APIBRIDGE, THING_TYPE_SYSTEM, THING_TYPE_THERMOSTAT)
                     .collect(Collectors.toSet()));
 
+    private @NonNullByDefault({}) NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider;
+    private @NonNullByDefault({}) NibeUplinkRestChannelTypeProvider channelTypeProvider;
     private @NonNullByDefault({}) OAuthFactory oAuthFactory;
     private @NonNullByDefault({}) NibeUplinkRestOAuthService oAuthService;
     private @NonNullByDefault({}) HttpClient httpClient;
@@ -71,7 +75,8 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
             return handler;
         }
         if (THING_TYPE_SYSTEM.equals(thingTypeUID)) {
-            final NibeUplinkRestBaseSystemHandler handler = new NibeUplinkRestBaseSystemHandler(thing);
+            final NibeUplinkRestBaseSystemHandler handler = new NibeUplinkRestBaseSystemHandler(thing,
+                    channelGroupTypeProvider, channelTypeProvider);
             return handler;
         }
         if (THING_TYPE_THERMOSTAT.equals(thingTypeUID)) {
@@ -104,4 +109,22 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
     protected void setOAuthService(NibeUplinkRestOAuthService oAuthService) { this.oAuthService = oAuthService; }
 
     protected void unsetOAuthService(NibeUplinkRestOAuthService oAuthService) { this.oAuthService = null; }
+
+    @Reference
+    protected void setChannelGroupTypeProvider(NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider) {
+        this.channelGroupTypeProvider = channelGroupTypeProvider;
+    }
+
+    protected void unsetChannelGroupTypeProvider(NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider) {
+        this.channelGroupTypeProvider = null;
+    }
+
+    @Reference
+    protected void setChannelTypeProvider(NibeUplinkRestChannelTypeProvider channelTypeProvider) {
+        this.channelTypeProvider = channelTypeProvider;
+    }
+
+    protected void unsetChannelTypeProvider(NibeUplinkRestChannelTypeProvider channelTypeProvider) {
+        this.channelTypeProvider = null;
+    }
 }

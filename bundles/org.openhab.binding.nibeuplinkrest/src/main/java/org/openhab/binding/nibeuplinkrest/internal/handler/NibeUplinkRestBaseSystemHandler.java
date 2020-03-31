@@ -23,6 +23,9 @@ import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestCallbackListener;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
+import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelGroupTypeProvider;
+import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelTypeProvider;
+import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,14 +42,19 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 @NonNullByDefault
 public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements NibeUplinkRestCallbackListener {
 
+    private final NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider;
+    private final NibeUplinkRestChannelTypeProvider channelTypeProvider;
     private @NonNullByDefault({}) NibeUplinkRestApi nibeUplinkRestApi;
     private @NonNullByDefault({}) NibeUplinkRestBaseSystemConfiguration config;
     private @NonNullByDefault({}) int systemId;
 
     private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestBaseSystemHandler.class);
 
-    public NibeUplinkRestBaseSystemHandler(Thing thing) {
+    public NibeUplinkRestBaseSystemHandler(Thing thing, NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider,
+                                           NibeUplinkRestChannelTypeProvider channelTypeProvider) {
         super(thing);
+        this.channelGroupTypeProvider = channelGroupTypeProvider;
+        this.channelTypeProvider = channelTypeProvider;
     }
 
     @Override
@@ -126,20 +134,28 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     private void addChannels() {
         List<Category> categories = nibeUplinkRestApi.getCategories(config.systemId, true);
         List<Channel> channels = new ArrayList<>();
+        channels.addAll(thing.getChannels());
         for (Category category : categories) {
             if (!category.getCategoryId().equals("SYSTEM_INFO")) {
-                ChannelGroupUID cgid = new ChannelGroupUID(thing.getUID(), category.getCategoryId());
-                ChannelGroupTypeUID cgtid = new ChannelGroupTypeUID(cgid.getAsString());
-                //ChannelGroupType cgt = ChannelGroupTypeBuilder.instance(cgtid, category.getName()).build();
-                //ChannelGroupDefinition definition = new ChannelGroupDefinition(category.getCategoryId(), cgtid);
+                String cg = StringConvert.snakeCaseToCamelCase(category.getCategoryId());
+                ChannelGroupTypeUID cgtid = new ChannelGroupTypeUID(BINDING_ID, cg);
+                ChannelGroupUID cgid = new ChannelGroupUID(thing.getUID(), cg);
+                List<ChannelDefinition> channelDefinitions = new ArrayList<>();
                 for (Parameter parameter : category.getParameters()) {
-                    ChannelUID cid = new ChannelUID(cgid, parameter.getName());
                     ChannelTypeUID ctid = new ChannelTypeUID(BINDING_ID, parameter.getName());
-                    //ChannelType ct = ChannelTypeBuilder.state(ctid, parameter.getName(), "Number").build();
-                    Channel channel = ChannelBuilder.create(cid, "Number")
-                            .withLabel(parameter.getTitle()).withType(ctid).build();
+                    ChannelType ct = ChannelTypeBuilder.state(ctid, parameter.getTitle(), "Number").build();
+                    ChannelDefinition cd = new ChannelDefinitionBuilder(parameter.getName(), ctid)
+                            .withLabel(parameter.getTitle()).build();
+                    ChannelUID cid = new ChannelUID(cgid, parameter.getName());
+                    Channel channel = ChannelBuilder.create(cid, "Number").withType(ctid)
+                            .withLabel(parameter.getTitle()).build();
+                    channelTypeProvider.add(ctid, ct);
+                    channelDefinitions.add(cd);
                     channels.add(channel);
                 }
+                ChannelGroupType cgt = ChannelGroupTypeBuilder.instance(cgtid, category.getName())
+                        .withChannelDefinitions(channelDefinitions).build();
+                channelGroupTypeProvider.add(cgtid, cgt);
             }
         }
         updateThing(editThing().withChannels(channels).build());
