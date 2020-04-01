@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Anders Alfredsson - Initial contribution
  */
-@Component(service = { ChannelGroupTypeProvider.class, NibeUplinkRestChannelGroupTypeProvider.class })
+@Component(service = { ChannelGroupTypeProvider.class, NibeUplinkRestChannelGroupTypeProvider.class }, immediate = true)
 @NonNullByDefault
 public class NibeUplinkRestChannelGroupTypeProvider implements ChannelGroupTypeProvider {
 
@@ -45,8 +45,14 @@ public class NibeUplinkRestChannelGroupTypeProvider implements ChannelGroupTypeP
         return channelGroupTypes.get(channelGroupTypeUID);
     }
 
-    public void add(ChannelGroupTypeUID uid, ChannelGroupType type) {
-        channelGroupTypes.put(uid, type);
+    public void add(ChannelGroupType type) {
+        channelGroupTypes.putIfAbsent(type.getUID(), type);
+    }
+
+    public void addAll(List<ChannelGroupType> types) {
+        types.forEach(t -> {
+            add(t);
+        });
     }
 
     public void remove(ChannelGroupTypeUID uid) {

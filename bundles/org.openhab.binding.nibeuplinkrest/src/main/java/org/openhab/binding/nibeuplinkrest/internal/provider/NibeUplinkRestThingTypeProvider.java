@@ -15,42 +15,44 @@ package org.openhab.binding.nibeuplinkrest.internal.provider;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.smarthome.core.thing.type.*;
+import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
+import org.eclipse.smarthome.core.thing.type.ThingType;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 /**
  * @author Anders Alfredsson - Initial contribution
  */
-@Component(service = { ChannelTypeProvider.class, NibeUplinkRestChannelTypeProvider.class }, immediate = true)
-@NonNullByDefault
-public class NibeUplinkRestChannelTypeProvider implements ChannelTypeProvider {
 
-    private final Map<ChannelTypeUID, ChannelType> channelTypes = new ConcurrentHashMap<>();
+@Component(service = { ThingTypeProvider.class, NibeUplinkRestThingTypeProvider.class }, immediate = true)
+@NonNullByDefault
+public class NibeUplinkRestThingTypeProvider implements ThingTypeProvider {
+
+    private Map<ThingTypeUID, ThingType> thingTypes = new ConcurrentHashMap<>();
     private @NonNullByDefault({}) BundleContext bundleContext;
 
     @Override
-    public Collection<ChannelType> getChannelTypes(@Nullable Locale locale) {
-        return channelTypes.values();
+    public Collection<ThingType> getThingTypes(@Nullable Locale locale) {
+        return thingTypes.values();
     }
 
     @Override
-    public @Nullable ChannelType getChannelType(ChannelTypeUID channelTypeUID, @Nullable Locale locale) {
-        return channelTypes.get(channelTypeUID);
+    public @Nullable ThingType getThingType(ThingTypeUID thingTypeUID, @Nullable Locale locale) {
+        return thingTypes.get(thingTypeUID);
     }
 
-    public void add(ChannelType type) {
-        channelTypes.put(type.getUID(), type);
-    }
-
-    public void remove(ChannelTypeUID uid) {
-        channelTypes.remove(uid);
+    public void addThingType(ThingTypeUID thingTypeUID, ThingType thingType) {
+        thingTypes.put(thingTypeUID, thingType);
     }
 
     @Activate
@@ -60,7 +62,7 @@ public class NibeUplinkRestChannelTypeProvider implements ChannelTypeProvider {
 
     @Deactivate
     protected void deactivate() {
-        channelTypes.clear();
+        thingTypes.clear();
         bundleContext = null;
     }
 }

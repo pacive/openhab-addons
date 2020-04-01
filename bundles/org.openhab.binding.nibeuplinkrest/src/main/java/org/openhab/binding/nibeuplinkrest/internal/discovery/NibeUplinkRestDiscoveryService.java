@@ -19,21 +19,24 @@ import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
 import org.eclipse.smarthome.config.discovery.DiscoveryResult;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
 import org.eclipse.smarthome.config.discovery.DiscoveryService;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
-import org.eclipse.smarthome.core.thing.ThingUID;
+import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
+import org.eclipse.smarthome.core.thing.type.*;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Parameter;
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
+import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelGroupTypeProvider;
+import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelTypeProvider;
+import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestTypeFactory;
+import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 
@@ -50,6 +53,7 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
     private static final int TIMEOUT = 10;
 
     private @NonNullByDefault({}) NibeUplinkRestBridgeHandler bridgeHandler;
+    private @NonNullByDefault({}) NibeUplinkRestTypeFactory typeFactory;
 
     public NibeUplinkRestDiscoveryService() {
         super(SUPPORTED_THING_TYPES, TIMEOUT);
@@ -67,13 +71,22 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
 
     @Override
     protected void startScan() {
-            scheduler.execute(this::findSystems);
+        if (bridgeHandler.getThing().getStatus() == ThingStatus.ONLINE) {
+            logger.debug("Starting discovery");
+            NibeUplinkRestApi connection = bridgeHandler.getApiConnection();
+            connection.getConnectedSystems().forEach(system -> {
+                logger.debug("Found system wit id {}", system.getSystemId());
+                List<Category> categories = connection.getCategories(system.getSystemId(), true);
+                thingDiscovered(system, categories);
+            });
+        }
     }
 
     @Override
     public void setThingHandler(@Nullable ThingHandler handler) {
         if (handler instanceof NibeUplinkRestBridgeHandler) {
             bridgeHandler = (NibeUplinkRestBridgeHandler) handler;
+            typeFactory = bridgeHandler.getTypeFactory();
         }
 
     }
@@ -83,16 +96,7 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
         return bridgeHandler;
     }
 
-    private void findSystems() {
-        if (bridgeHandler.getThing().getStatus() == ThingStatus.ONLINE) {
-            logger.debug("Starting discovery");
-            NibeUplinkRestApi connection = bridgeHandler.getApiConnection();
-            connection.getConnectedSystems().forEach(this::thingDiscovered);
-        }
-    }
-
-    private void thingDiscovered(NibeSystem system) {
-        logger.debug("Found system with id {}", system.getSystemId());
+    private void thingDiscovered(NibeSystem system, List<Category> categories) {
         Map<String, Object> properties = new HashMap<>();
         final ThingUID bridgeUID = bridgeHandler.getThing().getUID();
 
@@ -102,7 +106,9 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
         properties.put(PROPERTY_SECURITY_LEVEL, system.getSecurityLevel());
         properties.put(PROPERTY_SERIAL_NUMBER, system.getSerialNumber());
 
-        ThingUID thingUID = new ThingUID(THING_TYPE_SYSTEM, bridgeUID,
+        ThingTypeUID thingTypeUID = typeFactory.createThingType(system, categories);
+
+        ThingUID thingUID = new ThingUID(thingTypeUID, bridgeUID,
                 Integer.toString(system.getSystemId()));
 
         DiscoveryResult result = DiscoveryResultBuilder.create(thingUID).withBridge(bridgeUID)

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0
+	https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<!-- The thing updates at intervals the High and Medium priority channels, defined in channel configuration file. This parameters
+		specify how often (time in seconds) these channels should be updated. -->
+
+	<config-description uri="thing-type:nibeuplinkrest:apibridge">
+		<parameter name="clientId" type="text" required="true">
+			<label>Client Identifier</label>
+			<description>OAuth Client Identifier obtained from Nibe Uplink</description>
+		</parameter>
+		<parameter name="clientSecret" type="text" required="true">
+			<label>Client Secret</label>
+			<description>OAuth Client Secret obtained from Nibe Uplink</description>
+		</parameter>
+		<parameter name="updateInterval" type="integer" min="30" max="3600" required="true">
+			<label>Update interval</label>
+			<description>Update interval</description>
+			<default>60</default>
+		</parameter>
+		<parameter name="softwareUpdateCheckInterval" type="integer" min="0" max="365" required="true">
+			<label>Update interval</label>
+			<description>Update interval</description>
+			<default>7</default>
+		</parameter>
+	</config-description>
+</config-description:config-descriptions>

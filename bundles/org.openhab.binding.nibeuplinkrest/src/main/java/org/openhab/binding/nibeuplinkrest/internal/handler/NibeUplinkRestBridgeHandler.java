@@ -23,16 +23,25 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
+import org.eclipse.smarthome.core.thing.type.*;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestConnector;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Parameter;
 import org.openhab.binding.nibeuplinkrest.internal.discovery.NibeUplinkRestDiscoveryService;
+import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelGroupTypeProvider;
+import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelTypeProvider;
+import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestTypeFactory;
+import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * The {@link NibeUplinkRestBridgeHandler} is responsible for handling commands, which are
@@ -47,15 +56,18 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
 
     private final OAuthFactory oAuthFactory;
     private final HttpClient httpClient;
+    private final NibeUplinkRestTypeFactory typeFactory;
 
     private @NonNullByDefault({}) OAuthClientService oAuthClient;
     private @NonNullByDefault({}) NibeUplinkRestConnector nibeUplinkRestApi;
     private @NonNullByDefault({}) NibeUplinkRestBridgeConfiguration config;
 
-    public NibeUplinkRestBridgeHandler(Bridge bridge, OAuthFactory oAuthFactory, HttpClient httpClient) {
+    public NibeUplinkRestBridgeHandler(Bridge bridge, OAuthFactory oAuthFactory, HttpClient httpClient,
+                                       NibeUplinkRestTypeFactory typeFactory) {
         super(bridge);
         this.oAuthFactory = oAuthFactory;
         this.httpClient = httpClient;
+        this.typeFactory = typeFactory;
     }
 
     @Override
@@ -127,5 +139,9 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
 
     public void signalServerOnline() {
         updateStatus(ThingStatus.ONLINE);
+    }
+
+    public NibeUplinkRestTypeFactory getTypeFactory() {
+        return typeFactory;
     }
 }

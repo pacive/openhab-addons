@@ -18,6 +18,7 @@ import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
+import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
 import org.eclipse.smarthome.core.thing.type.*;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
@@ -42,19 +43,14 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 @NonNullByDefault
 public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements NibeUplinkRestCallbackListener {
 
-    private final NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider;
-    private final NibeUplinkRestChannelTypeProvider channelTypeProvider;
     private @NonNullByDefault({}) NibeUplinkRestApi nibeUplinkRestApi;
     private @NonNullByDefault({}) NibeUplinkRestBaseSystemConfiguration config;
     private @NonNullByDefault({}) int systemId;
 
     private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestBaseSystemHandler.class);
 
-    public NibeUplinkRestBaseSystemHandler(Thing thing, NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider,
-                                           NibeUplinkRestChannelTypeProvider channelTypeProvider) {
+    public NibeUplinkRestBaseSystemHandler(Thing thing) {
         super(thing);
-        this.channelGroupTypeProvider = channelGroupTypeProvider;
-        this.channelTypeProvider = channelTypeProvider;
     }
 
     @Override
@@ -136,31 +132,23 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     private void addChannels() {
         List<Category> categories = nibeUplinkRestApi.getCategories(config.systemId, true);
         List<Channel> channels = new ArrayList<>();
-        channels.addAll(thing.getChannels());
         for (Category category : categories) {
             if (!category.getCategoryId().equals("SYSTEM_INFO")) {
                 String cg = StringConvert.snakeCaseToCamelCase(category.getCategoryId());
                 ChannelGroupTypeUID cgtid = new ChannelGroupTypeUID(BINDING_ID, cg);
                 ChannelGroupUID cgid = new ChannelGroupUID(thing.getUID(), cg);
-                List<ChannelDefinition> channelDefinitions = new ArrayList<>();
-                for (Parameter parameter : category.getParameters()) {
-                    ChannelTypeUID ctid = new ChannelTypeUID(BINDING_ID, parameter.getName());
-                    ChannelType ct = ChannelTypeBuilder.state(ctid, parameter.getTitle(), "Number").build();
-                    ChannelDefinition cd = new ChannelDefinitionBuilder(parameter.getName(), ctid)
-                            .withLabel(parameter.getTitle()).build();
-                    ChannelUID cid = new ChannelUID(cgid, parameter.getName());
-                    Channel channel = ChannelBuilder.create(cid, "Number").withType(ctid)
-                            .withLabel(parameter.getTitle()).build();
-                    channelTypeProvider.add(ctid, ct);
-                    channelDefinitions.add(cd);
-                    channels.add(channel);
-                }
-                ChannelGroupType cgt = ChannelGroupTypeBuilder.instance(cgtid, category.getName())
-                        .withChannelDefinitions(channelDefinitions).build();
-                channelGroupTypeProvider.add(cgtid, cgt);
+                getCallback().createChannelBuilders(cgid, cgtid).forEach(channelBuilder -> {
+                    Channel newChannel = channelBuilder.build();
+                    Channel existing = thing.getChannel(newChannel.getUID());
+                    if (existing == null) {
+                        channels.add(newChannel);
+                    }
+                        });
             }
         }
-        updateThing(editThing().withChannels(channels).build());
+        ThingBuilder thingBuilder = editThing();
+        channels.forEach(thingBuilder::withChannel);
+        updateThing(thingBuilder.build());
     }
 
     @Override
