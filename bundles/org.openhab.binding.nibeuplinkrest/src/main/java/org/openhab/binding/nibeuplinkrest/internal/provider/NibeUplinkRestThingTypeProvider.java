@@ -31,6 +31,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
+ * Provides generated thing-types to the framework
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 
@@ -51,6 +53,11 @@ public class NibeUplinkRestThingTypeProvider implements ThingTypeProvider {
         return thingTypes.get(thingTypeUID);
     }
 
+    /**
+     * Add a thing type to the provider
+     * @param thingTypeUID
+     * @param thingType
+     */
     public void addThingType(ThingTypeUID thingTypeUID, ThingType thingType) {
         thingTypes.putIfAbsent(thingTypeUID, thingType);
     }

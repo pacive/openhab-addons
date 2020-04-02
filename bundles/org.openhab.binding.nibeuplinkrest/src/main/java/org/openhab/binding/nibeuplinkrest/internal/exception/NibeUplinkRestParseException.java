@@ -16,6 +16,8 @@ package org.openhab.binding.nibeuplinkrest.internal.exception;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
+ * Exception thrown to indicate error in the parsing of data returned from Nibe uplink
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault

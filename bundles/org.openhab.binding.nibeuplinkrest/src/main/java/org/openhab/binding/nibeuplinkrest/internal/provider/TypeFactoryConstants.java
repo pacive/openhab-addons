@@ -22,11 +22,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ * Constant values for use in the type factory
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault
 public class TypeFactoryConstants {
 
+    // Internal types of parameters
     public enum ParameterType {
         TEMPERATURE,
         CURRENT,
@@ -44,6 +47,7 @@ public class TypeFactoryConstants {
         OTHER
     }
 
+    // Regex pattern to extract a double value - stripping unit
     public static final Pattern DOUBLE_PATTERN = Pattern.compile("(\\d+\\.?\\d*).*");
 
     public static final int NO_SCALING = 1;
@@ -55,6 +59,7 @@ public class TypeFactoryConstants {
     public static final String TARGET_TEMP_HEAT = "targetTempHeat";
     public static final String TARGET_TEMP_COOL = "targetTempCool";
 
+    // Map of static type mappings, for parameters that cannot be classified automatically
     public static final Map<Integer, ParameterType> STATIC_PARAMETER_TYPE_MAPPINGS = Collections.unmodifiableMap(
             Stream.of(
                     new AbstractMap.SimpleEntry<>(43416, ParameterType.COUNTER),
@@ -73,6 +78,7 @@ public class TypeFactoryConstants {
             ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue))
     );
 
+    // Static scale factor mappings for parameters that need it
     public static final Map<Integer, Integer> STATIC_SCALING_FACTORS = Collections.unmodifiableMap(
             Stream.of(
                     new AbstractMap.SimpleEntry<>(43125, SCALE_FACTOR_TEN),
@@ -80,11 +86,13 @@ public class TypeFactoryConstants {
             ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue))
     );
 
+    // Standard ctegories that should not be hinned in the UI
     public static final Set<String> STANDARD_CATEGORIES = Collections.unmodifiableSet(
             Stream.of("STATUS", "VENTILATION", "DEFROSTING", "SYSTEM_1", "SYSTEM_2", "SYSTEM_3", "SYSTEM_4", "SYSTEM_5",
                     "SYSTEM_6", "SYSTEM_7", "SYSTEM_8", "ADDITION", "GROUND_WATER_PUMP").collect(Collectors.toSet())
     );
 
+    // Parameter id mappings for the heating control channels
     public static final Map<String, List<Integer>> HEAT_CONTROL_PARAMETERS = Collections.unmodifiableMap(
             Stream.of(
                     new AbstractMap.SimpleEntry<>(PARALLEL_ADJUST_HEAT,
@@ -98,6 +106,7 @@ public class TypeFactoryConstants {
             ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue))
     );
 
+    // References to XML defined config descriptions
     public static final URI CHANNEL_CONFIG = URI.create("channel-type:nibeuplinkrest:channels");
     public static final URI SYSTEM_CONFIG = URI.create("thing-type:nibeuplinkrest:system");
 }

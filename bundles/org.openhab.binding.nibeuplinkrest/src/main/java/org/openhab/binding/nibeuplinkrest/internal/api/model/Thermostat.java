@@ -19,6 +19,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import java.util.Set;
 
 /**
+ * Class representing a virtual thermostat that can affect the system
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault

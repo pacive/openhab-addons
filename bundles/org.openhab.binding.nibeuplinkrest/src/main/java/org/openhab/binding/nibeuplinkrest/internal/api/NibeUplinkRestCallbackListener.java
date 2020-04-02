@@ -22,16 +22,38 @@ import org.openhab.binding.nibeuplinkrest.internal.api.model.SoftwareInfo;
 import java.util.List;
 
 /**
+ * Interface that specifies callback methods to inform the handler of updates
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault
 public interface NibeUplinkRestCallbackListener {
 
+    /**
+     * Callback method when a request for parameter values has been responded
+     *
+     * @param parameterValues A list of {@link Parameter}s
+     */
     void parametersUpdated(List<Parameter> parameterValues);
 
+    /**
+     * Callback when a request for system info has a response
+     *
+     * @param system A {@link NibeSystem} object
+     */
     void systemUpdated(NibeSystem system);
 
+    /**
+     * Callback when a request for software info has a response
+     *
+     * @param softwareInfo A {@link SoftwareInfo} object
+     */
     void softwareUpdateAvailable(SoftwareInfo softwareInfo);
 
+    /**
+     * Callback when a request for the systems opertaing mode has a response
+     *
+     * @param mode A {@link Mode} enum value
+     */
     void modeUpdated(Mode mode);
 }

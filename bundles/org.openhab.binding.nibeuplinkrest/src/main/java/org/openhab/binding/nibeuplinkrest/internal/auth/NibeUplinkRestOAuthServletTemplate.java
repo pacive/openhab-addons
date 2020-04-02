@@ -57,6 +57,11 @@ public class NibeUplinkRestOAuthServletTemplate  {
         this.replaceMap = replaceMap;
     }
 
+    /**
+     * Load a html file from the bundle's resources to be used as a template
+     * @param fileName
+     * @throws IOException
+     */
     public void loadTemplateFile(String fileName) throws IOException {
         final URL file = bundleContext.getBundle().getEntry(fileName);
 
@@ -68,6 +73,11 @@ public class NibeUplinkRestOAuthServletTemplate  {
         }
     }
 
+    /**
+     * Add a string key to replace with another
+     * @param from
+     * @param to
+     */
     public void addReplacement(String from, @Nullable String to) {
         if (to == null) {
             to = "";
@@ -79,6 +89,10 @@ public class NibeUplinkRestOAuthServletTemplate  {
         replaceMap.remove(from);
     }
 
+    /**
+     * Replace all template strings with their corresponding values
+     * @return
+     */
     public String replaceAll() {
         Matcher match = EXPANSION_PATTERN.matcher(this.template);
         StringBuffer output = new StringBuffer();

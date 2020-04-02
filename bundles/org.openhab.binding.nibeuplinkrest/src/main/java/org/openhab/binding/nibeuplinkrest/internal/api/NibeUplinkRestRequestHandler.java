@@ -46,6 +46,10 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 @NonNullByDefault
 public class NibeUplinkRestRequestHandler {
 
+    /**
+     * Different types of requests, stored in the {@link Request} object to
+     * decide what to do after the request is completed
+     */
     public enum RequestType {
         SYSTEM,
         PARAMETER_GET,
@@ -77,28 +81,59 @@ public class NibeUplinkRestRequestHandler {
         this.httpClient = httpClient;
     }
 
+    /**
+     * Create a request for connected systems
+     * @return
+     */
     public Request createConnectedSystemsRequest() {
         return prepareRequest(HttpMethod.GET, API_SYSTEMS, NO_SYSTEM_ID, RequestType.SYSTEMS);
     }
 
+    /**
+     * Create a request for a specific system
+     * @param systemId
+     * @return
+     */
     public Request createSystemRequest(int systemId) {
         return prepareRequest(HttpMethod.GET, API_SYSTEM_WITH_ID, systemId, RequestType.SYSTEM);
     }
 
+    /**
+     * Create a request for system configuration
+     * @param systemId
+     * @return
+     */
     public Request createSystemConfigRequest(int systemId) {
         return prepareRequest(HttpMethod.GET, API_CONFIG, systemId, RequestType.CONFIG);
     }
 
+    /**
+     * Create a request for software info
+     * @param systemId
+     * @return
+     */
     public Request createSoftwareRequest(int systemId) {
         return prepareRequest(HttpMethod.GET, API_SOFTWARE, systemId, RequestType.SOFTWARE);
     }
 
+    /**
+     * Create a request for the system's categories
+     * @param systemId
+     * @param includeParameters
+     * @return
+     */
     public Request createCategoriesRequest(int systemId, boolean includeParameters) {
         Request req = prepareRequest(HttpMethod.GET, API_CATEGORIES, systemId, RequestType.CATEGORIES);
         req.param(API_QUERY_INCLUDE_PARAMETERS, Boolean.toString(includeParameters));
         return req;
     }
 
+    /**
+     * Create a request to get parameters
+     * @param systemId
+     * @param parameterIds
+     * @return
+     */
     public Request createGetParametersRequest(int systemId, Set<Integer> parameterIds) {
         Request req = prepareRequest(HttpMethod.GET, API_PARAMETERS, systemId, RequestType.PARAMETER_GET);
         parameterIds.forEach(p -> {
@@ -107,6 +142,12 @@ public class NibeUplinkRestRequestHandler {
         return req;
     }
 
+    /**
+     * Create a request to set parameters
+     * @param systemId
+     * @param parameters
+     * @return
+     */
     public Request createSetParametersRequest(int systemId, Map<Integer, Integer> parameters) {
         Request req = prepareRequest(HttpMethod.PUT, API_PARAMETERS, systemId, RequestType.PARAMETER_SET);
         Map<String, Map<Integer, Integer>> wrapper = Collections.singletonMap("settings", parameters);
@@ -114,10 +155,21 @@ public class NibeUplinkRestRequestHandler {
         return req;
     }
 
+    /**
+     * Create a request to get the system's mode
+     * @param systemId
+     * @return
+     */
     public Request createGetModeRequest(int systemId) {
         return prepareRequest(HttpMethod.GET, API_MODE, systemId, RequestType.MODE_GET);
     }
 
+    /**
+     * Create a request to set the system's mode
+     * @param systemId
+     * @param mode
+     * @return
+     */
     public Request createSetModeRequest(int systemId, Mode mode) {
         Request req = prepareRequest(HttpMethod.PUT, API_MODE, systemId, RequestType.MODE_SET);
         String body = serializer.toJson(Collections.singletonMap("mode", mode));
@@ -125,12 +177,26 @@ public class NibeUplinkRestRequestHandler {
         return req;
     }
 
+    /**
+     * Create a request to set a thermostat
+     * @param systemId
+     * @param thermostat
+     * @return
+     */
     public Request createSetThermostatRequest(int systemId, Thermostat thermostat) {
         Request req = prepareRequest(HttpMethod.POST, API_THERMOSTATS, systemId, RequestType.THERMOSTAT);
         req.content(new StringContentProvider(serializer.toJson(thermostat)), CONTENT_TYPE);
         return req;
     }
 
+    /**
+     * Prepare the request with default values
+     * @param method
+     * @param endPoint
+     * @param systemId
+     * @param requestType
+     * @return
+     */
     private Request prepareRequest(HttpMethod method, String endPoint, int systemId, RequestType requestType) {
         Request req = systemId == NO_SYSTEM_ID ?
                 httpClient.newRequest(endPoint) :
@@ -143,6 +209,12 @@ public class NibeUplinkRestRequestHandler {
         return req;
     }
 
+    /**
+     * Get OAuth token and add it to the request. Refresh token and retry on a 401 response
+     * @param req The request to send
+     * @return The body of the response as a String
+     * @throws NibeUplinkRestException
+     */
     public String makeRequest(Request req) throws NibeUplinkRestException {
         try {
             AccessTokenResponse response = oAuthClient.getAccessTokenResponse();
@@ -164,6 +236,11 @@ public class NibeUplinkRestRequestHandler {
         return handleResponse(resp);
     }
 
+    /**
+     * Send the request. Catch any errors an re-throw a {@link NibeUplinkRestException}
+     * @param req
+     * @return
+     */
     private ContentResponse sendRequest(Request req) {
         ContentResponse resp;
         try {
@@ -174,6 +251,12 @@ public class NibeUplinkRestRequestHandler {
         return resp;
     }
 
+    /**
+     * Check the response code and act accordingly. Throws an exception holding the response
+     * code on error, to be handled elsewhere.
+     * @param resp
+     * @return
+     */
     private String handleResponse(ContentResponse resp) {
         switch (resp.getStatus()) {
             case OK_200:
@@ -205,6 +288,9 @@ public class NibeUplinkRestRequestHandler {
         }
     }
 
+    /**
+     * Refresh the OAuth token
+     */
     private void refreshToken() {
         try {
             bearerToken = oAuthClient.refreshToken().getAccessToken();

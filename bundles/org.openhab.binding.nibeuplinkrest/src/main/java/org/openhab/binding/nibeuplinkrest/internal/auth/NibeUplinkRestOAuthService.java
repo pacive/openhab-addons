@@ -65,6 +65,11 @@ public class NibeUplinkRestOAuthService {
         httpService.unregister(SERVLET_IMG_PATH);
     }
 
+    /**
+     * Create a servlet to enable OAuth flow
+     * @return
+     * @throws IOException
+     */
     private HttpServlet createServlet() throws IOException {
         Map<String, NibeUplinkRestOAuthServletTemplate> templates = new HashMap<>();
         templates.put(SERVLET_TEMPLATE_INDEX, new NibeUplinkRestOAuthServletTemplate(bundleContext,
@@ -74,20 +79,38 @@ public class NibeUplinkRestOAuthService {
         return new NibeUplinkRestOAuthServlet(this, templates);
     }
 
+    /**
+     * Inject a bridge handler to make callbacks to
+     * @param handler
+     */
     public void addBridgeHandler(NibeUplinkRestBridgeHandler handler) {
         if (!bridgeHandlers.contains(handler)) {
             bridgeHandlers.add(handler);
         }
     }
 
+    /**
+     * Get all bridge handlers using the service
+     * @return
+     */
     public List<NibeUplinkRestBridgeHandler> getBridgeHandlers() {
         return bridgeHandlers;
     }
 
+    /**
+     * Get a speceific bridge handler
+     * @param thingUID
+     * @return
+     */
     public @Nullable NibeUplinkRestBridgeHandler getBridgeHandler(ThingUID thingUID) {
         return getBridgeHandler(thingUID.getAsString());
     }
 
+    /**
+     * Get a specific bridge handler
+     * @param thingUID
+     * @return
+     */
     public @Nullable NibeUplinkRestBridgeHandler getBridgeHandler(String thingUID) {
         NibeUplinkRestBridgeHandler handler = null;
         for (NibeUplinkRestBridgeHandler h : bridgeHandlers) {

@@ -15,6 +15,8 @@ package org.openhab.binding.nibeuplinkrest.internal.api.model;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
+ * Enum corresponding to different sonnection status of a system
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault

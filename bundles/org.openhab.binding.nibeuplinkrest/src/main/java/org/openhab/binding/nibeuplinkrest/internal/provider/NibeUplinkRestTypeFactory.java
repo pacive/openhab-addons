@@ -36,6 +36,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ * Handles the creation of thing-types, channel-group-types and channel-types
+ * based in info retreived from Nibe uplink
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @Component(immediate = true, service = { NibeUplinkRestTypeFactory.class })
@@ -51,6 +54,11 @@ public class NibeUplinkRestTypeFactory {
     @Activate
     public NibeUplinkRestTypeFactory() {}
 
+    /**
+     * Create a new thing-type based on a system and it's categories
+     * @param system
+     * @param categories
+     */
     public void createThingType(NibeSystem system, List<Category> categories) {
         ChannelGroupType defaultControlGroup = channelGroupTypeRegistry.getChannelGroupType(
                 CHANNEL_GROUP_TYPE_DEFAULT_CONTROL);
@@ -61,29 +69,31 @@ public class NibeUplinkRestTypeFactory {
             controlChannels.addAll(defaultControlGroup.getChannelDefinitions());
         }
         categories.forEach(c -> {
+            // The system info category only contains static values, and the parameters
+            // have the same id, so don't include
             if (c.getCategoryId().equals("SYSTEM_INFO")) {
                 return;
             }
+            // Create channel group types and channel group definitions from the categories
             ChannelGroupType groupType = createChannelGroupType(c);
             channelGroupTypeProvider.add(groupType);
             ChannelGroupDefinition groupDefinition = createChannelGroupDefinition(groupType.getUID());
             groupDefinitions.add(groupDefinition);
         });
 
+        // Add control channels that aren't included
         controlChannels.addAll(createHeatControlChannels(system, categories));
-
         ChannelGroupType controlChannelGroup = ChannelGroupTypeBuilder.instance(CHANNEL_GROUP_TYPE_CONTROL, "Control")
                 .withChannelDefinitions(controlChannels)
                 .build();
-
         channelGroupTypeProvider.add(controlChannelGroup);
         ChannelGroupDefinition controlChannelGroupDefinition = new ChannelGroupDefinition(CHANNEL_GROUP_CONTROL_ID,
                 CHANNEL_GROUP_TYPE_CONTROL);
         groupDefinitions.add(controlChannelGroupDefinition);
 
+        // Construct the thing-type
         ThingTypeUID thingTypeUID = new ThingTypeUID(BINDING_ID,
                 StringUtils.deleteWhitespace(system.getProductName()).toLowerCase(Locale.ROOT));
-
         ThingType thingType = ThingTypeBuilder.instance(thingTypeUID, system.getProductName())
                 .withSupportedBridgeTypeUIDs(Collections.singletonList(THING_TYPE_APIBRIDGE.getAsString()))
                 .withChannelGroupDefinitions(groupDefinitions)
@@ -95,6 +105,11 @@ public class NibeUplinkRestTypeFactory {
         thingTypeProvider.addThingType(thingTypeUID, thingType);
     }
 
+    /**
+     * Create a channel group from a category, with the parameters as channels
+     * @param category
+     * @return
+     */
     private ChannelGroupType createChannelGroupType(Category category) {
         ChannelGroupTypeUID channelGroupTypeUID = new ChannelGroupTypeUID(BINDING_ID,
                 StringConvert.snakeCaseToCamelCase(category.getCategoryId()));
@@ -106,6 +121,7 @@ public class NibeUplinkRestTypeFactory {
                     channelDefinitions.add(createChannelDefinition(type.getUID(), p));
                 });
 
+        // Add some extra channels to the status group
         if (category.getCategoryId().equals("STATUS")) {
             channelDefinitions.addAll(createStatusChannels());
         }
@@ -117,10 +133,20 @@ public class NibeUplinkRestTypeFactory {
                 .build();
     }
 
+    /**
+     * Create a channel group definition for the thing-type
+     * @param uid
+     * @return
+     */
     private ChannelGroupDefinition createChannelGroupDefinition(ChannelGroupTypeUID uid) {
         return new ChannelGroupDefinition(uid.getId(), uid);
     }
 
+    /**
+     * Create a channel type from a parameter
+     * @param parameter
+     * @return
+     */
     private ChannelType createChannelType(Parameter parameter) {
         ParameterType type = getParameterType(parameter);
         ChannelTypeUID channelTypeUID = new ChannelTypeUID(BINDING_ID, type.toString().toLowerCase(Locale.ROOT));
@@ -134,6 +160,12 @@ public class NibeUplinkRestTypeFactory {
                 .build();
     }
 
+    /**
+     * Create a channel definition for a channel group
+     * @param uid
+     * @param parameter
+     * @return
+     */
     private ChannelDefinition createChannelDefinition(ChannelTypeUID uid, Parameter parameter) {
         ParameterType type = getParameterType(parameter);
         int scalingFactor = getScalingFactor(parameter, type);
@@ -144,6 +176,10 @@ public class NibeUplinkRestTypeFactory {
                 .build();
     }
 
+    /**
+     * Generate some additional channels for the status group, based on templates in XML-files
+     * @return
+     */
     private List<ChannelDefinition> createStatusChannels() {
         ChannelType lastActivityType = channelTypeRegistry.getChannelType(CHANNEL_TYPE_LAST_ACTIVITY);
         ChannelType hasAlarmedType = channelTypeRegistry.getChannelType(CHANNEL_TYPE_HAS_ALARMED);
@@ -177,6 +213,13 @@ public class NibeUplinkRestTypeFactory {
         return Collections.emptyList();
     }
 
+    /**
+     * Creates control channels, based on the system's reported capabilities, based on templates
+     * defined in XML-files
+     * @param system
+     * @param categories
+     * @return
+     */
     private List<ChannelDefinition> createHeatControlChannels(NibeSystem system, List<Category> categories) {
         ChannelType parAdjustHeat = channelTypeRegistry.getChannelType(CHANNEL_TYPE_PARALLEL_ADJUST_HEAT);
         ChannelType parAdjustCool = channelTypeRegistry.getChannelType(CHANNEL_TYPE_PARALLEL_ADJUST_COOL);
@@ -187,23 +230,29 @@ public class NibeUplinkRestTypeFactory {
 
         List<ChannelDefinition> definitions = new ArrayList<>();
 
+        // Add ventilation boost if the system has ventilation
         if (system.hasVentilation() && ventilationBoost != null) {
             definitions.add(new ChannelDefinitionBuilder(
-                    CHANNEL_VENTILATION_BOOST_ID, CHANNEL_TYPE_VENTILATION_BOOST)
+                    "47260", CHANNEL_TYPE_VENTILATION_BOOST)
                     .withLabel(ventilationBoost.getLabel())
                     .withDescription(ventilationBoost.getDescription())
                     .build());
         }
+        // Add hot water boost if the system produces hot water
         if (system.hasHotWater() && hotWaterBoost != null) {
             definitions.add(new ChannelDefinitionBuilder(
-                    CHANNEL_HOT_WATER_BOOST_ID, CHANNEL_TYPE_HOT_WATER_BOOST)
+                    "48132", CHANNEL_TYPE_HOT_WATER_BOOST)
                     .withLabel(hotWaterBoost.getLabel())
                     .withDescription(hotWaterBoost.getDescription())
                     .build());
         }
         categories.forEach(c -> {
+            // A system can support up to 8 sub-systems (e.g floor heating and radiator heating)
+            // these are reported as SYSTEM_X in the categories. Add channels to control each of
+            // their setpoints and heating curves
             if (c.getCategoryId().startsWith("SYSTEM") && !c.getCategoryId().equals("SYSTEM_INFO")) {
                 int index = Integer.parseInt(c.getCategoryId().substring(7));
+                // Add heating controls if the system has heating
                 if (system.hasHeating() && parAdjustHeat != null && targetTempHeat != null) {
                     definitions.add(new ChannelDefinitionBuilder(
                             String.valueOf(HEAT_CONTROL_PARAMETERS.get(PARALLEL_ADJUST_HEAT)
@@ -220,6 +269,7 @@ public class NibeUplinkRestTypeFactory {
                             .withDescription(targetTempHeat.getDescription())
                             .build());
                 }
+                // Add cooling control if the system has cooling
                 if (system.hasCooling() && parAdjustCool != null && targetTempCool != null) {
                     definitions.add(new ChannelDefinitionBuilder(
                             String.valueOf(HEAT_CONTROL_PARAMETERS.get(PARALLEL_ADJUST_COOL)
@@ -241,6 +291,15 @@ public class NibeUplinkRestTypeFactory {
         return definitions;
     }
 
+    /**
+     * Decide the parameter's typa based on
+     * 1. It's reported unit
+     * 2. It's reported value (if it's a boolean value)
+     * 3. Static mappings if it can't be decided otherwise
+     *
+     * @param parameter
+     * @return
+     */
     private ParameterType getParameterType(Parameter parameter) {
         switch (parameter.getUnit()) {
             case "°C":
@@ -272,6 +331,15 @@ public class NibeUplinkRestTypeFactory {
         return ParameterType.OTHER;
     }
 
+    /**
+     * Get the parameter's scaling factor, decided by:
+     * 1. Some static mappings
+     * 2. Type
+     * 3. Attempt to calculate based on display value and raw value
+     * @param parameter
+     * @param type
+     * @return
+     */
     private int getScalingFactor(Parameter parameter, ParameterType type) {
         if (STATIC_SCALING_FACTORS.containsKey(parameter.getParameterId())) {
             return STATIC_SCALING_FACTORS.get(parameter.getParameterId());
@@ -294,6 +362,12 @@ public class NibeUplinkRestTypeFactory {
         }
     }
 
+    /**
+     * Attempt to calculate the scaling factor by dividing the raw value with the
+     * parsed display value string
+     * @param parameter
+     * @return
+     */
     private int calculateScalingFactor(Parameter parameter) {
         double result;
         try {
@@ -306,10 +380,20 @@ public class NibeUplinkRestTypeFactory {
         return NO_SCALING;
     }
 
+    /**
+     * Some categories should be marked as advanced to reduce clutter in the UI
+     * @param categoryId
+     * @return
+     */
     private boolean isCategoryAdvanced(String categoryId) {
         return !STANDARD_CATEGORIES.contains(categoryId);
     }
 
+    /**
+     * Mark some channels as advanced
+     * @param type
+     * @return
+     */
     private boolean isChannelAdvanced(ParameterType type) {
         switch (type) {
             case CURRENT:
@@ -321,6 +405,11 @@ public class NibeUplinkRestTypeFactory {
         }
     }
 
+    /**
+     * Get the correspoding OH Item type based on the parameter type
+     * @param type
+     * @return
+     */
     private String getItemType(ParameterType type) {
         switch (type) {
             case STRING:
@@ -332,10 +421,19 @@ public class NibeUplinkRestTypeFactory {
         }
     }
 
+    /**
+     * Convenience method to query the thing-type provider if it has a certain thing-type
+     * @param thingTypeUID
+     * @return
+     */
     public boolean hasThingType(ThingTypeUID thingTypeUID) {
         return thingTypeProvider.getThingType(thingTypeUID, null) != null;
     }
 
+    /**
+     * Convenience method to get access to the {@link NibeUplinkRestChannelGroupTypeProvider}
+     * @return
+     */
     public NibeUplinkRestChannelGroupTypeProvider getGroupTypeProvider() {
         return channelGroupTypeProvider;
     }

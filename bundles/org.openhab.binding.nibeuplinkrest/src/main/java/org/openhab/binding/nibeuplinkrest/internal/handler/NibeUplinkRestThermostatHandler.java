@@ -27,6 +27,8 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.CHANNEL_THERMOSTAT_TARGET;
 
 /**
+ * Handles virtual thermostat Things connecting openHAB to Nibe uplink
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault

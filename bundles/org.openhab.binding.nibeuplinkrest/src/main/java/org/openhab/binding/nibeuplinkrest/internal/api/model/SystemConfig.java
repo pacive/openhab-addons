@@ -16,6 +16,8 @@ package org.openhab.binding.nibeuplinkrest.internal.api.model;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
+ * Class for holding info on the system's capabilities
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault

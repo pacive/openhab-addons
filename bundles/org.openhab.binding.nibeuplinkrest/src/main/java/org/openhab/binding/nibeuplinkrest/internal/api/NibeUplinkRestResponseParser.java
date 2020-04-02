@@ -29,6 +29,9 @@ import java.util.List;
 @NonNullByDefault
 public class NibeUplinkRestResponseParser {
 
+    /**
+     * Custom deserializer to handle ZonedDateTime
+     */
     @NonNullByDefault
     private static class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime> {
         @Override
@@ -39,6 +42,9 @@ public class NibeUplinkRestResponseParser {
         }
     }
 
+    /**
+     * Custom deserializer to get system info in a nested json object
+     */
     @NonNullByDefault
     private static class NibeSystemListDeserializer implements JsonDeserializer<List<NibeSystem>> {
 
@@ -58,30 +64,65 @@ public class NibeUplinkRestResponseParser {
             .registerTypeAdapter(new TypeToken<List<NibeSystem>>(){}.getType(), new NibeSystemListDeserializer())
             .create();
 
+    /**
+     * Parse a json string with system info
+     * @param json
+     * @return
+     */
     public static NibeSystem parseSystem(String json) {
         return gson.fromJson(json, NibeSystem.class);
     }
 
+    /**
+     * Parse a json string with a list of systems
+     * @param json
+     * @return
+     */
     public static List<NibeSystem> parseSystemList(String json) {
         return gson.fromJson(json, new TypeToken<List<NibeSystem>>(){}.getType());
     }
 
+    /**
+     * Parse a json string with system config information
+     * @param json
+     * @return
+     */
     public static SystemConfig parseSystemConfig(String json) {
         return gson.fromJson(json, SystemConfig.class);
     }
 
+    /**
+     * Parse a json string with software info
+     * @param json
+     * @return
+     */
     public static SoftwareInfo parseSoftwareInfo(String json) {
         return gson.fromJson(json, SoftwareInfo.class);
     }
 
+    /**
+     * Parse a json string with a list of categories
+     * @param json
+     * @return
+     */
     public static List<Category> parseCategoryList(String json) {
         return gson.fromJson(json, new TypeToken<List<Category>>(){}.getType());
     }
 
+    /**
+     * Parse a json string with a list of parameters
+     * @param json
+     * @return
+     */
     public static List<Parameter> parseParameterList(String json) {
         return gson.fromJson(json, new TypeToken<List<Parameter>>(){}.getType());
     }
 
+    /**
+     * Parse a json string with info on the mode of the system
+     * @param json
+     * @return
+     */
     public static Mode parseMode(String json) {
         return gson.fromJson(json, Mode.class);
     }

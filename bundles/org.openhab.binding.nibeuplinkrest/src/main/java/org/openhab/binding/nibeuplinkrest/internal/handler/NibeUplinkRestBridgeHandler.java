@@ -38,8 +38,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The {@link NibeUplinkRestBridgeHandler} is responsible for handling commands, which are
- * sent to one of the channels.
+ * The {@link NibeUplinkRestBridgeHandler} handles the connection to the Nibe Uplink API.
  *
  * @author Anders Alfredsson - Initial contribution
  */
@@ -104,12 +103,26 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
         oAuthFactory.ungetOAuthService(thing.getUID().getAsString());
     }
 
+    /**
+     * Callback to authorize with Nibe uplink's OAuth endpoint after the user have authenticated.
+     *
+     * @param authCode
+     * @param baseURL
+     * @throws OAuthException
+     * @throws OAuthResponseException
+     * @throws IOException
+     */
     public void authorize(String authCode, String baseURL) throws OAuthException, OAuthResponseException, IOException {
         oAuthClient.getAccessTokenResponseByAuthorizationCode(authCode, baseURL);
         logger.debug("Authorization successful, setting thing {} online", thing.getUID().getAsString());
         updateStatus(ThingStatus.ONLINE);
     }
 
+    /**
+     * Checks if there is a valid OAuth token
+     *
+     * @return true if a valid token exists
+     */
     public boolean isAuthorized() {
         AccessTokenResponse token = null;
         try {
@@ -120,6 +133,12 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
         return token != null;
     }
 
+    /**
+     * Callback to construct the authorization url the user is redirected to in order to authenticate
+     *
+     * @param baseURL Url the user should be redirected to after authentication (i.e. url hosted by openHAB)
+     * @return URL the user should access to authenticate
+     */
     public String getAuthorizationUrl(String baseURL) {
         try {
             return oAuthClient.getAuthorizationUrl(baseURL, SCOPE, thing.getUID().getAsString());
@@ -129,18 +148,35 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
         }
     }
 
+    /**
+     * Get a handle to the {@link NibeUplinkRestApi} instance that handles the connection to Nibe uplink
+     *
+     * @return
+     */
     public NibeUplinkRestApi getApiConnection() {
         return nibeUplinkRestApi;
     }
 
+    /**
+     * Callback to signal the bridge handler that there's an error with the connection, to mark it as offline
+     *
+     * @param responseCode The http response code returned from Nibe uplink
+     */
     public void signalServerError(int responseCode) {
         updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, String.valueOf(responseCode));
     }
 
+    /**
+     * Callback to signal the bridge handler that connection has been restored, so the bridge can be set online
+     */
     public void signalServerOnline() {
         updateStatus(ThingStatus.ONLINE);
     }
 
+    /**
+     * Get a handle to the {@link NibeUplinkRestTypeFactory} that handles the creation of thing types
+     * @return
+     */
     public NibeUplinkRestTypeFactory getTypeFactory() {
         return typeFactory;
     }

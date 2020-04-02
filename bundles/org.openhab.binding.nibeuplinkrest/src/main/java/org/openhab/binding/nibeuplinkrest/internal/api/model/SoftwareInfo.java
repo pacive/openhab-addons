@@ -19,6 +19,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import java.util.Map;
 
 /**
+ * Class for holding info on the systems software, as well as available updates
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault

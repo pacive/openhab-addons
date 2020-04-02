@@ -26,6 +26,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Provides generated channel-types to the framework
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @Component(service = { ChannelTypeProvider.class, NibeUplinkRestChannelTypeProvider.class }, immediate = true)
@@ -45,10 +47,18 @@ public class NibeUplinkRestChannelTypeProvider implements ChannelTypeProvider {
         return channelTypes.get(channelTypeUID);
     }
 
+    /**
+     * Add a channel-type
+     * @param type
+     */
     public void add(ChannelType type) {
         channelTypes.put(type.getUID(), type);
     }
 
+    /**
+     * Remove a channel-type
+     * @param uid
+     */
     public void remove(ChannelTypeUID uid) {
         channelTypes.remove(uid);
     }

@@ -19,6 +19,8 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 
 /**
+ * Class for holding general info on the system
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault

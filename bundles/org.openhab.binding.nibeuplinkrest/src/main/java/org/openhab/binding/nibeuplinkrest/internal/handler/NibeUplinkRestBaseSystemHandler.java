@@ -39,6 +39,8 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 
 
 /**
+ * Handles Things for a heating system connected to Nibe uplink
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault
@@ -60,9 +62,11 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     public void handleCommand(ChannelUID channelUID, Command command) {
         String groupId = channelUID.getGroupId();
         String channelId = channelUID.getIdWithoutGroup();
+        // Only channels in the control channel group can be commanded
         if (groupId.equals(CHANNEL_GROUP_CONTROL_ID)) {
             if (channelId.equals(CHANNEL_MODE_ID) && command instanceof StringType) {
                 nibeUplinkRestApi.setMode(systemId, Mode.from(command.toFullString()));
+                // All channels except for mode accept numbers as command
             } else if (command instanceof DecimalType) {
                 try {
                     Map<Integer, Integer> parameter = new HashMap<>();
@@ -133,11 +137,20 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         nibeUplinkRestApi.removeCallbackListener(systemId);
     }
 
+    /**
+     * Checks whether the system is online
+     *
+     * @return false if the system is marked OFFLINE, otherwise true
+     */
     public boolean isOnline() {
         ConnectionStatus status = nibeUplinkRestApi.getSystem(config.systemId).getConnectionStatus();
         return status != ConnectionStatus.OFFLINE;
     }
 
+    /**
+     * Gets information about the system configuration and software from Nibe uplink
+     * and adds them as Thing properties
+     */
     private void updateProperties() {
         SystemConfig systemConfig = nibeUplinkRestApi.getSystemConfig(systemId);
         SoftwareInfo softwareInfo = nibeUplinkRestApi.getSoftwareInfo(systemId);
@@ -153,6 +166,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     @Override
     public void parametersUpdated(List<Parameter> parameterValues) {
         parameterValues.forEach(p -> {
+            // Gets the full channel id (group#channel)
             String channelId = groupTypeProvider.getChannelFromID(p.getName());
             Channel channel = thing.getChannel(channelId);
             if (channel != null) {
@@ -164,11 +178,13 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                 State state;
                 switch (itemType) {
                     case CoreItemFactory.NUMBER:
+                        // Nibe sends -32768 to mark a value as invalid
                         if (p.getRawValue() == -32768) {
                             state = UnDefType.UNDEF;
                             break;
                         }
                         String scalingFactor = "1";
+                        // Check first channel configuration, then property to get scaling for the raw value
                         if (channel.getConfiguration().containsKey(CHANNEL_PROPERTY_SCALING_FACTOR)) {
                             scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR).toString();
                         } else {

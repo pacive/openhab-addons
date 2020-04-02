@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * Class representing a category of parameters on the system
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault

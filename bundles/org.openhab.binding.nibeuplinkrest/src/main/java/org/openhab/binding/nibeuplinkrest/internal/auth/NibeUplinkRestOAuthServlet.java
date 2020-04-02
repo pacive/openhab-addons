@@ -75,6 +75,11 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
         resp.getWriter().close();
     }
 
+    /**
+     * Adds a list of available accounts to the response, with links for authentication
+     * @param baseURL
+     * @return
+     */
     private String formatAccounts(String baseURL) {
         StringBuilder accounts = new StringBuilder();
         NibeUplinkRestOAuthServletTemplate template = templates.get(SERVLET_TEMPLATE_ACCOUNT);
@@ -87,6 +92,11 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
         return accounts.toString();
     }
 
+    /**
+     * Handle requests to the servlet
+     * @param queryString
+     * @param baseURL
+     */
     private void handleCallback(@Nullable String queryString, String baseURL) {
         if (queryString == null) {
             return;

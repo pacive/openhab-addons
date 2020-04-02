@@ -91,6 +91,13 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
         return bridgeHandler;
     }
 
+    /**
+     * Prepares a thing for adding as a discovery result, and creates a thing-type
+     * if it doesn't exist
+     *
+     * @param system
+     * @param categories
+     */
     private void thingDiscovered(NibeSystem system, List<Category> categories) {
         Map<String, Object> properties = new HashMap<>();
         final ThingUID bridgeUID = bridgeHandler.getThing().getUID();

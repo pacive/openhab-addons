@@ -18,6 +18,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import java.util.Objects;
 
 /**
+ * Class for holding info on a parameter
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault

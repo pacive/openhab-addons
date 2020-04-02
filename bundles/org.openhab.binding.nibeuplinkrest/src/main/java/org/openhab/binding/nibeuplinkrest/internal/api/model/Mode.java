@@ -15,6 +15,8 @@ package org.openhab.binding.nibeuplinkrest.internal.api.model;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
+ * Enum corresponding to the systems mode
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault

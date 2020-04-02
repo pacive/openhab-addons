@@ -26,6 +26,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Provides generated channel-group-types to the framework
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @Component(service = { ChannelGroupTypeProvider.class, NibeUplinkRestChannelGroupTypeProvider.class }, immediate = true)
@@ -45,16 +47,32 @@ public class NibeUplinkRestChannelGroupTypeProvider implements ChannelGroupTypeP
         return channelGroupTypes.get(channelGroupTypeUID);
     }
 
+    /**
+     * Adnna channel-group-type
+     * @param type
+     */
     public void add(ChannelGroupType type) {
         channelGroupTypes.putIfAbsent(type.getUID(), type);
     }
 
+    /**
+     * Add a list of channel-group-types
+     *
+     * @param types
+     */
     public void addAll(List<ChannelGroupType> types) {
         types.forEach(t -> {
             add(t);
         });
     }
 
+    /**
+     * Convenience method to get a channels full id (groupId#channelId)
+     * based on it's channel id
+     *
+     * @param channelId
+     * @return
+     */
     public String getChannelFromID(String channelId) {
         for (ChannelGroupType groupType : channelGroupTypes.values()) {
             for (ChannelDefinition channel : groupType.getChannelDefinitions()) {

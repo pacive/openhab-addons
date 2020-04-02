@@ -16,6 +16,8 @@ package org.openhab.binding.nibeuplinkrest.internal.exception;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
+ * Exception class used do handle http errors
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault

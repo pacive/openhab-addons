@@ -254,12 +254,18 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         modes.remove(systemId);
     }
 
+    /**
+     * Cancel all running scheduled jobs
+     */
     public void cancelAllJobs() {
         cancelPolling();
         logger.debug("Stopping request processor");
         if (requestProcessor != null) { requestProcessor.cancel(false); }
     }
 
+    /**
+     * Start all request producers and the request processor with their respective intervals
+     */
     private void startPolling() {
         logger.debug("Start polling jobs");
         if (standardRequestProducer == null || standardRequestProducer.isCancelled()) {
@@ -291,6 +297,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         }
     }
 
+    /**
+     * Cancel all request producers and clear the request queue
+     */
     private void cancelPolling() {
         logger.debug("Stopping all request producers and clearing queue");
         if (standardRequestProducer != null) { standardRequestProducer.cancel(false); }
@@ -300,6 +309,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         queuedRequests.clear();
     }
 
+    /**
+     * Queue requests for system and parameter updates
+     */
     private void queueStandardRequests() {
         listeners.forEach((systemId, listener) -> {
             if (listener != null) {
@@ -318,6 +330,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
                 Iterator<Integer> i = parameterSet.iterator();
                 int counter = 0;
                 Set<Integer> parameters = new HashSet<>();
+                // Only 15 parameter are allowed in each request, so queue as many as necessary
                 while (i.hasNext()) {
                     parameters.add(i.next());
                     counter++;
@@ -346,6 +359,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         });
     }
 
+    /**
+     * Queue requests to periodically update virtual thermostats
+     */
     private void queueThermostatRequests() {
         thermostats.forEach((systemId, thermostatMap) -> {
             if (thermostatMap != null && !thermostatMap.isEmpty()) {
@@ -362,6 +378,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         });
     }
 
+    /**
+     * Queue requests to periodically update the system's mode if it's not default
+     */
     private void queueModeRequests() {
         modes.forEach((systemId, mode) -> {
             if (mode != null && mode != Mode.DEFAULT_OPERATION) {
@@ -383,6 +402,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         });
     }
 
+    /**
+     * Queue request for software info
+     */
     private void queueSoftwareRequests() {
         for (int systemId : listeners.keySet()) {
             logger.trace("Queueing software update request for {}", systemId);
@@ -395,6 +417,10 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         }
     }
 
+    /**
+     * Retrieves requests from the queue an send them with 5 second intervals, to stay
+     * clear of the rate limit
+     */
     private void processRequests() {
         Request req;
         try {
@@ -403,6 +429,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             logger.trace("No requests queued for more than {} seconds", updateInterval * 2);
             return;
         }
+
         int systemId;
         RequestType requestType;
         NibeUplinkRestCallbackListener listener;
@@ -427,6 +454,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         try {
             resp = requests.makeRequest(req);
         } catch (NibeUplinkRestHttpException e) {
+            // If Nibe's server has problems, stop polling and periodically check if back online
             if (e.getResponseCode() >= 500) {
                 logger.debug("Server error, cancelling requests and starting alive check.");
                 bridgeHandler.signalServerError(e.getResponseCode());
@@ -443,13 +471,16 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             return;
         }
 
+        // If we get to here the connection works
         if (isAliveRequestProducer != null) {
             logger.debug("Nibe Uplink back online");
             isAliveRequestProducer.cancel(false);
+            isAliveRequestProducer = null;
             bridgeHandler.signalServerOnline();
             startPolling();
         }
 
+        // Callback
         switch (requestType) {
             case SYSTEM:
                 listener.systemUpdated(parseSystem(resp));

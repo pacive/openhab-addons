@@ -16,6 +16,8 @@ package org.openhab.binding.nibeuplinkrest.internal.exception;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
+ * Generic internal exception class
+ *
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault
