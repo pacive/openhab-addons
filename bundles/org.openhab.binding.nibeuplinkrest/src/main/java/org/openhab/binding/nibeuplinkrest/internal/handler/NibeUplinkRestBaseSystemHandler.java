@@ -164,6 +164,10 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                 State state;
                 switch (itemType) {
                     case CoreItemFactory.NUMBER:
+                        if (p.getRawValue() == -32768) {
+                            state = UnDefType.UNDEF;
+                            break;
+                        }
                         String scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
                         if (scalingFactor != null) {
                             try {
