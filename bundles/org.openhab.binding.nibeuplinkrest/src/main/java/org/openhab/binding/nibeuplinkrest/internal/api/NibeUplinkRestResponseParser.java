@@ -29,6 +29,7 @@ import java.util.List;
 @NonNullByDefault
 public class NibeUplinkRestResponseParser {
 
+    @NonNullByDefault
     private static class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime> {
         @Override
         public ZonedDateTime deserialize(@Nullable JsonElement json, @Nullable Type type,
@@ -38,6 +39,7 @@ public class NibeUplinkRestResponseParser {
         }
     }
 
+    @NonNullByDefault
     private static class NibeSystemListDeserializer implements JsonDeserializer<List<NibeSystem>> {
 
         @Override

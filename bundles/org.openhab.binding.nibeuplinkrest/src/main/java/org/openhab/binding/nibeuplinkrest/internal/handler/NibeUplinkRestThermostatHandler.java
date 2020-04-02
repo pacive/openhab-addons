@@ -47,9 +47,11 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
         updateStatus(ThingStatus.UNKNOWN);
         config = getConfigAs(NibeUplinkRestThermostatConfiguration.class);
         Bridge bridge = getBridge();
-        if (bridge != null && bridge.getHandler() != null) {
+        if (bridge != null) {
             NibeUplinkRestBridgeHandler bridgeHandler = (NibeUplinkRestBridgeHandler) bridge.getHandler();
-            nibeUplinkRestApi = bridgeHandler.getApiConnection();
+            if (bridgeHandler != null) {
+                nibeUplinkRestApi = bridgeHandler.getApiConnection();
+            }
         } else {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_UNINITIALIZED, "No bridge found");
         }

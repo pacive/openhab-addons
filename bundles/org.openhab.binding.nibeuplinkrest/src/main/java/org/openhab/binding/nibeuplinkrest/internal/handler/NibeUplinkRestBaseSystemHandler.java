@@ -14,6 +14,7 @@
 package org.openhab.binding.nibeuplinkrest.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
@@ -78,7 +79,11 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         scheduler.execute(() -> {
             updateProperties();
             thing.getChannels().stream().filter(c -> isLinked(c.getUID())).forEach(c -> {
-                nibeUplinkRestApi.addTrackedParameter(systemId, Integer.parseInt(c.getUID().getIdWithoutGroup()));
+                try {
+                    nibeUplinkRestApi.addTrackedParameter(systemId, Integer.parseInt(c.getUID().getIdWithoutGroup()));
+                } catch (NumberFormatException ignored) {
+                    return;
+                }
             });
             if (isOnline()) {
                 updateStatus(ThingStatus.ONLINE);
@@ -90,7 +95,6 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void channelLinked(ChannelUID channelUID) {
-        super.channelLinked(channelUID);
         try {
             nibeUplinkRestApi.addTrackedParameter(systemId, Integer.parseInt(channelUID.getIdWithoutGroup()));
         } catch (NumberFormatException ignored) {}
@@ -98,7 +102,6 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void channelUnlinked(ChannelUID channelUID) {
-        super.channelUnlinked(channelUID);
         nibeUplinkRestApi.removeTrackedParameter(systemId, Integer.parseInt(channelUID.getId()));
     }
 
@@ -134,24 +137,28 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     @Override
     public void parametersUpdated(List<Parameter> parameterValues) {
         parameterValues.forEach(p -> {
-            String channelId = groupTypeProvider.getGroupFromID(p.getName()) + "#" + p.getName();
+            String channelId = groupTypeProvider.getChannelFromID(p.getName());
             Channel channel = thing.getChannel(channelId);
             if (channel != null) {
                 String itemType = channel.getAcceptedItemType();
+                if (itemType == null) {
+                    logger.warn("No item type defined for channel {}", channel.getUID());
+                    return;
+                }
                 State state;
                 switch (itemType) {
-                    case "Number":
-                        Object scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR);
-                        if (scalingFactor instanceof Number) {
-                            state = new DecimalType(p.getRawValue() / (double) scalingFactor );
-                        } else {
+                    case CoreItemFactory.NUMBER:
+                        String scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
+                        try {
+                            state = new DecimalType(p.getRawValue() / Double.parseDouble(scalingFactor));
+                        } catch (NumberFormatException e) {
                             state = new DecimalType(p.getRawValue());
                         }
                         break;
-                    case "Switch":
+                    case CoreItemFactory.SWITCH:
                         state = OnOffType.from(String.valueOf(p.getRawValue()));
                         break;
-                    case "String":
+                    case CoreItemFactory.STRING:
                         state = new StringType(p.getDisplayValue());
                         break;
                     default:
@@ -164,8 +171,8 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void systemUpdated(NibeSystem system) {
-        updateState("status#lastActivity", new DateTimeType(system.getLastActivityDate()));
-        updateState("status#hasAlarmed", OnOffType.from(system.hasAlarmed()));
+        updateState(CHANNEL_LAST_ACTIVITY, new DateTimeType(system.getLastActivityDate()));
+        updateState(CHANNEL_HAS_ALARMED, OnOffType.from(system.hasAlarmed()));
         if (system.getConnectionStatus() == ConnectionStatus.OFFLINE) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.NONE, "Nibe reports the system as offline");
         } else {
