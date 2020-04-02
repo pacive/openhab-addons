@@ -372,6 +372,13 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
                 } catch (RuntimeException e) {
                     logger.warn("{}", e.getMessage());
                 }
+            } else {
+                try {
+                    Request req = requests.createGetModeRequest(systemId);
+                    queuedRequests.add(req);
+                } catch (RuntimeException e) {
+                    logger.warn("{}", e.getMessage());
+                }
             }
         });
     }

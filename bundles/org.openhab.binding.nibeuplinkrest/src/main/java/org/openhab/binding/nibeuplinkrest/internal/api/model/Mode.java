@@ -46,4 +46,15 @@ public enum Mode {
         }
         throw new IllegalArgumentException();
     }
+
+    public int asInt() {
+        switch (this) {
+            case AWAY_FROM_HOME:
+                return 1;
+            case VACATION:
+                return 2;
+            default:
+                return 0;
+        }
+    }
 }

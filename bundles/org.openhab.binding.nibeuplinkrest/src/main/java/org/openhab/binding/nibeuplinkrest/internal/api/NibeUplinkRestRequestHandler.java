@@ -101,7 +101,9 @@ public class NibeUplinkRestRequestHandler {
 
     public Request createGetParametersRequest(int systemId, Set<Integer> parameterIds) {
         Request req = prepareRequest(HttpMethod.GET, API_PARAMETERS, systemId, RequestType.PARAMETER_GET);
-        req.param(API_QUERY_PARAMETER_IDS, StringConvert.toCommaList(parameterIds));
+        parameterIds.forEach(p -> {
+            req.param(API_QUERY_PARAMETER_IDS, p.toString());
+        });
         return req;
     }
 

@@ -41,8 +41,13 @@ public class NibeUplinkRestBindingConstants {
     public static final String CHANNEL_LAST_ACTIVITY_ID = "lastActivity";
     public static final String CHANNEL_HAS_ALARMED_ID = "hasAlarmed";
     public static final String CHANNEL_MODE_ID = "mode";
+    public static final String CHANNEL_SOFTWARE_UPDATE_ID = "softwareUpdate";
+    public static final String CHANNEL_LATEST_SOFTWARE_ID = "latestSoftware";
     public static final String CHANNEL_LAST_ACTIVITY = CHANNEL_GROUP_STATUS + CHANNEL_LAST_ACTIVITY_ID;
     public static final String CHANNEL_HAS_ALARMED = CHANNEL_GROUP_STATUS + CHANNEL_HAS_ALARMED_ID;
+    public static final String CHANNEL_SOFTWARE_UPDATE = CHANNEL_GROUP_STATUS + CHANNEL_SOFTWARE_UPDATE_ID;
+    public static final String CHANNEL_LATEST_SOFTWARE = CHANNEL_GROUP_STATUS + CHANNEL_LATEST_SOFTWARE_ID;
+    public static final String CHANNEL_MODE = CHANNEL_GROUP_CONTROL + CHANNEL_MODE_ID;
     public static final String CHANNEL_THERMOSTAT_CURRENT = "currentTemperature";
     public static final String CHANNEL_THERMOSTAT_TARGET = "targetTemperature";
     public static final ChannelGroupTypeUID CHANNEL_GROUP_TYPE_DEFAULT_CONTROL =
@@ -61,6 +66,10 @@ public class NibeUplinkRestBindingConstants {
             new ChannelTypeUID(BINDING_ID, CHANNEL_LAST_ACTIVITY_ID);
     public static final ChannelTypeUID CHANNEL_TYPE_HAS_ALARMED =
             new ChannelTypeUID(BINDING_ID, CHANNEL_HAS_ALARMED_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_SOFTWARE_UPDATE =
+            new ChannelTypeUID(BINDING_ID, CHANNEL_SOFTWARE_UPDATE_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_LATEST_SOFTWARE =
+            new ChannelTypeUID(BINDING_ID, CHANNEL_LATEST_SOFTWARE_ID);
     public static final String CHANNEL_PROPERTY_SCALING_FACTOR = "scalingFactor";
 
     // Fixed update intervals for scheduled tasks

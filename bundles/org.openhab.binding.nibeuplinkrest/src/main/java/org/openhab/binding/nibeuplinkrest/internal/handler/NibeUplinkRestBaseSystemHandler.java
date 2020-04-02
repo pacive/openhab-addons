@@ -167,7 +167,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                         String scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
                         if (scalingFactor != null) {
                             try {
-                                state = new DecimalType(p.getRawValue() / Integer.parseInt(scalingFactor));
+                                state = new DecimalType((double) p.getRawValue() / Integer.parseInt(scalingFactor));
                                 break;
                             } catch (NumberFormatException ignored) {}
                         }
@@ -200,11 +200,17 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void softwareUpdateAvailable(SoftwareInfo softwareInfo) {
-
+        if (softwareInfo.isUpgradeAvailable()) {
+            updateState(CHANNEL_SOFTWARE_UPDATE, OnOffType.ON);
+            updateState(CHANNEL_LATEST_SOFTWARE, new StringType(softwareInfo.getUpgradeAvailable().get("name")));
+        } else {
+            updateState(CHANNEL_SOFTWARE_UPDATE, OnOffType.OFF);
+            updateState(CHANNEL_LATEST_SOFTWARE, new StringType(softwareInfo.getCurrentVersion()));
+        }
     }
 
     @Override
     public void modeUpdated(Mode mode) {
-
+        updateState(CHANNEL_MODE, new DecimalType(mode.asInt()));
     }
 }
