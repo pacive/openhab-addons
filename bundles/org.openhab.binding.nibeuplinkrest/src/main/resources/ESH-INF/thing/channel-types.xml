@@ -81,21 +81,26 @@
 	<channel-type id="lastActivity">
 		<item-type>DateTime</item-type>
 		<label>Last update</label>
+		<description>Last time the system connected to Nibe uplink</description>
+		<state readOnly="true" />
 	</channel-type>
 	<channel-type id="hasAlarmed">
 		<item-type>Switch</item-type>
 		<label>Alarm</label>
 		<description>There is an active alarm on the system</description>
+		<state readOnly="true" />
 	</channel-type>
 	<channel-type id="softwareUpdate">
 		<item-type>Switch</item-type>
 		<label>Software update available</label>
 		<description>Indicates if there's a new software update for your system</description>
+		<state readOnly="true" />
 	</channel-type>
 	<channel-type id="latestSoftware">
 		<item-type>String</item-type>
 		<label>Latest software version</label>
 		<description>The latest software version for your system</description>
+		<state readOnly="true" />
 	</channel-type>
 
 	<channel-group-type id="default_control">
