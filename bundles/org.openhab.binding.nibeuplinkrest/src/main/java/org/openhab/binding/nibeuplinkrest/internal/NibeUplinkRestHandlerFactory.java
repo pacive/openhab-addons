@@ -59,7 +59,7 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
-        return SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID) || typeFactory.hasThingType(thingTypeUID);
+        return SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID) || thingTypeUID.getBindingId().equals(BINDING_ID);
     }
 
     @Override
@@ -75,8 +75,8 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
         if (THING_TYPE_THERMOSTAT.equals(thingTypeUID)) {
             return new NibeUplinkRestThermostatHandler(thing);
         }
-        if (typeFactory.hasThingType(thingTypeUID)) {
-            return new NibeUplinkRestBaseSystemHandler(thing);
+        if (thingTypeUID.getBindingId().equals(BINDING_ID)) {
+            return new NibeUplinkRestBaseSystemHandler(thing, typeFactory.getGroupTypeProvider());
         }
 
         return null;

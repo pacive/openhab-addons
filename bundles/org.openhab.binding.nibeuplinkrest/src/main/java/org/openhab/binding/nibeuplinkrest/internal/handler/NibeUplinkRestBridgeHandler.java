@@ -88,6 +88,11 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
                 config.updateInterval, config.softwareUpdateCheckInterval);
         updateStatus(ThingStatus.UNKNOWN);
         scheduler.execute(() -> {
+            logger.debug("Rebuilding thing-types");
+            nibeUplinkRestApi.getConnectedSystems().forEach(system -> {
+                List<Category> categories = nibeUplinkRestApi.getCategories(system.getSystemId(), true);
+                typeFactory.createThingType(system, categories);
+            });
             if (isAuthorized()) {
                 updateStatus(ThingStatus.ONLINE);
             }

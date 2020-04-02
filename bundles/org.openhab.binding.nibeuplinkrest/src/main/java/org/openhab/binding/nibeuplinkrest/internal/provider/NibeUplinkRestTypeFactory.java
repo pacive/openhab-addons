@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.BINDING_ID;
+import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -93,17 +93,25 @@ public class NibeUplinkRestTypeFactory {
     private @NonNullByDefault({}) NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider;
     private @NonNullByDefault({}) NibeUplinkRestChannelTypeProvider channelTypeProvider;
     private @NonNullByDefault({}) NibeUplinkRestThingTypeProvider thingTypeProvider;
+    private @NonNullByDefault({}) ChannelGroupTypeRegistry channelGroupTypeRegistry;
 
+    @Activate
     public NibeUplinkRestTypeFactory() {}
 
-    public ThingTypeUID createThingType(NibeSystem system, List<Category> categories) {
-        ThingTypeUID thingTypeUID = new ThingTypeUID(BINDING_ID,
-                StringUtils.deleteWhitespace(system.getProductName()).toLowerCase(Locale.ROOT));
+    public void createThingType(NibeSystem system, List<Category> categories) {
+        ChannelGroupType defaultControlGroup = channelGroupTypeRegistry.getChannelGroupType(
+                new ChannelGroupTypeUID(BINDING_ID, "default_control"));
+
         List<ChannelGroupDefinition> groupDefinitions = new ArrayList<>();
+        List<ChannelDefinition> controlChannels = new ArrayList<>();
+        controlChannels.addAll(defaultControlGroup.getChannelDefinitions());
 
         categories.forEach(c -> {
             if (c.getCategoryId().equals("SYSTEM_INFO")) {
                 return;
+            }
+            if (c.getCategoryId().startsWith("SYSTEM")) {
+                controlChannels.addAll(createHeatControlChannels(c.getCategoryId().substring(7)));
             }
             ChannelGroupType groupType = createChannelGroupType(c);
             channelGroupTypeProvider.add(groupType);
@@ -111,17 +119,27 @@ public class NibeUplinkRestTypeFactory {
             groupDefinitions.add(groupDefinition);
         });
 
+        ChannelGroupType controlChannelGroup = ChannelGroupTypeBuilder.instance(CHANNEL_GROUP_TYPE_CONTROL, "Control")
+                .withChannelDefinitions(controlChannels)
+                .build();
+
+        channelGroupTypeProvider.add(controlChannelGroup);
+        ChannelGroupDefinition controlChannelGroupDefinition = new ChannelGroupDefinition("control",
+                CHANNEL_GROUP_TYPE_CONTROL);
+        groupDefinitions.add(controlChannelGroupDefinition);
+
+        ThingTypeUID thingTypeUID = new ThingTypeUID(BINDING_ID,
+                StringUtils.deleteWhitespace(system.getProductName()).toLowerCase(Locale.ROOT));
+
         ThingType thingType = ThingTypeBuilder.instance(thingTypeUID, system.getProductName())
-                .withSupportedBridgeTypeUIDs(Collections.singletonList("apibridge"))
+                .withSupportedBridgeTypeUIDs(Collections.singletonList(THING_TYPE_APIBRIDGE.getAsString()))
                 .withChannelGroupDefinitions(groupDefinitions)
                 .withConfigDescriptionURI(SYSTEM_CONFIG)
-                .withLabel("System")
-                .withRepresentationProperty("systemId")
+                .withLabel(system.getProductName())
+                .withRepresentationProperty(PROPERTY_SYSTEM_ID)
                 .build();
 
         thingTypeProvider.addThingType(thingTypeUID, thingType);
-
-        return thingTypeUID;
     }
 
     private ChannelGroupType createChannelGroupType(Category category) {
@@ -135,13 +153,20 @@ public class NibeUplinkRestTypeFactory {
                     channelDefinitions.add(createChannelDefinition(type.getUID(), p));
                 });
 
+        if (category.getCategoryId().equals("STATUS")) {
+            channelDefinitions.add(
+                    new ChannelDefinitionBuilder("lastActivity", CHANNEL_TYPE_LAST_ACTIVITY).build()
+            );
+            channelDefinitions.add(
+                    new ChannelDefinitionBuilder("hasAlarmed", CHANNEL_TYPE_HAS_ALARMED).build()
+            );
+        }
 
-        ChannelGroupType channelGroupType = ChannelGroupTypeBuilder.instance(channelGroupTypeUID, category.getName())
+        return ChannelGroupTypeBuilder.instance(channelGroupTypeUID,
+                StringUtils.capitalize(category.getName()))
                 .withChannelDefinitions(channelDefinitions)
-                .isAdvanced(isCategoryAdvanced(category))
+                .isAdvanced(isCategoryAdvanced(category.getCategoryId()))
                 .build();
-
-        return channelGroupType;
     }
 
     private ChannelGroupDefinition createChannelGroupDefinition(ChannelGroupTypeUID uid) {
@@ -166,8 +191,21 @@ public class NibeUplinkRestTypeFactory {
 
         return new ChannelDefinitionBuilder(parameter.getName(), uid)
                 .withLabel(parameter.getTitle())
-                .withProperties(Collections.singletonMap("scalingFactor", Integer.toString(scalingFactor)))
+                .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR, Integer.toString(scalingFactor)))
                 .build();
+    }
+
+    private List<ChannelDefinition> createHeatControlChannels(String index) {
+        ChannelDefinition parAdjustHeat = new ChannelDefinitionBuilder(
+                "parAdjustHeat" + index, CHANNEL_TYPE_PARALLEL_ADJUST_HEAT).build();
+        ChannelDefinition parAdjustCool = new ChannelDefinitionBuilder(
+                "parAdjustCool" + index, CHANNEL_TYPE_PARALLEL_ADJUST_COOL).build();
+        ChannelDefinition targetTempHeat = new ChannelDefinitionBuilder(
+                "targetTempHeat" + index, CHANNEL_TYPE_TARGET_TEMP_HEAT).build();
+        ChannelDefinition targetTempCool = new ChannelDefinitionBuilder(
+                "targetTempCool" + index, CHANNEL_TYPE_TARGET_TEMP_COOL).build();
+
+        return Stream.of(parAdjustHeat, parAdjustCool, targetTempHeat, targetTempCool).collect(Collectors.toList());
     }
 
     private ParameterType getParameterType(Parameter parameter) {
@@ -230,8 +268,8 @@ public class NibeUplinkRestTypeFactory {
         return NO_SCALING;
     }
 
-    private boolean isCategoryAdvanced(Category category) {
-        return !STANDARD_CATEGORIES.contains(category.getCategoryId());
+    private boolean isCategoryAdvanced(String categoryId) {
+        return !STANDARD_CATEGORIES.contains(categoryId);
     }
 
     private String getItemType(ParameterType type) {
@@ -249,8 +287,9 @@ public class NibeUplinkRestTypeFactory {
         return thingTypeProvider.getThingType(thingTypeUID, null) != null;
     }
 
-    @Activate
-    public void activate() {}
+    public NibeUplinkRestChannelGroupTypeProvider getGroupTypeProvider() {
+        return channelGroupTypeProvider;
+    }
 
     @Reference
     protected void setChannelGroupTypeProvider(NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider) {
@@ -277,5 +316,14 @@ public class NibeUplinkRestTypeFactory {
 
     protected void unsetThingTypeProvider(NibeUplinkRestThingTypeProvider thingTypeProvider) {
         this.thingTypeProvider = null;
+    }
+
+    @Reference
+    protected void setChannelGroupTypeRegistry(ChannelGroupTypeRegistry channelGroupTypeRegistry) {
+        this.channelGroupTypeRegistry = channelGroupTypeRegistry;
+    }
+
+    protected void unsetChannelGroupTypeRegistry(ChannelGroupTypeRegistry channelGroupTypeRegistry) {
+        this.channelGroupTypeRegistry = null;
     }
 }

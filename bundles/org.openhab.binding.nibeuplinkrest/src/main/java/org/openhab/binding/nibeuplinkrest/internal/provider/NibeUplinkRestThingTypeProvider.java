@@ -52,7 +52,7 @@ public class NibeUplinkRestThingTypeProvider implements ThingTypeProvider {
     }
 
     public void addThingType(ThingTypeUID thingTypeUID, ThingType thingType) {
-        thingTypes.put(thingTypeUID, thingType);
+        thingTypes.putIfAbsent(thingTypeUID, thingType);
     }
 
     @Activate

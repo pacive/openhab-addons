@@ -78,7 +78,17 @@
 		<state min="5" max="35" step="0.5" />
 	</channel-type>
 
-	<channel-group-type id="control">
+	<channel-type id="lastActivity">
+		<item-type>DateTime</item-type>
+		<label>Last update</label>
+	</channel-type>
+	<channel-type id="hasAlarmed">
+		<item-type>Switch</item-type>
+		<label>Alarm</label>
+		<description>There is an active alarm on the system</description>
+	</channel-type>
+
+	<channel-group-type id="default_control">
 		<label>Control</label>
 		<description>Channels to control the operation of the system</description>
 		<channels>

@@ -13,7 +13,10 @@
 package org.openhab.binding.nibeuplinkrest.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.core.thing.ChannelGroupUID;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.eclipse.smarthome.core.thing.type.ChannelGroupTypeUID;
+import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
 
 /**
  * The {@link NibeUplinkRestBindingConstants} class defines common constants, which are
@@ -31,8 +34,23 @@ public class NibeUplinkRestBindingConstants {
     public static final ThingTypeUID THING_TYPE_SYSTEM = new ThingTypeUID(BINDING_ID, "system");
     public static final ThingTypeUID THING_TYPE_THERMOSTAT = new ThingTypeUID(BINDING_ID, "thermostat");
 
+    public static final ChannelGroupTypeUID CHANNEL_GROUP_TYPE_CONTROL =
+            new ChannelGroupTypeUID(BINDING_ID, "control");
+    public static final ChannelTypeUID CHANNEL_TYPE_PARALLEL_ADJUST_HEAT =
+            new ChannelTypeUID(BINDING_ID, "parallelAdjustmentHeating");
+    public static final ChannelTypeUID CHANNEL_TYPE_PARALLEL_ADJUST_COOL =
+            new ChannelTypeUID(BINDING_ID, "parallelAdjustmentCooling");
+    public static final ChannelTypeUID CHANNEL_TYPE_TARGET_TEMP_HEAT =
+            new ChannelTypeUID(BINDING_ID, "targetTemperatureHeating");
+    public static final ChannelTypeUID CHANNEL_TYPE_TARGET_TEMP_COOL =
+            new ChannelTypeUID(BINDING_ID, "targetTemperatureCooling");
+    public static final ChannelTypeUID CHANNEL_TYPE_LAST_ACTIVITY =
+            new ChannelTypeUID(BINDING_ID, "lastActivity");
+    public static final ChannelTypeUID CHANNEL_TYPE_HAS_ALARMED =
+            new ChannelTypeUID(BINDING_ID, "hasAlarmed");
     public static final String CHANNEL_THERMOSTAT_CURRENT = "currentTemperature";
     public static final String CHANNEL_THERMOSTAT_TARGET = "targetTemperature";
+    public static final String CHANNEL_PROPERTY_SCALING_FACTOR = "scalingFactor";
 
     public static final long THERMOSTAT_UPDATE_INTERVAL = 15;
     public static final long MODE_UPDATE_INTERVAL = THERMOSTAT_UPDATE_INTERVAL;

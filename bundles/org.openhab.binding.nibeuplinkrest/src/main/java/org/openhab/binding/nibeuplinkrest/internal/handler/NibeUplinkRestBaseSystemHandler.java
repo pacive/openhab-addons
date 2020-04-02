@@ -17,20 +17,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
-import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
-import org.eclipse.smarthome.core.thing.type.*;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestCallbackListener;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelGroupTypeProvider;
-import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelTypeProvider;
-import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -76,7 +70,6 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         }
         scheduler.execute(() -> {
             updateProperties();
-            addChannels();
             thing.getChannels().stream().filter(c -> isLinked(c.getUID())).forEach(c -> {
                 nibeUplinkRestApi.addTrackedParameter(systemId, Integer.parseInt(c.getUID().getIdWithoutGroup()));
             });
@@ -127,28 +120,6 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         properties.put(PROPERTY_HAS_VENTILATION, Boolean.toString(systemConfig.hasVentilation()));
         properties.put(PROPERTY_SOFTWARE_VERSION, softwareInfo.getCurrentVersion());
         updateProperties(properties);
-    }
-
-    private void addChannels() {
-        List<Category> categories = nibeUplinkRestApi.getCategories(config.systemId, true);
-        List<Channel> channels = new ArrayList<>();
-        for (Category category : categories) {
-            if (!category.getCategoryId().equals("SYSTEM_INFO")) {
-                String cg = StringConvert.snakeCaseToCamelCase(category.getCategoryId());
-                ChannelGroupTypeUID cgtid = new ChannelGroupTypeUID(BINDING_ID, cg);
-                ChannelGroupUID cgid = new ChannelGroupUID(thing.getUID(), cg);
-                getCallback().createChannelBuilders(cgid, cgtid).forEach(channelBuilder -> {
-                    Channel newChannel = channelBuilder.build();
-                    Channel existing = thing.getChannel(newChannel.getUID());
-                    if (existing == null) {
-                        channels.add(newChannel);
-                    }
-                        });
-            }
-        }
-        ThingBuilder thingBuilder = editThing();
-        channels.forEach(thingBuilder::withChannel);
-        updateThing(thingBuilder.build());
     }
 
     @Override

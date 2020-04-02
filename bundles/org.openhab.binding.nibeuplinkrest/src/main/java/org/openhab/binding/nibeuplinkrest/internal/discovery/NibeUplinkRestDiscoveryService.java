@@ -13,6 +13,7 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.discovery;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
@@ -22,17 +23,11 @@ import org.eclipse.smarthome.config.discovery.DiscoveryService;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
-import org.eclipse.smarthome.core.thing.type.*;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.Parameter;
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
-import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelGroupTypeProvider;
-import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelTypeProvider;
 import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestTypeFactory;
-import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +70,7 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
             logger.debug("Starting discovery");
             NibeUplinkRestApi connection = bridgeHandler.getApiConnection();
             connection.getConnectedSystems().forEach(system -> {
-                logger.debug("Found system wit id {}", system.getSystemId());
+                logger.debug("Found system with id {}", system.getSystemId());
                 List<Category> categories = connection.getCategories(system.getSystemId(), true);
                 thingDiscovered(system, categories);
             });
@@ -106,7 +101,12 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
         properties.put(PROPERTY_SECURITY_LEVEL, system.getSecurityLevel());
         properties.put(PROPERTY_SERIAL_NUMBER, system.getSerialNumber());
 
-        ThingTypeUID thingTypeUID = typeFactory.createThingType(system, categories);
+        ThingTypeUID thingTypeUID = new ThingTypeUID(BINDING_ID,
+                StringUtils.deleteWhitespace(system.getProductName()).toLowerCase(Locale.ROOT));
+
+        if (!typeFactory.hasThingType(thingTypeUID)) {
+            typeFactory.createThingType(system, categories);
+        }
 
         ThingUID thingUID = new ThingUID(thingTypeUID, bridgeUID,
                 Integer.toString(system.getSystemId()));
