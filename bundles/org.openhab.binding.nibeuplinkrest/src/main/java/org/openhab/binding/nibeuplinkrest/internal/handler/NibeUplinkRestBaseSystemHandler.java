@@ -14,10 +14,15 @@
 package org.openhab.binding.nibeuplinkrest.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.State;
+import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestCallbackListener;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
@@ -40,11 +45,13 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     private @NonNullByDefault({}) NibeUplinkRestApi nibeUplinkRestApi;
     private @NonNullByDefault({}) NibeUplinkRestBaseSystemConfiguration config;
     private @NonNullByDefault({}) int systemId;
+    private final NibeUplinkRestChannelGroupTypeProvider groupTypeProvider;
 
     private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestBaseSystemHandler.class);
 
-    public NibeUplinkRestBaseSystemHandler(Thing thing) {
+    public NibeUplinkRestBaseSystemHandler(Thing thing, NibeUplinkRestChannelGroupTypeProvider groupTypeProvider) {
         super(thing);
+        this.groupTypeProvider = groupTypeProvider;
     }
 
     @Override
@@ -84,7 +91,9 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     @Override
     public void channelLinked(ChannelUID channelUID) {
         super.channelLinked(channelUID);
-        nibeUplinkRestApi.addTrackedParameter(systemId, Integer.parseInt(channelUID.getIdWithoutGroup()));
+        try {
+            nibeUplinkRestApi.addTrackedParameter(systemId, Integer.parseInt(channelUID.getIdWithoutGroup()));
+        } catch (NumberFormatException ignored) {}
     }
 
     @Override
@@ -125,13 +134,43 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     @Override
     public void parametersUpdated(List<Parameter> parameterValues) {
         parameterValues.forEach(p -> {
-            updateState("STATUS#" + p.getName(), new DecimalType(p.getRawValue()));
+            String channelId = groupTypeProvider.getGroupFromID(p.getName()) + "#" + p.getName();
+            Channel channel = thing.getChannel(channelId);
+            if (channel != null) {
+                String itemType = channel.getAcceptedItemType();
+                State state;
+                switch (itemType) {
+                    case "Number":
+                        Object scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR);
+                        if (scalingFactor instanceof Number) {
+                            state = new DecimalType(p.getRawValue() / (double) scalingFactor );
+                        } else {
+                            state = new DecimalType(p.getRawValue());
+                        }
+                        break;
+                    case "Switch":
+                        state = OnOffType.from(String.valueOf(p.getRawValue()));
+                        break;
+                    case "String":
+                        state = new StringType(p.getDisplayValue());
+                        break;
+                    default:
+                        state = UnDefType.UNDEF;
+                }
+                updateState(channelId, state);
+            }
         });
     }
 
     @Override
     public void systemUpdated(NibeSystem system) {
-
+        updateState("status#lastActivity", new DateTimeType(system.getLastActivityDate()));
+        updateState("status#hasAlarmed", OnOffType.from(system.hasAlarmed()));
+        if (system.getConnectionStatus() == ConnectionStatus.OFFLINE) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.NONE, "Nibe reports the system as offline");
+        } else {
+            updateStatus(ThingStatus.ONLINE);
+        }
     }
 
     @Override
