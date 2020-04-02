@@ -258,7 +258,6 @@ public class NibeUplinkRestTypeFactory {
     private boolean isChannelAdvanced(ParameterType type) {
         switch (type) {
             case CURRENT:
-            case POWER:
             case STRING:
             case TIME_FACTOR:
                 return true;
