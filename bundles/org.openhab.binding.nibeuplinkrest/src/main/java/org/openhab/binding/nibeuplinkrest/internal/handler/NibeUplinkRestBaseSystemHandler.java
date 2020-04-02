@@ -168,7 +168,12 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                             state = UnDefType.UNDEF;
                             break;
                         }
-                        String scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
+                        String scalingFactor = "1";
+                        if (channel.getConfiguration().containsKey(CHANNEL_PROPERTY_SCALING_FACTOR)) {
+                            scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR).toString();
+                        } else {
+                            scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
+                        }
                         if (scalingFactor != null) {
                             try {
                                 state = new DecimalType((double) p.getRawValue() / Integer.parseInt(scalingFactor));

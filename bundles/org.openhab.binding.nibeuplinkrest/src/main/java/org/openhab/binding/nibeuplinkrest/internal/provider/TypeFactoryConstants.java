@@ -46,6 +46,15 @@ public class TypeFactoryConstants {
 
     public static final Pattern DOUBLE_PATTERN = Pattern.compile("(\\d+\\.?\\d*).*");
 
+    public static final int NO_SCALING = 1;
+    public static final int SCALE_FACTOR_TEN = 10;
+    public static final int SCALE_FACTOR_HUNDRED = 100;
+
+    public static final String PARALLEL_ADJUST_HEAT = "parAdjustHeat";
+    public static final String PARALLEL_ADJUST_COOL = "parAdjustCool";
+    public static final String TARGET_TEMP_HEAT = "targetTempHeat";
+    public static final String TARGET_TEMP_COOL = "targetTempCool";
+
     public static final Map<Integer, ParameterType> STATIC_PARAMETER_TYPE_MAPPINGS = Collections.unmodifiableMap(
             Stream.of(
                     new AbstractMap.SimpleEntry<>(43416, ParameterType.COUNTER),
@@ -64,15 +73,17 @@ public class TypeFactoryConstants {
             ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue))
     );
 
+    public static final Map<Integer, Integer> STATIC_SCALING_FACTORS = Collections.unmodifiableMap(
+            Stream.of(
+                    new AbstractMap.SimpleEntry<>(43125, SCALE_FACTOR_TEN),
+                    new AbstractMap.SimpleEntry<>(43136, SCALE_FACTOR_TEN)
+            ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue))
+    );
+
     public static final Set<String> STANDARD_CATEGORIES = Collections.unmodifiableSet(
             Stream.of("STATUS", "VENTILATION", "DEFROSTING", "SYSTEM_1", "SYSTEM_2", "SYSTEM_3", "SYSTEM_4", "SYSTEM_5",
                     "SYSTEM_6", "SYSTEM_7", "SYSTEM_8", "ADDITION", "GROUND_WATER_PUMP").collect(Collectors.toSet())
     );
-
-    public static final String PARALLEL_ADJUST_HEAT = "parAdjustHeat";
-    public static final String PARALLEL_ADJUST_COOL = "parAdjustCool";
-    public static final String TARGET_TEMP_HEAT = "targetTempHeat";
-    public static final String TARGET_TEMP_COOL = "targetTempCool";
 
     public static final Map<String, List<Integer>> HEAT_CONTROL_PARAMETERS = Collections.unmodifiableMap(
             Stream.of(
@@ -87,10 +98,6 @@ public class TypeFactoryConstants {
             ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue))
     );
 
-    public static final URI CHANNEL_CONFIG = URI.create("thing-type:nibeuplinkrest:channels");
+    public static final URI CHANNEL_CONFIG = URI.create("channel-type:nibeuplinkrest:channels");
     public static final URI SYSTEM_CONFIG = URI.create("thing-type:nibeuplinkrest:system");
-
-    public static final int NO_SCALING = 1;
-    public static final int SCALE_FACTOR_TEN = 10;
-    public static final int SCALE_FACTOR_HUNDRED = 100;
 }

@@ -108,8 +108,6 @@
 		<description>Channels to control the operation of the system</description>
 		<channels>
 			<channel id="mode" typeId="mode" />
-			<channel id="48132" typeId="hotWaterBoost" />
-			<channel id="47260" typeId="ventilationBoost" />
 		</channels>
 	</channel-group-type>
 

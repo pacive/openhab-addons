@@ -84,6 +84,7 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
         scheduler.execute(() -> {
             logger.debug("Rebuilding thing-types");
             nibeUplinkRestApi.getConnectedSystems().forEach(system -> {
+                system.setConfig(nibeUplinkRestApi.getSystemConfig(system.getSystemId()));
                 List<Category> categories = nibeUplinkRestApi.getCategories(system.getSystemId(), true);
                 typeFactory.createThingType(system, categories);
             });

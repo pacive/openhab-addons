@@ -64,14 +64,13 @@ public class NibeUplinkRestTypeFactory {
             if (c.getCategoryId().equals("SYSTEM_INFO")) {
                 return;
             }
-            if (c.getCategoryId().startsWith("SYSTEM")) {
-                controlChannels.addAll(createHeatControlChannels(c.getCategoryId().substring(7)));
-            }
             ChannelGroupType groupType = createChannelGroupType(c);
             channelGroupTypeProvider.add(groupType);
             ChannelGroupDefinition groupDefinition = createChannelGroupDefinition(groupType.getUID());
             groupDefinitions.add(groupDefinition);
         });
+
+        controlChannels.addAll(createHeatControlChannels(system, categories));
 
         ChannelGroupType controlChannelGroup = ChannelGroupTypeBuilder.instance(CHANNEL_GROUP_TYPE_CONTROL, "Control")
                 .withChannelDefinitions(controlChannels)
@@ -178,43 +177,68 @@ public class NibeUplinkRestTypeFactory {
         return Collections.emptyList();
     }
 
-    private List<ChannelDefinition> createHeatControlChannels(String index) {
-        ChannelType parAdjustHeatType = channelTypeRegistry.getChannelType(CHANNEL_TYPE_PARALLEL_ADJUST_HEAT);
-        ChannelType parAdjustCoolType = channelTypeRegistry.getChannelType(CHANNEL_TYPE_PARALLEL_ADJUST_COOL);
-        ChannelType targetTempHeatType = channelTypeRegistry.getChannelType(CHANNEL_TYPE_TARGET_TEMP_HEAT);
-        ChannelType targetTempCoolType = channelTypeRegistry.getChannelType(CHANNEL_TYPE_TARGET_TEMP_COOL);
+    private List<ChannelDefinition> createHeatControlChannels(NibeSystem system, List<Category> categories) {
+        ChannelType parAdjustHeat = channelTypeRegistry.getChannelType(CHANNEL_TYPE_PARALLEL_ADJUST_HEAT);
+        ChannelType parAdjustCool = channelTypeRegistry.getChannelType(CHANNEL_TYPE_PARALLEL_ADJUST_COOL);
+        ChannelType targetTempHeat = channelTypeRegistry.getChannelType(CHANNEL_TYPE_TARGET_TEMP_HEAT);
+        ChannelType targetTempCool = channelTypeRegistry.getChannelType(CHANNEL_TYPE_TARGET_TEMP_COOL);
+        ChannelType ventilationBoost = channelTypeRegistry.getChannelType(CHANNEL_TYPE_VENTILATION_BOOST);
+        ChannelType hotWaterBoost = channelTypeRegistry.getChannelType(CHANNEL_TYPE_HOT_WATER_BOOST);
 
-        if (parAdjustHeatType != null && parAdjustCoolType != null &&
-                targetTempHeatType != null && targetTempCoolType != null) {
-            ChannelDefinition parAdjustHeat = new ChannelDefinitionBuilder(
-                    String.valueOf(HEAT_CONTROL_PARAMETERS.get(PARALLEL_ADJUST_HEAT)
-                            .get(Integer.parseInt(index))), CHANNEL_TYPE_PARALLEL_ADJUST_HEAT)
-                    .withLabel("System " + index + " " + parAdjustHeatType.getLabel())
-                    .withDescription(parAdjustHeatType.getDescription())
-                    .build();
-            ChannelDefinition parAdjustCool = new ChannelDefinitionBuilder(
-                    String.valueOf(HEAT_CONTROL_PARAMETERS.get(PARALLEL_ADJUST_COOL)
-                            .get(Integer.parseInt(index))), CHANNEL_TYPE_PARALLEL_ADJUST_COOL)
-                    .withLabel("System " + index + " " + parAdjustCoolType.getLabel())
-                    .withDescription(parAdjustCoolType.getDescription())
-                    .build();
-            ChannelDefinition targetTempHeat = new ChannelDefinitionBuilder(
-                    String.valueOf(HEAT_CONTROL_PARAMETERS.get(TARGET_TEMP_HEAT)
-                            .get(Integer.parseInt(index))), CHANNEL_TYPE_TARGET_TEMP_HEAT)
-                    .withLabel("System " + index + " " + targetTempHeatType.getLabel())
-                    .withDescription(targetTempHeatType.getDescription())
-                    .build();
-            ChannelDefinition targetTempCool = new ChannelDefinitionBuilder(
-                    String.valueOf(HEAT_CONTROL_PARAMETERS.get(TARGET_TEMP_COOL)
-                            .get(Integer.parseInt(index))), CHANNEL_TYPE_TARGET_TEMP_COOL)
-                    .withLabel("System " + index + " " + targetTempCoolType.getLabel())
-                    .withDescription(targetTempCoolType.getDescription())
-                    .build();
+        List<ChannelDefinition> definitions = new ArrayList<>();
 
-            return Stream.of(parAdjustHeat, parAdjustCool, targetTempHeat, targetTempCool).collect(Collectors.toList());
-        } else {
-            return Collections.emptyList();
+        if (system.hasVentilation() && ventilationBoost != null) {
+            definitions.add(new ChannelDefinitionBuilder(
+                    CHANNEL_VENTILATION_BOOST_ID, CHANNEL_TYPE_VENTILATION_BOOST)
+                    .withLabel(ventilationBoost.getLabel())
+                    .withDescription(ventilationBoost.getDescription())
+                    .build());
         }
+        if (system.hasHotWater() && hotWaterBoost != null) {
+            definitions.add(new ChannelDefinitionBuilder(
+                    CHANNEL_HOT_WATER_BOOST_ID, CHANNEL_TYPE_HOT_WATER_BOOST)
+                    .withLabel(hotWaterBoost.getLabel())
+                    .withDescription(hotWaterBoost.getDescription())
+                    .build());
+        }
+        categories.forEach(c -> {
+            if (c.getCategoryId().startsWith("SYSTEM") && !c.getCategoryId().equals("SYSTEM_INFO")) {
+                int index = Integer.parseInt(c.getCategoryId().substring(7));
+                if (system.hasHeating() && parAdjustHeat != null && targetTempHeat != null) {
+                    definitions.add(new ChannelDefinitionBuilder(
+                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(PARALLEL_ADJUST_HEAT)
+                                    .get(index)), CHANNEL_TYPE_PARALLEL_ADJUST_HEAT)
+                            .withLabel("System " + index + " " + parAdjustHeat.getLabel())
+                            .withDescription(parAdjustHeat.getDescription())
+                            .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR,
+                                    Integer.toString(SCALE_FACTOR_TEN)))
+                            .build());
+                    definitions.add(new ChannelDefinitionBuilder(
+                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(TARGET_TEMP_HEAT)
+                                    .get(index)), CHANNEL_TYPE_TARGET_TEMP_HEAT)
+                            .withLabel("System " + index + " " + targetTempHeat.getLabel())
+                            .withDescription(targetTempHeat.getDescription())
+                            .build());
+                }
+                if (system.hasCooling() && parAdjustCool != null && targetTempCool != null) {
+                    definitions.add(new ChannelDefinitionBuilder(
+                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(PARALLEL_ADJUST_COOL)
+                                    .get(index)), CHANNEL_TYPE_PARALLEL_ADJUST_COOL)
+                            .withLabel("System " + index + " " + parAdjustCool.getLabel())
+                            .withDescription(parAdjustCool.getDescription())
+                            .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR,
+                                    Integer.toString(SCALE_FACTOR_TEN)))
+                            .build());
+                    definitions.add(new ChannelDefinitionBuilder(
+                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(TARGET_TEMP_COOL)
+                                    .get(index)), CHANNEL_TYPE_TARGET_TEMP_COOL)
+                            .withLabel("System " + index + " " + targetTempCool.getLabel())
+                            .withDescription(targetTempCool.getDescription())
+                            .build());
+                }
+            }
+        });
+        return definitions;
     }
 
     private ParameterType getParameterType(Parameter parameter) {
@@ -249,6 +273,9 @@ public class NibeUplinkRestTypeFactory {
     }
 
     private int getScalingFactor(Parameter parameter, ParameterType type) {
+        if (STATIC_SCALING_FACTORS.containsKey(parameter.getParameterId())) {
+            return STATIC_SCALING_FACTORS.get(parameter.getParameterId());
+        }
         switch (type) {
             case TEMPERATURE:
             case DEGREEMINUTES:

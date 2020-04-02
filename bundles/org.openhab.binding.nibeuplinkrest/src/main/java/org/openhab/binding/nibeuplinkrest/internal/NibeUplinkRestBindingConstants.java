@@ -43,6 +43,8 @@ public class NibeUplinkRestBindingConstants {
     public static final String CHANNEL_MODE_ID = "mode";
     public static final String CHANNEL_SOFTWARE_UPDATE_ID = "softwareUpdate";
     public static final String CHANNEL_LATEST_SOFTWARE_ID = "latestSoftware";
+    public static final String CHANNEL_VENTILATION_BOOST_ID = "ventilationBoost";
+    public static final String CHANNEL_HOT_WATER_BOOST_ID = "hotWaterBoost";
     public static final String CHANNEL_LAST_ACTIVITY = CHANNEL_GROUP_STATUS + CHANNEL_LAST_ACTIVITY_ID;
     public static final String CHANNEL_HAS_ALARMED = CHANNEL_GROUP_STATUS + CHANNEL_HAS_ALARMED_ID;
     public static final String CHANNEL_SOFTWARE_UPDATE = CHANNEL_GROUP_STATUS + CHANNEL_SOFTWARE_UPDATE_ID;
@@ -62,6 +64,10 @@ public class NibeUplinkRestBindingConstants {
             new ChannelTypeUID(BINDING_ID, "targetTemperatureHeating");
     public static final ChannelTypeUID CHANNEL_TYPE_TARGET_TEMP_COOL =
             new ChannelTypeUID(BINDING_ID, "targetTemperatureCooling");
+    public static final ChannelTypeUID CHANNEL_TYPE_VENTILATION_BOOST =
+            new ChannelTypeUID(BINDING_ID, "ventilationBoost");
+    public static final ChannelTypeUID CHANNEL_TYPE_HOT_WATER_BOOST =
+            new ChannelTypeUID(BINDING_ID, "hotWaterBoost");
     public static final ChannelTypeUID CHANNEL_TYPE_LAST_ACTIVITY =
             new ChannelTypeUID(BINDING_ID, CHANNEL_LAST_ACTIVITY_ID);
     public static final ChannelTypeUID CHANNEL_TYPE_HAS_ALARMED =
