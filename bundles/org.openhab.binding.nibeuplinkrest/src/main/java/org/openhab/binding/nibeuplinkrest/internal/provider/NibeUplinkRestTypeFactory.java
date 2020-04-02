@@ -135,6 +135,8 @@ public class NibeUplinkRestTypeFactory {
                 type.toString().toLowerCase(Locale.ROOT), getItemType(type))
                 .withConfigDescriptionURI(CHANNEL_CONFIG)
                 .isAdvanced(isChannelAdvanced(type))
+                .withStateDescription(StateDescriptionFragmentBuilder.create()
+                        .withReadOnly(true).build().toStateDescription())
                 .build();
     }
 
