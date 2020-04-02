@@ -13,11 +13,15 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.provider;
 
+import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
+import static org.openhab.binding.nibeuplinkrest.internal.provider.TypeFactoryConstants.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.type.*;
+import org.eclipse.smarthome.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Parameter;
@@ -26,15 +30,10 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import java.net.URI;
 import java.util.*;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -42,55 +41,6 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 @Component(immediate = true, service = { NibeUplinkRestTypeFactory.class })
 @NonNullByDefault
 public class NibeUplinkRestTypeFactory {
-
-    private enum ParameterType {
-        TEMPERATURE,
-        CURRENT,
-        DEGREEMINUTES,
-        BOOLEAN,
-        POWER,
-        AIRFLOW,
-        TIME_H,
-        TIME_S,
-        TIME_FACTOR,
-        PERCENT,
-        FREQUENCY,
-        COUNTER,
-        STRING,
-        OTHER
-    }
-
-    private static final Pattern DOUBLE_PATTERN = Pattern.compile("(\\d+\\.?\\d*).*");
-
-    private static final Map<Integer, ParameterType> STATIC_PARAMETER_TYPE_MAPPINGS = Collections.unmodifiableMap(
-            Stream.of(
-                    new SimpleEntry<>(43416, ParameterType.COUNTER),
-                    new SimpleEntry<>(43371, ParameterType.BOOLEAN),
-                    new SimpleEntry<>(43372, ParameterType.BOOLEAN),
-                    new SimpleEntry<>(43064, ParameterType.TEMPERATURE),
-                    new SimpleEntry<>(43065, ParameterType.TEMPERATURE),
-                    new SimpleEntry<>(43124, ParameterType.AIRFLOW),
-                    new SimpleEntry<>(40050, ParameterType.AIRFLOW),
-                    new SimpleEntry<>(47407, ParameterType.STRING),
-                    new SimpleEntry<>(47408, ParameterType.STRING),
-                    new SimpleEntry<>(47409, ParameterType.STRING),
-                    new SimpleEntry<>(47410, ParameterType.STRING),
-                    new SimpleEntry<>(47411, ParameterType.STRING),
-                    new SimpleEntry<>(47412, ParameterType.STRING)
-            ).collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue))
-    );
-
-    private static final Set<String> STANDARD_CATEGORIES = Collections.unmodifiableSet(
-            Stream.of("STATUS", "VENTILATION", "DEFROSTING", "SYSTEM_1", "SYSTEM_2", "SYSTEM_3", "SYSTEM_4", "SYSTEM_5",
-                    "SYSTEM_6", "SYSTEM_7", "SYSTEM_8", "ADDITION", "GROUND_WATER_PUMP").collect(Collectors.toSet())
-    );
-
-    private static final URI CHANNEL_CONFIG = URI.create("thing-type:nibeuplinkrest:channels");
-    private static final URI SYSTEM_CONFIG = URI.create("thing-type:nibeuplinkrest:system");
-
-    private static final int NO_SCALING = 1;
-    private static final int SCALE_FACTOR_TEN = 10;
-    private static final int SCALE_FACTOR_HUNDRED = 100;
 
     private @NonNullByDefault({}) NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider;
     private @NonNullByDefault({}) NibeUplinkRestChannelTypeProvider channelTypeProvider;
@@ -207,22 +157,26 @@ public class NibeUplinkRestTypeFactory {
         if (parAdjustHeatType != null && parAdjustCoolType != null &&
                 targetTempHeatType != null && targetTempCoolType != null) {
             ChannelDefinition parAdjustHeat = new ChannelDefinitionBuilder(
-                    CHANNEL_PARALLEL_ADJUST_HEAT_ID + index, CHANNEL_TYPE_PARALLEL_ADJUST_HEAT)
+                    String.valueOf(HEAT_CONTROL_PARAMETERS.get(PARALLEL_ADJUST_HEAT)
+                            .get(Integer.parseInt(index))), CHANNEL_TYPE_PARALLEL_ADJUST_HEAT)
                     .withLabel("System " + index + " " + parAdjustHeatType.getLabel())
                     .withDescription(parAdjustHeatType.getDescription())
                     .build();
             ChannelDefinition parAdjustCool = new ChannelDefinitionBuilder(
-                    CHANNEL_PARALLEL_ADJUST_COOL_ID + index, CHANNEL_TYPE_PARALLEL_ADJUST_COOL)
+                    String.valueOf(HEAT_CONTROL_PARAMETERS.get(PARALLEL_ADJUST_COOL)
+                            .get(Integer.parseInt(index))), CHANNEL_TYPE_PARALLEL_ADJUST_COOL)
                     .withLabel("System " + index + " " + parAdjustCoolType.getLabel())
                     .withDescription(parAdjustCoolType.getDescription())
                     .build();
             ChannelDefinition targetTempHeat = new ChannelDefinitionBuilder(
-                    CHANNEL_TARGET_TEMP_HEAT_ID + index, CHANNEL_TYPE_TARGET_TEMP_HEAT)
+                    String.valueOf(HEAT_CONTROL_PARAMETERS.get(TARGET_TEMP_HEAT)
+                            .get(Integer.parseInt(index))), CHANNEL_TYPE_TARGET_TEMP_HEAT)
                     .withLabel("System " + index + " " + targetTempHeatType.getLabel())
                     .withDescription(targetTempHeatType.getDescription())
                     .build();
             ChannelDefinition targetTempCool = new ChannelDefinitionBuilder(
-                    CHANNEL_TARGET_TEMP_COOL_ID + index, CHANNEL_TYPE_TARGET_TEMP_COOL)
+                    String.valueOf(HEAT_CONTROL_PARAMETERS.get(TARGET_TEMP_COOL)
+                            .get(Integer.parseInt(index))), CHANNEL_TYPE_TARGET_TEMP_COOL)
                     .withLabel("System " + index + " " + targetTempCoolType.getLabel())
                     .withDescription(targetTempCoolType.getDescription())
                     .build();

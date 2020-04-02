@@ -35,15 +35,13 @@ public class NibeUplinkRestBindingConstants {
 
     // Standard channel groups and channels
     public static final String CHANNEL_GROUP_STATUS_ID = "status";
+    public static final String CHANNEL_GROUP_STATUS = CHANNEL_GROUP_STATUS_ID + "#";
     public static final String CHANNEL_GROUP_CONTROL_ID = "control";
-    public static final String CHANNEL_PARALLEL_ADJUST_HEAT_ID = "parAdjustHeat";
-    public static final String CHANNEL_PARALLEL_ADJUST_COOL_ID = "parAdjustCool";
-    public static final String CHANNEL_TARGET_TEMP_HEAT_ID = "targetTempHeat";
-    public static final String CHANNEL_TARGET_TEMP_COOL_ID = "targetTempCool";
+    public static final String CHANNEL_GROUP_CONTROL = CHANNEL_GROUP_CONTROL_ID + "#";
     public static final String CHANNEL_LAST_ACTIVITY_ID = "lastActivity";
     public static final String CHANNEL_HAS_ALARMED_ID = "hasAlarmed";
-    public static final String CHANNEL_LAST_ACTIVITY = CHANNEL_GROUP_STATUS_ID + "#" + CHANNEL_LAST_ACTIVITY_ID;
-    public static final String CHANNEL_HAS_ALARMED = CHANNEL_GROUP_STATUS_ID + "#" + CHANNEL_HAS_ALARMED_ID;
+    public static final String CHANNEL_LAST_ACTIVITY = CHANNEL_GROUP_STATUS + CHANNEL_LAST_ACTIVITY_ID;
+    public static final String CHANNEL_HAS_ALARMED = CHANNEL_GROUP_STATUS + CHANNEL_HAS_ALARMED_ID;
     public static final String CHANNEL_THERMOSTAT_CURRENT = "currentTemperature";
     public static final String CHANNEL_THERMOSTAT_TARGET = "targetTemperature";
     public static final ChannelGroupTypeUID CHANNEL_GROUP_TYPE_DEFAULT_CONTROL =
