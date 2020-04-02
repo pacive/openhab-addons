@@ -40,6 +40,7 @@ public class NibeUplinkRestBindingConstants {
     public static final String CHANNEL_GROUP_CONTROL = CHANNEL_GROUP_CONTROL_ID + "#";
     public static final String CHANNEL_LAST_ACTIVITY_ID = "lastActivity";
     public static final String CHANNEL_HAS_ALARMED_ID = "hasAlarmed";
+    public static final String CHANNEL_MODE_ID = "mode";
     public static final String CHANNEL_LAST_ACTIVITY = CHANNEL_GROUP_STATUS + CHANNEL_LAST_ACTIVITY_ID;
     public static final String CHANNEL_HAS_ALARMED = CHANNEL_GROUP_STATUS + CHANNEL_HAS_ALARMED_ID;
     public static final String CHANNEL_THERMOSTAT_CURRENT = "currentTemperature";

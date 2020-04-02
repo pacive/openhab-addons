@@ -31,6 +31,7 @@ import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChanne
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +58,22 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        //TODO: handle commands
+        String groupId = channelUID.getGroupId();
+        String channelId = channelUID.getIdWithoutGroup();
+        if (groupId.equals(CHANNEL_GROUP_CONTROL_ID)) {
+            if (channelId.equals(CHANNEL_MODE_ID) && command instanceof StringType) {
+                nibeUplinkRestApi.setMode(systemId, Mode.from(command.toFullString()));
+            } else if (command instanceof DecimalType) {
+                try {
+                    Map<Integer, Integer> parameter = new HashMap<>();
+                    parameter.put(Integer.parseInt(channelId), ((DecimalType) command).intValue());
+                    nibeUplinkRestApi.setParameters(systemId, parameter);
+                } catch (Exception e) {
+                    logger.warn("Failed to send command to channel {} with value {}. Reason: {}",
+                            channelId, command.toFullString(), e.getMessage());
+                }
+            }
+        }
     }
 
     @Override
@@ -149,11 +165,13 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                 switch (itemType) {
                     case CoreItemFactory.NUMBER:
                         String scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
-                        try {
-                            state = new DecimalType(p.getRawValue() / Double.parseDouble(scalingFactor));
-                        } catch (NumberFormatException e) {
-                            state = new DecimalType(p.getRawValue());
+                        if (scalingFactor != null) {
+                            try {
+                                state = new DecimalType(p.getRawValue() / Integer.parseInt(scalingFactor));
+                                break;
+                            } catch (NumberFormatException ignored) {}
                         }
+                        state = new DecimalType(p.getRawValue());
                         break;
                     case CoreItemFactory.SWITCH:
                         state = OnOffType.from(String.valueOf(p.getRawValue()));
