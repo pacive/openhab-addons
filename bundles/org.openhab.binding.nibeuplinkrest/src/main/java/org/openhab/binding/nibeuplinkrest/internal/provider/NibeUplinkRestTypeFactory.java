@@ -259,14 +259,14 @@ public class NibeUplinkRestTypeFactory {
                                     .get(index)), CHANNEL_TYPE_PARALLEL_ADJUST_HEAT)
                             .withLabel("System " + index + " " + parAdjustHeat.getLabel())
                             .withDescription(parAdjustHeat.getDescription())
-                            .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR,
-                                    Integer.toString(SCALE_FACTOR_TEN)))
                             .build());
                     definitions.add(new ChannelDefinitionBuilder(
                             String.valueOf(HEAT_CONTROL_PARAMETERS.get(TARGET_TEMP_HEAT)
                                     .get(index)), CHANNEL_TYPE_TARGET_TEMP_HEAT)
                             .withLabel("System " + index + " " + targetTempHeat.getLabel())
                             .withDescription(targetTempHeat.getDescription())
+                            .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR,
+                                    Integer.toString(SCALE_FACTOR_TEN)))
                             .build());
                 }
                 // Add cooling control if the system has cooling
@@ -276,14 +276,14 @@ public class NibeUplinkRestTypeFactory {
                                     .get(index)), CHANNEL_TYPE_PARALLEL_ADJUST_COOL)
                             .withLabel("System " + index + " " + parAdjustCool.getLabel())
                             .withDescription(parAdjustCool.getDescription())
-                            .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR,
-                                    Integer.toString(SCALE_FACTOR_TEN)))
                             .build());
                     definitions.add(new ChannelDefinitionBuilder(
                             String.valueOf(HEAT_CONTROL_PARAMETERS.get(TARGET_TEMP_COOL)
                                     .get(index)), CHANNEL_TYPE_TARGET_TEMP_COOL)
                             .withLabel("System " + index + " " + targetTempCool.getLabel())
                             .withDescription(targetTempCool.getDescription())
+                            .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR,
+                                    Integer.toString(SCALE_FACTOR_TEN)))
                             .build());
                 }
             }

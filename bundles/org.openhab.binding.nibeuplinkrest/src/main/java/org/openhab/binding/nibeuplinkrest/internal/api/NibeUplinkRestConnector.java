@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.smarthome.core.auth.client.oauth2.*;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestHttpException;
@@ -165,7 +166,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             if (listeners.get(systemId) == null) {
                 logger.debug("No listener for system {} adding tracked parameters anyway.", systemId);
             }
-            systemTrackedParameters = new HashSet<>();
+            systemTrackedParameters = new ConcurrentHashSet<>();
             trackedParameters.putIfAbsent(systemId, systemTrackedParameters);
         }
         if (systemTrackedParameters.add(parameterId)) {
@@ -186,10 +187,25 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     @Override
+    public List<Parameter> getParameters(int systemId, Set<Integer> parameterIds) {
+        logger.debug("Getting parameters: {}", parameterIds);
+        Request req = requests.createGetParametersRequest(systemId, parameterIds);
+        return parseParameterList(requests.makeRequest(req));
+    }
+
+    @Override
     public void setParameters(int systemId, Map<Integer, Integer> parameters) {
         logger.debug("Setting parameters: {}", parameters);
         Request req = requests.createSetParametersRequest(systemId, parameters);
         requests.makeRequest(req);
+    }
+
+    @Override
+    public Mode getMode(int systemId) {
+        logger.debug("Requesting mode from Nibe uplink");
+        Request req = requests.createGetModeRequest(systemId);
+        String resp = requests.makeRequest(req);
+        return parseMode(resp);
     }
 
     @Override
@@ -330,7 +346,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
                 Iterator<Integer> i = parameterSet.iterator();
                 int counter = 0;
                 Set<Integer> parameters = new HashSet<>();
-                // Only 15 parameter are allowed in each request, so queue as many as necessary
+                // Only 15 parameter are allowed in each request, iterate through the tracked parameters
+                // and queue one request per 15.
                 while (i.hasNext()) {
                     parameters.add(i.next());
                     counter++;
@@ -391,13 +408,6 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
                 } catch (RuntimeException e) {
                     logger.warn("{}", e.getMessage());
                 }
-            } else {
-                try {
-                    Request req = requests.createGetModeRequest(systemId);
-                    queuedRequests.add(req);
-                } catch (RuntimeException e) {
-                    logger.warn("{}", e.getMessage());
-                }
             }
         });
     }
@@ -447,6 +457,11 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
 
         if (listener == null) {
             logger.debug("No listener for systemId {}", systemId);
+            return;
+        }
+
+        // If mode has been reset to default, don't send.
+        if (requestType == RequestType.MODE_SET && modes.get(systemId) == null) {
             return;
         }
 

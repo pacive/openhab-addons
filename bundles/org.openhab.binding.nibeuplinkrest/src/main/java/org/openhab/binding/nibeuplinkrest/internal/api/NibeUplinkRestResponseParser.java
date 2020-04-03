@@ -43,6 +43,19 @@ public class NibeUplinkRestResponseParser {
     }
 
     /**
+     * Custom deserializer to handle Mode
+     */
+    @NonNullByDefault
+    private static class ModeDeserializer implements JsonDeserializer<Mode> {
+        @Override
+        public Mode deserialize(@Nullable JsonElement json, @Nullable Type type,
+                                         @Nullable JsonDeserializationContext jsonDeserializationContext)
+                throws JsonParseException {
+            return Mode.from(json.getAsJsonObject().get("mode").getAsString());
+        }
+    }
+
+    /**
      * Custom deserializer to get system info in a nested json object
      */
     @NonNullByDefault
@@ -59,8 +72,25 @@ public class NibeUplinkRestResponseParser {
         }
     }
 
+    @NonNullByDefault
+    private static class SoftwareInfoDeserializer implements JsonDeserializer<SoftwareInfo> {
+
+        @Override
+        public SoftwareInfo deserialize(@Nullable JsonElement json, @Nullable Type type,
+                                            @Nullable JsonDeserializationContext jsonDeserializationContext)
+                throws JsonParseException {
+            JsonElement current = json.getAsJsonObject().get("current").getAsJsonObject().get("name");
+            JsonElement upgrade = json.getAsJsonObject().get("upgrade");
+            String upgradeVersion = upgrade.isJsonNull() ? null : upgrade.getAsJsonObject().get("name").getAsString();
+
+            return new SoftwareInfo(current.getAsString(), upgradeVersion);
+        }
+    }
+
     private static Gson gson = new GsonBuilder()
             .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeDeserializer())
+            .registerTypeAdapter(Mode.class, new ModeDeserializer())
+            .registerTypeAdapter(SoftwareInfo.class, new SoftwareInfoDeserializer())
             .registerTypeAdapter(new TypeToken<List<NibeSystem>>(){}.getType(), new NibeSystemListDeserializer())
             .create();
 

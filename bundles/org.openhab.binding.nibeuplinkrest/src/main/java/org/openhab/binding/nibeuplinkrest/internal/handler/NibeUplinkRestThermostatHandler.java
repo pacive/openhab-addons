@@ -79,7 +79,7 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
                     break;
             }
         }
-        Thermostat thermostat = new Thermostat(config.id, config.name, config.getClimateSystems(),
+        Thermostat thermostat = new Thermostat(config.id, config.name, config.climateSystems,
                     currentTemperature, targetTemperature);
         nibeUplinkRestApi.setThermostat(config.systemId, thermostat);
     }

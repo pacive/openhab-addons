@@ -22,6 +22,7 @@ import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
@@ -31,6 +32,7 @@ import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChanne
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,8 +64,29 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     public void handleCommand(ChannelUID channelUID, Command command) {
         String groupId = channelUID.getGroupId();
         String channelId = channelUID.getIdWithoutGroup();
-        // Only channels in the control channel group can be commanded
-        if (groupId.equals(CHANNEL_GROUP_CONTROL_ID)) {
+        if (command == RefreshType.REFRESH) {
+            switch (channelId) {
+                case CHANNEL_MODE_ID:
+                    modeUpdated(nibeUplinkRestApi.getMode(systemId));
+                    break;
+                case CHANNEL_LAST_ACTIVITY_ID:
+                case CHANNEL_HAS_ALARMED_ID:
+                    systemUpdated(nibeUplinkRestApi.getSystem(systemId));
+                    break;
+                case CHANNEL_SOFTWARE_UPDATE_ID:
+                case CHANNEL_LATEST_SOFTWARE_ID:
+                    softwareUpdateAvailable(nibeUplinkRestApi.getSoftwareInfo(systemId));
+                    break;
+                default:
+                    try {
+                        parametersUpdated(nibeUplinkRestApi.getParameters(systemId,
+                                Collections.singleton(Integer.parseInt(channelId))));
+                    } catch (NumberFormatException e) {
+                        logger.warn("Failed to update channel {}", channelId);
+                    }
+            }
+        } else if (groupId.equals(CHANNEL_GROUP_CONTROL_ID)) {
+            // Only channels in the control channel group can be commanded
             if (channelId.equals(CHANNEL_MODE_ID) && command instanceof StringType) {
                 nibeUplinkRestApi.setMode(systemId, Mode.from(command.toFullString()));
                 // All channels except for mode accept numbers as command
@@ -227,7 +250,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     public void softwareUpdateAvailable(SoftwareInfo softwareInfo) {
         if (softwareInfo.isUpgradeAvailable()) {
             updateState(CHANNEL_SOFTWARE_UPDATE, OnOffType.ON);
-            updateState(CHANNEL_LATEST_SOFTWARE, new StringType(softwareInfo.getUpgradeAvailable().get("name")));
+            updateState(CHANNEL_LATEST_SOFTWARE, new StringType(softwareInfo.getUpgradeAvailable()));
         } else {
             updateState(CHANNEL_SOFTWARE_UPDATE, OnOffType.OFF);
             updateState(CHANNEL_LATEST_SOFTWARE, new StringType(softwareInfo.getCurrentVersion()));
@@ -236,6 +259,6 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void modeUpdated(Mode mode) {
-        updateState(CHANNEL_MODE, new DecimalType(mode.asInt()));
+        updateState(CHANNEL_MODE, new StringType(mode.toString()));
     }
 }

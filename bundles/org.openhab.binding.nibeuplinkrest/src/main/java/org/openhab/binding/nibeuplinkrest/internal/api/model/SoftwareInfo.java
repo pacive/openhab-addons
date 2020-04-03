@@ -26,20 +26,20 @@ import java.util.Map;
 @NonNullByDefault
 public class SoftwareInfo {
     private String currentVersion;
-    private @Nullable Map<String, String> upgrade;
+    private @Nullable String upgrade;
 
-    public SoftwareInfo(String currentVersion, @Nullable Map<String, String> upgrade) {
+    public SoftwareInfo(String currentVersion, @Nullable String upgrade) {
         this.currentVersion = currentVersion;
         this.upgrade = upgrade;
     }
 
     public void setCurrentVersion(String currentVersion) { this.currentVersion = currentVersion; }
 
-    public void setUpgradeAvailable(Map<String, String> upgrade) { this.upgrade = upgrade; }
+    public void setUpgradeAvailable(String upgrade) { this.upgrade = upgrade; }
 
     public String getCurrentVersion() { return currentVersion; }
 
-    public @Nullable Map<String, String> getUpgradeAvailable() { return upgrade; }
+    public @Nullable String getUpgradeAvailable() { return upgrade; }
 
     public boolean isUpgradeAvailable() { return upgrade != null; }
 }

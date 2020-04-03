@@ -20,9 +20,20 @@
 			<label>Thermostat name</label>
 			<description>A short descriptive name of the thermostat (e.g. "Ground Floor" or "Bedroom")</description>
 		</parameter>
-		<parameter name="climateSystems" type="text">
+		<parameter name="climateSystems" type="integer" multiple="true">
 			<label>ClimateSystems</label>
 			<description>A comma-separated list of the heating systems this thermostat controls</description>
+			<multipleLimit>8</multipleLimit>
+			<options>
+				<option value="1">Climate system 1</option>
+				<option value="2">Climate system 2</option>
+				<option value="3">Climate system 3</option>
+				<option value="4">Climate system 4</option>
+				<option value="5">Climate system 5</option>
+				<option value="6">Climate system 6</option>
+				<option value="7">Climate system 7</option>
+				<option value="8">Climate system 8</option>
+			</options>
 		</parameter>
 	</config-description>
 </config-description:config-descriptions>

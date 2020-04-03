@@ -18,6 +18,7 @@ import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The interface between the handlers and the classes that handles the http requests to and responses
@@ -84,7 +85,21 @@ public interface NibeUplinkRestApi {
      * @param systemId Id of the system
      * @param parameters A {@link Map} of parameters and corresponding values to be set
      */
+    List<Parameter> getParameters(int systemId, Set<Integer> parameterIds);
+
+    /**
+     * Set writeable parameters to a specified value
+     * @param systemId Id of the system
+     * @param parameters A {@link Map} of parameters and corresponding values to be set
+     */
     void setParameters(int systemId, Map<Integer, Integer> parameters);
+
+    /**
+     * Gets the system operating mode - Default, away or vacation
+     * @param systemId Id of the system
+     * @return A {@link Mode} enum
+     */
+    Mode getMode(int systemId);
 
     /**
      * Set the system operating mode - Default, away or vacation

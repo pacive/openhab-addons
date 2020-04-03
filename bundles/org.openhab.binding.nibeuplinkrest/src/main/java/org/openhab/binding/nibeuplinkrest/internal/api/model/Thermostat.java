@@ -16,7 +16,7 @@ import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Class representing a virtual thermostat that can affect the system
@@ -28,11 +28,11 @@ public class Thermostat {
     @SerializedName("externalId")
     private final int id;
     private final String name;
-    private @Nullable Set<Integer> climateSystems;
+    private @Nullable List<Integer> climateSystems;
     private @Nullable Integer currentTemperature;
     private @Nullable Integer targetTemperature;
 
-    public Thermostat(int id, String name, @Nullable Set<Integer> climateSystems, @Nullable Double currentTemperature,
+    public Thermostat(int id, String name, @Nullable List<Integer> climateSystems, @Nullable Double currentTemperature,
                       @Nullable Double targetTemperature) {
         this.id = id;
         this.name = name;
@@ -45,7 +45,7 @@ public class Thermostat {
 
     public String getName() { return name; }
 
-    public @Nullable Set<Integer> getClimateSystems() { return climateSystems; }
+    public @Nullable List<Integer> getClimateSystems() { return climateSystems; }
 
     public @Nullable Double getCurrentTemperature() { return currentTemperature == null ? null : (double) currentTemperature / 10; }
 
