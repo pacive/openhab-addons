@@ -22,7 +22,7 @@
 		</parameter>
 		<parameter name="climateSystems" type="integer" multiple="true">
 			<label>ClimateSystems</label>
-			<description>A comma-separated list of the heating systems this thermostat controls</description>
+			<description>Select the heating systems this thermostat controls (optional)</description>
 			<multipleLimit>8</multipleLimit>
 			<options>
 				<option value="1">Climate system 1</option>

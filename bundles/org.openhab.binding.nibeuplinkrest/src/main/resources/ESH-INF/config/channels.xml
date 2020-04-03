@@ -11,6 +11,7 @@
 		<parameter name="scalingFactor" type="integer">
 			<label>Scaling Factor</label>
 			<advanced>true</advanced>
+			<limitToOptions>true</limitToOptions>
 			<options>
 				<option value="1">1</option>
 				<option value="10">10</option>

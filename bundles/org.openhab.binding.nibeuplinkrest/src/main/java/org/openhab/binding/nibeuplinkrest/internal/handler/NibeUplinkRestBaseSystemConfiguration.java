@@ -12,12 +12,14 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal.handler;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link NibeUplinkRestBaseSystemConfiguration} class contains fields mapping thing configuration parameters.
  *
  * @author Anders Alfredsson - Initial contribution
  */
-
+@NonNullByDefault
 public class NibeUplinkRestBaseSystemConfiguration {
     public int systemId;
 }

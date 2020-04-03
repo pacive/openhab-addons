@@ -14,20 +14,16 @@ package org.openhab.binding.nibeuplinkrest.internal.handler;
 
 import org.eclipse.jdt.annotation.Nullable;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * The {@link NibeUplinkRestThermostatConfiguration} class contains fields mapping thing configuration parameters.
  *
  * @author Anders Alfredsson - Initial contribution
  */
-
 public class NibeUplinkRestThermostatConfiguration {
     public int id;
     public int systemId;
     public String name;
-    public List<Integer> climateSystems;
+    @Nullable public List<Integer> climateSystems;
 }

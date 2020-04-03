@@ -16,7 +16,6 @@ package org.openhab.binding.nibeuplinkrest.internal.provider;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.type.*;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -35,7 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NibeUplinkRestChannelGroupTypeProvider implements ChannelGroupTypeProvider {
 
     private final Map<ChannelGroupTypeUID, ChannelGroupType> channelGroupTypes = new ConcurrentHashMap<>();
-    private @NonNullByDefault({}) BundleContext bundleContext;
 
     @Override
     public Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale) {
@@ -89,12 +87,11 @@ public class NibeUplinkRestChannelGroupTypeProvider implements ChannelGroupTypeP
 
     @Activate
     protected void activate(ComponentContext componentContext) {
-        bundleContext = componentContext.getBundleContext();
+
     }
 
     @Deactivate
     protected void deactivate() {
         channelGroupTypes.clear();
-        bundleContext = null;
     }
 }

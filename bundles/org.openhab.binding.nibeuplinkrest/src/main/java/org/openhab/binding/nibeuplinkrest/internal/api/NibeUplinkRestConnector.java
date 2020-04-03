@@ -76,7 +76,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public void setUpdateInterval(int updateInterval) {
         this.updateInterval = updateInterval;
         logger.debug("Update interval changed, reloading schedueler");
-        if (standardRequestProducer != null) { standardRequestProducer.cancel(false); }
+        if (standardRequestProducer != null) {
+            standardRequestProducer.cancel(false);
+        }
         standardRequestProducer = scheduler.scheduleWithFixedDelay(this::queueStandardRequests, 1,
                 updateInterval, TimeUnit.SECONDS);
     }
@@ -85,7 +87,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public void setSoftwareUpdateCheckInterval(int softwareUpdateCheckInterval) {
         this.softwareUpdateCheckInterval = softwareUpdateCheckInterval;
         logger.debug("Software update check interval changed, reloading scheduler");
-        if (softwareRequestProducer != null) { softwareRequestProducer.cancel(false); }
+        if (softwareRequestProducer != null) {
+            softwareRequestProducer.cancel(false);
+        }
         if (softwareUpdateCheckInterval > 0) {
             softwareRequestProducer = scheduler.scheduleWithFixedDelay(this::queueSoftwareRequests, 0,
                     softwareUpdateCheckInterval, TimeUnit.DAYS);
@@ -276,7 +280,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public void cancelAllJobs() {
         cancelPolling();
         logger.debug("Stopping request processor");
-        if (requestProcessor != null) { requestProcessor.cancel(false); }
+        if (requestProcessor != null) {
+            requestProcessor.cancel(false);
+        }
     }
 
     /**

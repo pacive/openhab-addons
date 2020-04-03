@@ -27,7 +27,6 @@ import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestHttpException;
-import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

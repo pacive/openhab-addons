@@ -16,7 +16,6 @@ package org.openhab.binding.nibeuplinkrest.internal.util;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 
-import java.util.Collection;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,14 +42,5 @@ public class StringConvert {
         }
         match.appendTail(output);
         return output.toString();
-    }
-
-    public static <T> String toCommaList(Collection<T> input) {
-        StringBuilder sb = new StringBuilder();
-        input.forEach(e -> {
-            sb.append(e).append(",");
-        });
-        sb.deleteCharAt(sb.lastIndexOf(","));
-        return sb.toString();
     }
 }

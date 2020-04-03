@@ -18,7 +18,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.ThingTypeProvider;
 import org.eclipse.smarthome.core.thing.type.ThingType;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -41,7 +40,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NibeUplinkRestThingTypeProvider implements ThingTypeProvider {
 
     private Map<ThingTypeUID, ThingType> thingTypes = new ConcurrentHashMap<>();
-    private @NonNullByDefault({}) BundleContext bundleContext;
 
     @Override
     public Collection<ThingType> getThingTypes(@Nullable Locale locale) {
@@ -64,12 +62,11 @@ public class NibeUplinkRestThingTypeProvider implements ThingTypeProvider {
 
     @Activate
     protected void activate(ComponentContext componentContext) {
-        bundleContext = componentContext.getBundleContext();
+
     }
 
     @Deactivate
     protected void deactivate() {
         thingTypes.clear();
-        bundleContext = null;
     }
 }

@@ -16,8 +16,6 @@ package org.openhab.binding.nibeuplinkrest.internal.api.model;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import java.util.Map;
-
 /**
  * Class for holding info on the systems software, as well as available updates
  *

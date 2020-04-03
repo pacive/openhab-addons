@@ -32,12 +32,15 @@ public class NibeUplinkRestResponseParser {
     /**
      * Custom deserializer to handle ZonedDateTime
      */
-    @NonNullByDefault
     private static class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime> {
         @Override
         public ZonedDateTime deserialize(@Nullable JsonElement json, @Nullable Type type,
                                          @Nullable JsonDeserializationContext jsonDeserializationContext)
                 throws JsonParseException {
+            if (json == null)
+            {
+                throw new JsonParseException("null");
+            }
             return ZonedDateTime.parse(json.getAsJsonPrimitive().getAsString());
         }
     }
@@ -45,12 +48,15 @@ public class NibeUplinkRestResponseParser {
     /**
      * Custom deserializer to handle Mode
      */
-    @NonNullByDefault
     private static class ModeDeserializer implements JsonDeserializer<Mode> {
         @Override
         public Mode deserialize(@Nullable JsonElement json, @Nullable Type type,
                                          @Nullable JsonDeserializationContext jsonDeserializationContext)
                 throws JsonParseException {
+            if (json == null)
+            {
+                throw new JsonParseException("null");
+            }
             return Mode.from(json.getAsJsonObject().get("mode").getAsString());
         }
     }
@@ -58,13 +64,16 @@ public class NibeUplinkRestResponseParser {
     /**
      * Custom deserializer to get system info in a nested json object
      */
-    @NonNullByDefault
     private static class NibeSystemListDeserializer implements JsonDeserializer<List<NibeSystem>> {
 
         @Override
         public List<NibeSystem> deserialize(@Nullable JsonElement json, @Nullable Type type,
                                             @Nullable JsonDeserializationContext jsonDeserializationContext)
                 throws JsonParseException {
+            if (json == null)
+            {
+                throw new JsonParseException("null");
+            }
             JsonElement inner = json.getAsJsonObject().get("objects");
 
             return new GsonBuilder().registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeDeserializer())
@@ -72,13 +81,16 @@ public class NibeUplinkRestResponseParser {
         }
     }
 
-    @NonNullByDefault
     private static class SoftwareInfoDeserializer implements JsonDeserializer<SoftwareInfo> {
 
         @Override
         public SoftwareInfo deserialize(@Nullable JsonElement json, @Nullable Type type,
                                             @Nullable JsonDeserializationContext jsonDeserializationContext)
                 throws JsonParseException {
+            if (json == null)
+            {
+                throw new JsonParseException("null");
+            }
             JsonElement current = json.getAsJsonObject().get("current").getAsJsonObject().get("name");
             JsonElement upgrade = json.getAsJsonObject().get("upgrade");
             String upgradeVersion = upgrade.isJsonNull() ? null : upgrade.getAsJsonObject().get("name").getAsString();

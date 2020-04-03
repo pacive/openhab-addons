@@ -64,6 +64,10 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     public void handleCommand(ChannelUID channelUID, Command command) {
         String groupId = channelUID.getGroupId();
         String channelId = channelUID.getIdWithoutGroup();
+        if (groupId == null) {
+            logger.debug("Invalid channel");
+            return;
+        }
         if (command == RefreshType.REFRESH) {
             switch (channelId) {
                 case CHANNEL_MODE_ID:
