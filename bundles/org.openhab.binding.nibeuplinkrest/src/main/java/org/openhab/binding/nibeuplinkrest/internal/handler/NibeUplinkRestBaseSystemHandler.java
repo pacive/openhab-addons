@@ -28,6 +28,7 @@ import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestCallbackListener;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelGroupTypeProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +98,12 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
             } else if (command instanceof DecimalType) {
                 try {
                     Map<Integer, Integer> parameter = new HashMap<>();
-                    parameter.put(Integer.parseInt(channelId), ((DecimalType) command).intValue());
+                    Channel channel = thing.getChannel(channelUID);
+                    if (channel == null) {
+                        throw new NibeUplinkRestException("Channel doesn't exist");
+                    }
+                    int outValue = transformOutgoing(channel, (DecimalType) command);
+                    parameter.put(Integer.parseInt(channelId), outValue);
                     nibeUplinkRestApi.setParameters(systemId, parameter);
                 } catch (Exception e) {
                     logger.warn("Failed to send command to channel {} with value {}. Reason: {}",
@@ -210,20 +216,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                             state = UnDefType.UNDEF;
                             break;
                         }
-                        String scalingFactor = "1";
-                        // Check first channel configuration, then property to get scaling for the raw value
-                        if (channel.getConfiguration().containsKey(CHANNEL_PROPERTY_SCALING_FACTOR)) {
-                            scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR).toString();
-                        } else {
-                            scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
-                        }
-                        if (scalingFactor != null) {
-                            try {
-                                state = new DecimalType((double) p.getRawValue() / Integer.parseInt(scalingFactor));
-                                break;
-                            } catch (NumberFormatException ignored) {}
-                        }
-                        state = new DecimalType(p.getRawValue());
+                        state = transformIncoming(channel, p.getRawValue());
                         break;
                     case CoreItemFactory.SWITCH:
                         state = OnOffType.from(String.valueOf(p.getRawValue()));
@@ -264,5 +257,39 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     @Override
     public void modeUpdated(Mode mode) {
         updateState(CHANNEL_MODE, new StringType(mode.toString()));
+    }
+
+    private DecimalType transformIncoming(Channel channel, int incomingValue) {
+        DecimalType transformed = new DecimalType(incomingValue);
+        String scalingFactor = "1";
+        // Check first channel configuration, then property to get scaling for the raw value
+        if (channel.getConfiguration().containsKey(CHANNEL_PROPERTY_SCALING_FACTOR)) {
+            scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR).toString();
+        } else {
+            scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
+        }
+        if (scalingFactor != null) {
+            try {
+                transformed = new DecimalType((double) incomingValue / Integer.parseInt(scalingFactor));
+            } catch (NumberFormatException ignored) {}
+        }
+        return transformed;
+    }
+
+    private int transformOutgoing(Channel channel, DecimalType outgoingValue) {
+        double transformed = outgoingValue.doubleValue();
+        String scalingFactor = "1";
+        // Check first channel configuration, then property to get scaling for the raw value
+        if (channel.getConfiguration().containsKey(CHANNEL_PROPERTY_SCALING_FACTOR)) {
+            scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR).toString();
+        } else {
+            scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
+        }
+        if (scalingFactor != null) {
+            try {
+                transformed = transformed * Integer.parseInt(scalingFactor);
+            } catch (NumberFormatException ignored) {}
+        }
+        return (int) transformed;
     }
 }
