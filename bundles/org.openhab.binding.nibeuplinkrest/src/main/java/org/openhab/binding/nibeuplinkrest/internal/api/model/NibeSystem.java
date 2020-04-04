@@ -83,13 +83,25 @@ public class NibeSystem {
 
     public boolean isConfigSet() { return config != null; }
 
-    public boolean hasCooling() { return config != null && config.hasCooling(); }
+    public boolean hasCooling() {
+        SystemConfig localRef = config;
+        return localRef != null && localRef.hasCooling();
+    }
 
-    public boolean hasHeating() { return config != null && config.hasHeating(); }
+    public boolean hasHeating() {
+        SystemConfig localRef = config;
+        return localRef != null && localRef.hasHeating();
+    }
 
-    public boolean hasHotWater() { return config != null && config.hasHotWater(); }
+    public boolean hasHotWater() {
+        SystemConfig localRef = config;
+        return localRef != null && localRef.hasHotWater();
+    }
 
-    public boolean hasVentilation() { return config != null && config.hasVentilation(); }
+    public boolean hasVentilation() {
+        SystemConfig localRef = config;
+        return localRef != null && localRef.hasVentilation();
+    }
 
     @Override
     public boolean equals(@Nullable Object o) {

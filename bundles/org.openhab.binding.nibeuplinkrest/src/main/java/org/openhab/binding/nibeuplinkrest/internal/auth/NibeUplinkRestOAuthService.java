@@ -71,7 +71,7 @@ public class NibeUplinkRestOAuthService {
      * @throws IOException
      */
     private HttpServlet createServlet() throws IOException {
-        Map<String, NibeUplinkRestOAuthServletTemplate> templates = new HashMap<>();
+        Map<String, @Nullable NibeUplinkRestOAuthServletTemplate> templates = new HashMap<>();
         templates.put(SERVLET_TEMPLATE_INDEX, new NibeUplinkRestOAuthServletTemplate(bundleContext,
                 SERVLET_TEMPLATE_INDEX_FILE));
         templates.put(SERVLET_TEMPLATE_ACCOUNT, new NibeUplinkRestOAuthServletTemplate(bundleContext,

@@ -48,12 +48,12 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
     private static final String CONTENT_TYPE = "text/html";
 
     private NibeUplinkRestOAuthService oAuthService;
-    private final Map<String, NibeUplinkRestOAuthServletTemplate> templates;
+    private final Map<String, @Nullable NibeUplinkRestOAuthServletTemplate> templates;
 
     private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestOAuthServlet.class);
 
     public NibeUplinkRestOAuthServlet(NibeUplinkRestOAuthService oAuthService,
-                                      Map<String, NibeUplinkRestOAuthServletTemplate> templates) {
+                                      Map<String, @Nullable NibeUplinkRestOAuthServletTemplate> templates) {
         this.oAuthService = oAuthService;
         this.templates = templates;
     }
@@ -66,6 +66,8 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
         logger.debug("Received GET request: {}", req.getRequestURI());
         final String servletBaseURL = req.getRequestURL().toString();
         final NibeUplinkRestOAuthServletTemplate indexTemplate = templates.get(SERVLET_TEMPLATE_INDEX);
+
+        if (indexTemplate == null) { throw new ServletException(); }
 
         handleCallback(req.getQueryString(), servletBaseURL);
         resp.setContentType(CONTENT_TYPE);
@@ -80,9 +82,12 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
      * @param baseURL
      * @return
      */
-    private String formatAccounts(String baseURL) {
+    private String formatAccounts(String baseURL) throws ServletException {
         StringBuilder accounts = new StringBuilder();
         NibeUplinkRestOAuthServletTemplate template = templates.get(SERVLET_TEMPLATE_ACCOUNT);
+
+        if (template == null) { throw new ServletException(); }
+
         oAuthService.getBridgeHandlers().forEach(h -> {
             String authURL = h.getAuthorizationUrl(baseURL);
             template.addReplacement(REPLACE_ACCOUNT_LABEL, h.getThing().getLabel());

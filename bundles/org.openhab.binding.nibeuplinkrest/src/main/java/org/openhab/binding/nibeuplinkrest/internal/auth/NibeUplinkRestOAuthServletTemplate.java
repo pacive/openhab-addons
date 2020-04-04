@@ -91,7 +91,7 @@ public class NibeUplinkRestOAuthServletTemplate  {
 
     /**
      * Replace all template strings with their corresponding values
-     * @return
+     * @return A string with the rendered html content
      */
     public String replaceAll() {
         Matcher match = EXPANSION_PATTERN.matcher(this.template);

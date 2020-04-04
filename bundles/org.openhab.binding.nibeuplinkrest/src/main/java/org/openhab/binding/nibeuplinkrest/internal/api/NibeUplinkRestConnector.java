@@ -76,8 +76,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public void setUpdateInterval(int updateInterval) {
         this.updateInterval = updateInterval;
         logger.debug("Update interval changed, reloading schedueler");
-        if (standardRequestProducer != null) {
-            standardRequestProducer.cancel(false);
+        Future<?> localRef = standardRequestProducer;
+        if (localRef != null) {
+            localRef.cancel(false);
         }
         standardRequestProducer = scheduler.scheduleWithFixedDelay(this::queueStandardRequests, 1,
                 updateInterval, TimeUnit.SECONDS);
@@ -87,8 +88,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public void setSoftwareUpdateCheckInterval(int softwareUpdateCheckInterval) {
         this.softwareUpdateCheckInterval = softwareUpdateCheckInterval;
         logger.debug("Software update check interval changed, reloading scheduler");
-        if (softwareRequestProducer != null) {
-            softwareRequestProducer.cancel(false);
+        Future<?> localRef = softwareRequestProducer;
+        if (localRef != null) {
+            localRef.cancel(false);
         }
         if (softwareUpdateCheckInterval > 0) {
             softwareRequestProducer = scheduler.scheduleWithFixedDelay(this::queueSoftwareRequests, 0,
@@ -258,7 +260,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         logger.debug("Adding callback listener for system {}", systemId);
         listeners.put(systemId, listener);
         trackedParameters.putIfAbsent(systemId, new HashSet<>());
-        if (standardRequestProducer == null || standardRequestProducer.isCancelled()) {
+        Future<?> localRef = standardRequestProducer;
+        if (localRef == null || localRef.isCancelled()) {
             startPolling();
         }
     }
@@ -280,8 +283,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public void cancelAllJobs() {
         cancelPolling();
         logger.debug("Stopping request processor");
-        if (requestProcessor != null) {
-            requestProcessor.cancel(false);
+        Future<?> localRef = requestProcessor;
+        if (localRef != null) {
+            localRef.cancel(false);
         }
     }
 
@@ -290,29 +294,34 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
      */
     private void startPolling() {
         logger.debug("Start polling jobs");
-        if (standardRequestProducer == null || standardRequestProducer.isCancelled()) {
+        Future<?> localRef = standardRequestProducer;
+        if (localRef == null || localRef.isCancelled()) {
             standardRequestProducer = scheduler.scheduleWithFixedDelay(this::queueStandardRequests,
                     REQUEST_INTERVAL - 1, updateInterval, TimeUnit.SECONDS);
             logger.trace("Standard request producer started with interval {} seconds", updateInterval);
         }
+        localRef = softwareRequestProducer;
         if (softwareUpdateCheckInterval > 0) {
-            if (softwareRequestProducer == null || softwareRequestProducer.isCancelled()) {
+            if (localRef == null || localRef.isCancelled()) {
                 softwareRequestProducer = scheduler.scheduleWithFixedDelay(this::queueSoftwareRequests,
                         0, softwareUpdateCheckInterval, TimeUnit.DAYS);
                 logger.trace("Software request producer started with interval {} days", softwareUpdateCheckInterval);
             }
         }
-        if (thermostatRequestProducer == null || thermostatRequestProducer.isCancelled()) {
+        localRef = thermostatRequestProducer;
+        if (localRef == null || localRef.isCancelled()) {
             thermostatRequestProducer = scheduler.scheduleWithFixedDelay(this::queueThermostatRequests,
                     THERMOSTAT_UPDATE_INTERVAL, THERMOSTAT_UPDATE_INTERVAL, TimeUnit.MINUTES);
             logger.trace("Thermostat request producer started");
         }
-        if (modeRequestProducer == null || modeRequestProducer.isCancelled()) {
+        localRef = modeRequestProducer;
+        if (localRef == null || localRef.isCancelled()) {
             modeRequestProducer = scheduler.scheduleWithFixedDelay(this::queueModeRequests,
                     MODE_UPDATE_INTERVAL / 2, MODE_UPDATE_INTERVAL, TimeUnit.MINUTES);
             logger.trace("Mode request producer started");
         }
-        if (requestProcessor == null || requestProcessor.isCancelled()) {
+        localRef = requestProcessor;
+        if (localRef == null || localRef.isCancelled()) {
             requestProcessor = scheduler.scheduleWithFixedDelay(this::processRequests, REQUEST_INTERVAL,
                     REQUEST_INTERVAL, TimeUnit.SECONDS);
             logger.trace("Request processor started");
@@ -324,10 +333,14 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
      */
     private void cancelPolling() {
         logger.debug("Stopping all request producers and clearing queue");
-        if (standardRequestProducer != null) { standardRequestProducer.cancel(false); }
-        if (softwareRequestProducer != null) { softwareRequestProducer.cancel(false); }
-        if (modeRequestProducer != null) { modeRequestProducer.cancel(false); }
-        if (thermostatRequestProducer != null) { thermostatRequestProducer.cancel(false); }
+        Future<?> localRef = standardRequestProducer;
+        if (localRef != null) { localRef.cancel(false); }
+        localRef = softwareRequestProducer;
+        if (localRef != null) { localRef.cancel(false); }
+        localRef = modeRequestProducer;
+        if (localRef != null) { localRef.cancel(false); }
+        localRef = thermostatRequestProducer;
+        if (localRef != null) { localRef.cancel(false); }
         queuedRequests.clear();
     }
 
@@ -493,9 +506,10 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         }
 
         // If we get to here the connection works
-        if (isAliveRequestProducer != null) {
+        Future<?> localRef = isAliveRequestProducer;
+        if (localRef != null) {
             logger.debug("Nibe Uplink back online");
-            isAliveRequestProducer.cancel(false);
+            localRef.cancel(false);
             isAliveRequestProducer = null;
             bridgeHandler.signalServerOnline();
             startPolling();

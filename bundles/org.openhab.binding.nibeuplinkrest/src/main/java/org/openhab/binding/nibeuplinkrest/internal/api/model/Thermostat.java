@@ -47,9 +47,15 @@ public class Thermostat {
 
     public @Nullable List<Integer> getClimateSystems() { return climateSystems; }
 
-    public @Nullable Double getCurrentTemperature() { return currentTemperature == null ? null : (double) currentTemperature / 10; }
+    public @Nullable Double getCurrentTemperature() {
+        Integer localRef = currentTemperature;
+        return localRef == null ? null : (double) localRef / 10;
+    }
 
-    public @Nullable Double getTargetTemperature() { return targetTemperature == null ? null : (double) targetTemperature / 10; }
+    public @Nullable Double getTargetTemperature() {
+        Integer localRef = targetTemperature;
+        return localRef == null ? null : (double) localRef / 10;
+    }
 
     public void setCurrentTemperature(int currentTemperature) { this.currentTemperature = currentTemperature; }
 
