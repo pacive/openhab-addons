@@ -44,6 +44,7 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
     private static final String REPLACE_ACCOUNTS = "accounts";
     private static final String REPLACE_ACCOUNT_LABEL = "account.thingLabel";
     private static final String REPLACE_ACCOUNT_REDIRECT = "account.redirectURI";
+    private static final String REPLACE_ACCOUNT_AUTHORIZED = "account.authorized";
 
     private static final String CONTENT_TYPE = "text/html";
 
@@ -92,6 +93,7 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
             String authURL = h.getAuthorizationUrl(baseURL);
             template.addReplacement(REPLACE_ACCOUNT_LABEL, h.getThing().getLabel());
             template.addReplacement(REPLACE_ACCOUNT_REDIRECT, authURL);
+            template.addReplacement(REPLACE_ACCOUNT_AUTHORIZED, h.isAuthorized() ? "Authorized" : "Not authorized");
             accounts.append(template.replaceAll());
         });
         return accounts.toString();

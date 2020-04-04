@@ -1,6 +1,8 @@
-<div>
-    <p>${account.thingLabel}</p>
+<div class="row">
+    <p>
+        ${account.thingLabel} - <span class="authorized">${account.authorized}</span>
+    </p>
     <div class="button">
-        <a href="${account.redirectURI}">Authorize!</a>
+        <a href="${account.redirectURI}">Authorize</a>
     </div>
 </div>
