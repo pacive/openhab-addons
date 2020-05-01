@@ -46,41 +46,59 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
     }
 
     public void initialize() {
-        updateStatus(ThingStatus.UNKNOWN);
         config = getConfigAs(NibeUplinkRestThermostatConfiguration.class);
         Bridge bridge = getBridge();
         if (bridge != null) {
             NibeUplinkRestBridgeHandler bridgeHandler = (NibeUplinkRestBridgeHandler) bridge.getHandler();
             if (bridgeHandler != null) {
                 nibeUplinkRestApi = bridgeHandler.getApiConnection();
+                nibeUplinkRestApi.setThermostat(config.systemId, createThermostat());
+            } else {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_UNINITIALIZED);
+                return;
             }
         } else {
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_UNINITIALIZED, "No bridge found");
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "No bridge configured");
+            return;
         }
         updateStatus(ThingStatus.ONLINE);
     }
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (command instanceof State) {
-            handleUpdate(channelUID, (State) command);
+        if (command instanceof DecimalType) {
+            switch (channelUID.getId()) {
+                case CHANNEL_THERMOSTAT_CURRENT:
+                    if (currentTemperature == null || ((DecimalType) command).doubleValue() != currentTemperature) {
+                        currentTemperature = ((DecimalType) command).doubleValue();
+                        nibeUplinkRestApi.setThermostat(config.systemId, createThermostat());
+                    }
+                    break;
+                case CHANNEL_THERMOSTAT_TARGET:
+                    if (targetTemperature == null || ((DecimalType) command).doubleValue() != targetTemperature) {
+                        targetTemperature = ((DecimalType) command).doubleValue();
+                        nibeUplinkRestApi.setThermostat(config.systemId, createThermostat());
+                    }
+                    break;
+            }
         }
     }
 
     @Override
     public void handleUpdate(ChannelUID channelUID, State newState) {
         if (newState instanceof DecimalType) {
-            switch (channelUID.getId()) {
-                case CHANNEL_THERMOSTAT_CURRENT:
-                    currentTemperature = ((DecimalType) newState).doubleValue();
-                    break;
-                case CHANNEL_THERMOSTAT_TARGET:
-                    targetTemperature = ((DecimalType) newState).doubleValue();
-                    break;
-            }
+            handleCommand(channelUID, (Command) newState);
         }
-        Thermostat thermostat = new Thermostat(config.id, config.name, config.climateSystems,
-                    currentTemperature, targetTemperature);
-        nibeUplinkRestApi.setThermostat(config.systemId, thermostat);
+    }
+
+    @Override
+    public void handleRemoval() {
+        nibeUplinkRestApi.removeThermostat(config.systemId, config.id);
+        super.handleRemoval();
+    }
+
+    public Thermostat createThermostat() {
+        return new Thermostat(config.id, config.name, config.climateSystems,
+                currentTemperature, targetTemperature);
     }
 }

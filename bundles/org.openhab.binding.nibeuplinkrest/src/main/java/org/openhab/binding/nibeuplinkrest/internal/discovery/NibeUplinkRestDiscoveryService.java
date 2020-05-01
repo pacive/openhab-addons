@@ -71,6 +71,9 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
             NibeUplinkRestApi connection = bridgeHandler.getApiConnection();
             connection.getConnectedSystems().forEach(system -> {
                 logger.debug("Found system with id {}", system.getSystemId());
+                if (!system.isConfigSet()) {
+                    system.setConfig(connection.getSystemConfig(system.getSystemId()));
+                }
                 List<Category> categories = connection.getCategories(system.getSystemId(), true);
                 thingDiscovered(system, categories);
             });

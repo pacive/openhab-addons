@@ -116,7 +116,6 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     @Override
     public void initialize() {
         logger.debug("Initializing thing {}", thing.getUID().getAsString());
-        updateStatus(ThingStatus.UNKNOWN);
         config = getConfigAs(NibeUplinkRestBaseSystemConfiguration.class);
         systemId = config.systemId;
         Bridge bridge = getBridge();

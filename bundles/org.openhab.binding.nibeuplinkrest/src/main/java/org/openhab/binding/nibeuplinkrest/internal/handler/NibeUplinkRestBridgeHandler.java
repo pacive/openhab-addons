@@ -28,6 +28,7 @@ import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestConnector;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
 import org.openhab.binding.nibeuplinkrest.internal.discovery.NibeUplinkRestDiscoveryService;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,14 +80,18 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
                 AUTH_ENDPOINT, config.clientId, config.clientSecret, SCOPE, false);
         nibeUplinkRestApi = new NibeUplinkRestConnector(this, oAuthClient, httpClient, scheduler,
                 config.updateInterval, config.softwareUpdateCheckInterval);
-        updateStatus(ThingStatus.UNKNOWN);
         scheduler.execute(() -> {
             logger.debug("Rebuilding thing-types");
-            nibeUplinkRestApi.getConnectedSystems().forEach(system -> {
-                system.setConfig(nibeUplinkRestApi.getSystemConfig(system.getSystemId()));
-                List<Category> categories = nibeUplinkRestApi.getCategories(system.getSystemId(), true);
-                typeFactory.createThingType(system, categories);
-            });
+            try {
+                nibeUplinkRestApi.getConnectedSystems().forEach(system -> {
+                    system.setConfig(nibeUplinkRestApi.getSystemConfig(system.getSystemId()));
+                    List<Category> categories = nibeUplinkRestApi.getCategories(system.getSystemId(), true);
+                    typeFactory.createThingType(system, categories);
+                });
+            } catch (NibeUplinkRestException e) {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_PENDING,
+                        "Waiting for OAuth authorization");
+            }
             if (isAuthorized()) {
                 updateStatus(ThingStatus.ONLINE);
             }
