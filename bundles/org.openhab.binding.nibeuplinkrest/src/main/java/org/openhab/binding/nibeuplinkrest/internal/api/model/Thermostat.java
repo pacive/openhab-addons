@@ -29,16 +29,16 @@ public class Thermostat {
     private final int id;
     private final String name;
     private @Nullable List<Integer> climateSystems;
-    private @Nullable Integer currentTemperature;
-    private @Nullable Integer targetTemperature;
+    private @Nullable Integer actualTemp;
+    private @Nullable Integer targetTemp;
 
-    public Thermostat(int id, String name, @Nullable List<Integer> climateSystems, @Nullable Double currentTemperature,
-                      @Nullable Double targetTemperature) {
+    public Thermostat(int id, String name, @Nullable List<Integer> climateSystems, @Nullable Double actualTemp,
+                      @Nullable Double targetTemp) {
         this.id = id;
         this.name = name;
         this.climateSystems = climateSystems;
-        this.currentTemperature = currentTemperature == null ? null : (int) (currentTemperature * 10);
-        this.targetTemperature = targetTemperature == null ? null : (int) (targetTemperature * 10);
+        this.actualTemp = actualTemp == null ? null : (int) (actualTemp * 10);
+        this.targetTemp = targetTemp == null ? null : (int) (targetTemp * 10);
     }
 
     public int getId() { return id; }
@@ -47,19 +47,19 @@ public class Thermostat {
 
     public @Nullable List<Integer> getClimateSystems() { return climateSystems; }
 
-    public @Nullable Double getCurrentTemperature() {
-        Integer localRef = currentTemperature;
+    public @Nullable Double getActualTemp() {
+        Integer localRef = actualTemp;
         return localRef == null ? null : (double) localRef / 10;
     }
 
-    public @Nullable Double getTargetTemperature() {
-        Integer localRef = targetTemperature;
+    public @Nullable Double getTargetTemp() {
+        Integer localRef = targetTemp;
         return localRef == null ? null : (double) localRef / 10;
     }
 
-    public void setCurrentTemperature(int currentTemperature) { this.currentTemperature = currentTemperature; }
+    public void setActualTemp(int actualTemp) { this.actualTemp = actualTemp; }
 
-    public void setTargetTemperature(int targetTemperature) { this.targetTemperature = targetTemperature; }
+    public void setTargetTemp(int targetTemp) { this.targetTemp = targetTemp; }
 
     @Override
     public boolean equals(@Nullable Object o) {
