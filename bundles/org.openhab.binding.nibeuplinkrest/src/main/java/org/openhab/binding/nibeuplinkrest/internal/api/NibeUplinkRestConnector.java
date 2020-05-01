@@ -102,7 +102,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public List<NibeSystem> getConnectedSystems() {
         logger.debug("Checking connected systems...");
         Request req = requests.createConnectedSystemsRequest();
-        String resp = requests.makeRequest(req);
+        String resp = requests.makeRequestWithRetry(req);
         List<NibeSystem> systems = parseSystemList(resp);
         logger.debug("{} systems found", systems.size());
         for (NibeSystem system : systems) {
@@ -116,7 +116,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         NibeSystem system = cachedSystems.get(systemId);
         if (system == null) {
             Request req = requests.createSystemRequest(systemId);
-            String resp = requests.makeRequest(req);
+            String resp = requests.makeRequestWithRetry(req);
             system = parseSystem(resp);
             cachedSystems.put(systemId, system);
         }
@@ -132,7 +132,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         }
         if (config == null) {
             Request req = requests.createSystemConfigRequest(systemId);
-            String resp = requests.makeRequest(req);
+            String resp = requests.makeRequestWithRetry(req);
             config = parseSystemConfig(resp);
         }
         if (system != null) {
@@ -144,7 +144,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     @Override
     public SoftwareInfo getSoftwareInfo(int systemId) {
         Request req = requests.createSoftwareRequest(systemId);
-        String resp = requests.makeRequest(req);
+        String resp = requests.makeRequestWithRetry(req);
         return parseSoftwareInfo(resp);
     }
 
@@ -153,7 +153,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         Map<String, Category> cachedValues = cachedCategories.get(systemId);
         if (cachedValues == null || cachedValues.isEmpty()) {
             Request req = requests.createCategoriesRequest(systemId, includeParameters);
-            String resp = requests.makeRequest(req);
+            String resp = requests.makeRequestWithRetry(req);
             List<Category> categories = parseCategoryList(resp);
             cachedValues = new HashMap<>();
             for (Category category : categories) {
@@ -196,21 +196,21 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public List<Parameter> getParameters(int systemId, Set<Integer> parameterIds) {
         logger.debug("Getting parameters: {}", parameterIds);
         Request req = requests.createGetParametersRequest(systemId, parameterIds);
-        return parseParameterList(requests.makeRequest(req));
+        return parseParameterList(requests.makeRequestWithRetry(req));
     }
 
     @Override
     public void setParameters(int systemId, Map<Integer, Integer> parameters) {
         logger.debug("Setting parameters: {}", parameters);
         Request req = requests.createSetParametersRequest(systemId, parameters);
-        requests.makeRequest(req);
+        requests.makeRequestWithRetry(req);
     }
 
     @Override
     public Mode getMode(int systemId) {
         logger.debug("Requesting mode from Nibe uplink");
         Request req = requests.createGetModeRequest(systemId);
-        String resp = requests.makeRequest(req);
+        String resp = requests.makeRequestWithRetry(req);
         return parseMode(resp);
     }
 
@@ -218,7 +218,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public void setMode(int systemId, Mode mode) {
         logger.debug("Setting mode: {}", mode);
         Request req = requests.createSetModeRequest(systemId, mode);
-        requests.makeRequest(req);
+        requests.makeRequestWithRetry(req);
         if (mode != Mode.DEFAULT_OPERATION) {
             modes.put(systemId, mode);
         } else {
@@ -229,9 +229,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     @Override
     public void setThermostat(int systemId, Thermostat thermostat) {
         logger.debug("Setting thermostat '{}': temperature {}, setpoint {}", thermostat.getName(),
-                thermostat.getCurrentTemperature(), thermostat.getTargetTemperature());
+                thermostat.getActualTemp(), thermostat.getTargetTemp());
         Request req = requests.createSetThermostatRequest(systemId, thermostat);
-        requests.makeRequest(req);
+        requests.makeRequestWithRetry(req);
 
         Map<Integer, Thermostat> systemThermostats = thermostats.get(systemId);
         if (systemThermostats != null) {
@@ -256,7 +256,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     @Override
-    public void addCallbackListener(int systemId, NibeUplinkRestCallbackListener listener) {
+    public synchronized void addCallbackListener(int systemId, NibeUplinkRestCallbackListener listener) {
         logger.debug("Adding callback listener for system {}", systemId);
         listeners.put(systemId, listener);
         trackedParameters.putIfAbsent(systemId, new HashSet<>());
@@ -267,7 +267,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     @Override
-    public void removeCallbackListener(int systemId) {
+    public synchronized void removeCallbackListener(int systemId) {
         logger.debug("Removing callback listener for system {}", systemId);
         listeners.remove(systemId);
         if (listeners.isEmpty()) {
@@ -280,7 +280,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     /**
      * Cancel all running scheduled jobs
      */
-    public void cancelAllJobs() {
+    public synchronized void cancelAllJobs() {
         cancelPolling();
         logger.debug("Stopping request processor");
         Future<?> localRef = requestProcessor;
@@ -292,7 +292,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     /**
      * Start all request producers and the request processor with their respective intervals
      */
-    private void startPolling() {
+    private synchronized void startPolling() {
         logger.debug("Start polling jobs");
         Future<?> localRef = standardRequestProducer;
         if (localRef == null || localRef.isCancelled()) {
@@ -331,7 +331,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     /**
      * Cancel all request producers and clear the request queue
      */
-    private void cancelPolling() {
+    private synchronized void cancelPolling() {
         logger.debug("Stopping all request producers and clearing queue");
         Future<?> localRef = standardRequestProducer;
         if (localRef != null) { localRef.cancel(false); }
@@ -486,7 +486,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
 
         logger.trace("Executing request of type {} for system {}", requestType, systemId);
         try {
-            resp = requests.makeRequest(req);
+            resp = requests.makeRequestWithRetry(req);
         } catch (NibeUplinkRestHttpException e) {
             // If Nibe's server has problems, stop polling and periodically check if back online
             if (e.getResponseCode() >= 500) {

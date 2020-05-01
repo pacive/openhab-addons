@@ -15,7 +15,6 @@ package org.openhab.binding.nibeuplinkrest.internal.api;
 
 import com.google.gson.Gson;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
@@ -27,9 +26,10 @@ import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestHttpException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -70,10 +70,10 @@ public class NibeUplinkRestRequestHandler {
 
     private final Gson serializer = new Gson();
 
-    private @Nullable String bearerToken;
-
     private final OAuthClientService oAuthClient;
     private final HttpClient httpClient;
+
+    private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestRequestHandler.class);
 
     public NibeUplinkRestRequestHandler(OAuthClientService oAuthClient, HttpClient httpClient) {
         this.oAuthClient = oAuthClient;
@@ -209,38 +209,41 @@ public class NibeUplinkRestRequestHandler {
     }
 
     /**
-     * Get OAuth token and add it to the request. Refresh token and retry on a 401 response
+     * Make the request, and retry if Nibe Uplink responds with a 401
      * @param req The request to send
      * @return The body of the response as a String
      * @throws NibeUplinkRestException
      */
-    public String makeRequest(Request req) throws NibeUplinkRestException {
-        try {
-            AccessTokenResponse response = oAuthClient.getAccessTokenResponse();
-            if (response == null ||
-                    response.isExpired(LocalDateTime.now(), 5) ||
-                    bearerToken == null) {
-                refreshToken();
-            }
-        } catch (OAuthException | OAuthResponseException | IOException e) {
-            throw new NibeUplinkRestException("Error retrieving token:" + e.getClass() + ": " + e.getMessage(), e);
-        }
-        req.header(HttpHeader.AUTHORIZATION, BEARER + bearerToken);
+    public String makeRequestWithRetry(Request req) throws NibeUplinkRestException {
         ContentResponse resp;
         resp = sendRequest(req);
         if (resp.getStatus() == UNAUTHORIZED_401) {
-            refreshToken();
             resp = sendRequest(req);
         }
         return handleResponse(resp);
     }
 
     /**
-     * Send the request. Catch any errors an re-throw a {@link NibeUplinkRestException}
+     * Add OAuth token and send the request. Catch any errors an re-throw a {@link NibeUplinkRestException}
      * @param req
      * @return
      */
     private ContentResponse sendRequest(Request req) {
+        String token;
+        try {
+            AccessTokenResponse accessTokenResponse = oAuthClient.getAccessTokenResponse();
+            if (accessTokenResponse == null) {
+                throw new NibeUplinkRestException("Error getting access token response");
+            }
+            token = accessTokenResponse.getAccessToken();
+        } catch (OAuthException | OAuthResponseException | IOException e) {
+            throw new NibeUplinkRestException("Error retrieving token:" + e.getClass() + ": " + e.getMessage(), e);
+        }
+        req.header(HttpHeader.AUTHORIZATION, BEARER + token);
+
+        logger.trace("Sending {} request to {} {}", req.getMethod(), req.getPath(),
+                req.getContent() != null ?
+                        "with data " + new String(req.getContent().iterator().next().array()) : "");
         ContentResponse resp;
         try {
             resp = req.send();
@@ -284,17 +287,6 @@ public class NibeUplinkRestRequestHandler {
             default:
                 throw new NibeUplinkRestHttpException(String.format("Unhandled http response: %s", resp.getStatus()),
                         resp.getStatus());
-        }
-    }
-
-    /**
-     * Refresh the OAuth token
-     */
-    private void refreshToken() {
-        try {
-            bearerToken = oAuthClient.refreshToken().getAccessToken();
-        } catch (OAuthException | IOException | OAuthResponseException e) {
-            throw new NibeUplinkRestException("Unable to refresh token", e);
         }
     }
 }
