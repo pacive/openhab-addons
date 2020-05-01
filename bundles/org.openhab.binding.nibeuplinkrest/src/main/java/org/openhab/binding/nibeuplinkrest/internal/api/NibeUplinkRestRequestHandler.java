@@ -59,7 +59,8 @@ public class NibeUplinkRestRequestHandler {
         PARAMETER_SET,
         MODE_SET,
         THERMOSTAT,
-        SYSTEMS
+        SYSTEMS,
+        ALARM
     }
 
     private static final String CONTENT_TYPE = "application/json";
@@ -95,6 +96,15 @@ public class NibeUplinkRestRequestHandler {
      */
     public Request createSystemRequest(int systemId) {
         return prepareRequest(HttpMethod.GET, API_SYSTEM_WITH_ID, systemId, RequestType.SYSTEM);
+    }
+
+    /**
+     * Create a request for a specific system
+     * @param systemId
+     * @return
+     */
+    public Request createAlarmInfoRequest(int systemId) {
+        return prepareRequest(HttpMethod.GET, API_NOTIFICATIONS, systemId, RequestType.ALARM);
     }
 
     /**

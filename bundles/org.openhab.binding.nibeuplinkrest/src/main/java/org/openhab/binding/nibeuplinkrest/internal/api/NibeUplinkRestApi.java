@@ -45,6 +45,14 @@ public interface NibeUplinkRestApi {
     NibeSystem getSystem(int systemId);
 
     /**
+     * Get info on a latest alarm on the system
+     *
+     * @param systemId Id of the system to get
+     * @return A {@link NibeSystem} object with info on the system
+     */
+    AlarmInfo getLatestAlarm(int systemId);
+
+    /**
      * Get a list of categories that represents different components of the system
      * @param systemId Id of the system
      * @param includeParameters Whether parameters related to the categories should be retrieved as well

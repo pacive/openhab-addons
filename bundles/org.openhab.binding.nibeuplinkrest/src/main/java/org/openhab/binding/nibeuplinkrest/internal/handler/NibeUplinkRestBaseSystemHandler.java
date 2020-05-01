@@ -235,6 +235,10 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     public void systemUpdated(NibeSystem system) {
         updateState(CHANNEL_LAST_ACTIVITY, new DateTimeType(system.getLastActivityDate()));
         updateState(CHANNEL_HAS_ALARMED, OnOffType.from(system.hasAlarmed()));
+        if (system.hasAlarmed()) {
+            AlarmInfo alarmInfo = nibeUplinkRestApi.getLatestAlarm(systemId);
+            updateState(CHANNEL_ALARM_INFO, new StringType(alarmInfo.toString()));
+        }
         if (system.getConnectionStatus() == ConnectionStatus.OFFLINE) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.NONE, "Nibe reports the system as offline");
         } else {

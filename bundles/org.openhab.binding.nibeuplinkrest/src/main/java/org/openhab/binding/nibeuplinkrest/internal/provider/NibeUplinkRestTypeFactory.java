@@ -183,11 +183,12 @@ public class NibeUplinkRestTypeFactory {
     private List<ChannelDefinition> createStatusChannels() {
         ChannelType lastActivityType = channelTypeRegistry.getChannelType(CHANNEL_TYPE_LAST_ACTIVITY);
         ChannelType hasAlarmedType = channelTypeRegistry.getChannelType(CHANNEL_TYPE_HAS_ALARMED);
+        ChannelType alarmInfoType = channelTypeRegistry.getChannelType(CHANNEL_TYPE_ALARM_INFO);
         ChannelType softwareUpdateType = channelTypeRegistry.getChannelType(CHANNEL_TYPE_SOFTWARE_UPDATE);
         ChannelType latestSoftwareType = channelTypeRegistry.getChannelType(CHANNEL_TYPE_LATEST_SOFTWARE);
 
-        if (lastActivityType != null && hasAlarmedType != null
-                && softwareUpdateType != null && latestSoftwareType != null) {
+        if (lastActivityType != null && hasAlarmedType != null &&
+                alarmInfoType != null && softwareUpdateType != null && latestSoftwareType != null) {
             ChannelDefinition lastActivity = new ChannelDefinitionBuilder(CHANNEL_LAST_ACTIVITY_ID,
                     CHANNEL_TYPE_LAST_ACTIVITY)
                     .withLabel(lastActivityType.getLabel())
@@ -197,6 +198,11 @@ public class NibeUplinkRestTypeFactory {
                     CHANNEL_TYPE_HAS_ALARMED)
                     .withLabel(hasAlarmedType.getLabel())
                     .withDescription(hasAlarmedType.getDescription())
+                    .build();
+            ChannelDefinition alarmInfo = new ChannelDefinitionBuilder(CHANNEL_ALARM_INFO_ID,
+                    CHANNEL_TYPE_ALARM_INFO)
+                    .withLabel(alarmInfoType.getLabel())
+                    .withDescription(alarmInfoType.getDescription())
                     .build();
             ChannelDefinition softwareUpdate = new ChannelDefinitionBuilder(CHANNEL_SOFTWARE_UPDATE_ID,
                     CHANNEL_TYPE_SOFTWARE_UPDATE)
@@ -208,7 +214,7 @@ public class NibeUplinkRestTypeFactory {
                     .withLabel(latestSoftwareType.getLabel())
                     .withDescription(latestSoftwareType.getDescription())
                     .build();
-            return Stream.of(lastActivity, hasAlarmed, softwareUpdate, latestSoftware).collect(Collectors.toList());
+            return Stream.of(lastActivity, hasAlarmed, alarmInfo, softwareUpdate, latestSoftware).collect(Collectors.toList());
         }
         return Collections.emptyList();
     }

@@ -40,6 +40,7 @@ public class NibeUplinkRestBindingConstants {
     public static final String CHANNEL_GROUP_CONTROL = CHANNEL_GROUP_CONTROL_ID + "#";
     public static final String CHANNEL_LAST_ACTIVITY_ID = "lastActivity";
     public static final String CHANNEL_HAS_ALARMED_ID = "hasAlarmed";
+    public static final String CHANNEL_ALARM_INFO_ID = "alarmInfo";
     public static final String CHANNEL_MODE_ID = "mode";
     public static final String CHANNEL_SOFTWARE_UPDATE_ID = "softwareUpdate";
     public static final String CHANNEL_LATEST_SOFTWARE_ID = "latestSoftware";
@@ -47,6 +48,7 @@ public class NibeUplinkRestBindingConstants {
     public static final String CHANNEL_HOT_WATER_BOOST_ID = "hotWaterBoost";
     public static final String CHANNEL_LAST_ACTIVITY = CHANNEL_GROUP_STATUS + CHANNEL_LAST_ACTIVITY_ID;
     public static final String CHANNEL_HAS_ALARMED = CHANNEL_GROUP_STATUS + CHANNEL_HAS_ALARMED_ID;
+    public static final String CHANNEL_ALARM_INFO = CHANNEL_GROUP_STATUS + CHANNEL_ALARM_INFO_ID;
     public static final String CHANNEL_SOFTWARE_UPDATE = CHANNEL_GROUP_STATUS + CHANNEL_SOFTWARE_UPDATE_ID;
     public static final String CHANNEL_LATEST_SOFTWARE = CHANNEL_GROUP_STATUS + CHANNEL_LATEST_SOFTWARE_ID;
     public static final String CHANNEL_MODE = CHANNEL_GROUP_CONTROL + CHANNEL_MODE_ID;
@@ -72,6 +74,8 @@ public class NibeUplinkRestBindingConstants {
             new ChannelTypeUID(BINDING_ID, CHANNEL_LAST_ACTIVITY_ID);
     public static final ChannelTypeUID CHANNEL_TYPE_HAS_ALARMED =
             new ChannelTypeUID(BINDING_ID, CHANNEL_HAS_ALARMED_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_ALARM_INFO =
+            new ChannelTypeUID(BINDING_ID, CHANNEL_ALARM_INFO_ID);
     public static final ChannelTypeUID CHANNEL_TYPE_SOFTWARE_UPDATE =
             new ChannelTypeUID(BINDING_ID, CHANNEL_SOFTWARE_UPDATE_ID);
     public static final ChannelTypeUID CHANNEL_TYPE_LATEST_SOFTWARE =
@@ -107,6 +111,7 @@ public class NibeUplinkRestBindingConstants {
     private static final String API_ENDPOINT = BASE_URL + "api/v1/";
     public static final String API_SYSTEMS = API_ENDPOINT + "systems";
     public static final String API_SYSTEM_WITH_ID = API_SYSTEMS + "/%s";
+    public static final String API_NOTIFICATIONS = API_SYSTEM_WITH_ID + "/notifications";
     public static final String API_CONFIG = API_SYSTEM_WITH_ID + "/config";
     public static final String API_SOFTWARE = API_SYSTEM_WITH_ID + "/software";
     public static final String API_CATEGORIES = API_SYSTEM_WITH_ID + "/serviceinfo/categories";

@@ -81,6 +81,44 @@ public class NibeUplinkRestResponseParser {
         }
     }
 
+    /**
+     * Custom deserializer to get alarm info in a nested json object
+     */
+    private static class AlarmInfoDeserializer implements JsonDeserializer<AlarmInfo> {
+
+        @Override
+        public AlarmInfo deserialize(@Nullable JsonElement json, @Nullable Type type,
+                                            @Nullable JsonDeserializationContext jsonDeserializationContext)
+                throws JsonParseException {
+            if (json == null)
+            {
+                throw new JsonParseException("null");
+            }
+
+            return new Gson().fromJson(json.getAsJsonObject().get("info"), AlarmInfo.class);
+        }
+    }
+
+    /**
+     * Custom deserializer to get a list of alarm info in a nested json object
+     */
+    private static class AlarmInfoListDeserializer implements JsonDeserializer<List<AlarmInfo>> {
+
+        @Override
+        public List<AlarmInfo> deserialize(@Nullable JsonElement json, @Nullable Type type,
+                                     @Nullable JsonDeserializationContext jsonDeserializationContext)
+                throws JsonParseException {
+            if (json == null)
+            {
+                throw new JsonParseException("null");
+            }
+
+            JsonElement objects = json.getAsJsonObject().get("objects");
+
+            return new Gson().fromJson(objects, new TypeToken<List<AlarmInfo>>(){}.getType());
+        }
+    }
+
     private static class SoftwareInfoDeserializer implements JsonDeserializer<SoftwareInfo> {
 
         @Override
@@ -104,6 +142,8 @@ public class NibeUplinkRestResponseParser {
             .registerTypeAdapter(Mode.class, new ModeDeserializer())
             .registerTypeAdapter(SoftwareInfo.class, new SoftwareInfoDeserializer())
             .registerTypeAdapter(new TypeToken<List<NibeSystem>>(){}.getType(), new NibeSystemListDeserializer())
+            .registerTypeAdapter(AlarmInfo.class, new AlarmInfoDeserializer())
+            .registerTypeAdapter(new TypeToken<List<AlarmInfo>>(){}.getType(), new AlarmInfoListDeserializer())
             .create();
 
     /**
@@ -122,6 +162,15 @@ public class NibeUplinkRestResponseParser {
      */
     public static List<NibeSystem> parseSystemList(String json) {
         return gson.fromJson(json, new TypeToken<List<NibeSystem>>(){}.getType());
+    }
+
+    /**
+     * Parse a json string with notification info
+     * @param json
+     * @return
+     */
+    public static List<AlarmInfo> parseAlarmInfoList(String json) {
+        return gson.fromJson(json, new TypeToken<List<AlarmInfo>>(){}.getType());
     }
 
     /**

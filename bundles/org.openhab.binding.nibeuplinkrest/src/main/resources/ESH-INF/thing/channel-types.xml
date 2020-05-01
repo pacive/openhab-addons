@@ -90,6 +90,12 @@
 		<description>There is an active alarm on the system</description>
 		<state readOnly="true" />
 	</channel-type>
+	<channel-type id="alarmInfo">
+		<item-type>String</item-type>
+		<label>Alarm Info</label>
+		<description>Info on the current alarm</description>
+		<state readOnly="true" />
+	</channel-type>
 	<channel-type id="softwareUpdate">
 		<item-type>Switch</item-type>
 		<label>Software update available</label>

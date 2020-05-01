@@ -124,6 +124,13 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     @Override
+    public AlarmInfo getLatestAlarm(int systemId) {
+        Request req = requests.createAlarmInfoRequest(systemId);
+        String resp = requests.makeRequestWithRetry(req);
+        return parseAlarmInfoList(resp).get(0);
+    }
+
+    @Override
     public SystemConfig getSystemConfig(int systemId) {
         NibeSystem system = cachedSystems.get(systemId);
         SystemConfig config = null;
