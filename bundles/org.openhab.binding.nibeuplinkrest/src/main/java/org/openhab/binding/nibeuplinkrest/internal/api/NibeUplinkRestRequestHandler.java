@@ -99,7 +99,7 @@ public class NibeUplinkRestRequestHandler {
     }
 
     /**
-     * Create a request for a specific system
+     * Create a request for alarm info
      * @param systemId
      * @return
      */

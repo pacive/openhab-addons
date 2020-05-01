@@ -29,6 +29,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
+import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
 import org.eclipse.smarthome.io.net.http.HttpClientFactory;
 import org.openhab.binding.nibeuplinkrest.internal.auth.NibeUplinkRestOAuthService;
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBaseSystemHandler;
@@ -56,6 +57,7 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
     private @NonNullByDefault({}) NibeUplinkRestOAuthService oAuthService;
     private @NonNullByDefault({}) HttpClient httpClient;
     private @NonNullByDefault({}) NibeUplinkRestTypeFactory typeFactory;
+    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -73,7 +75,7 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
             return handler;
         }
         if (THING_TYPE_THERMOSTAT.equals(thingTypeUID)) {
-            return new NibeUplinkRestThermostatHandler(thing);
+            return new NibeUplinkRestThermostatHandler(thing, itemChannelLinkRegistry);
         }
         if (thingTypeUID.getBindingId().equals(BINDING_ID)) {
             return new NibeUplinkRestBaseSystemHandler(thing, typeFactory.getGroupTypeProvider());
@@ -112,5 +114,14 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
 
     protected void unsetTypeFactory(NibeUplinkRestTypeFactory typeFactory) {
         this.typeFactory = null;
+    }
+
+    @Reference
+    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+    }
+
+    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
+        this.itemChannelLinkRegistry = null;
     }
 }
