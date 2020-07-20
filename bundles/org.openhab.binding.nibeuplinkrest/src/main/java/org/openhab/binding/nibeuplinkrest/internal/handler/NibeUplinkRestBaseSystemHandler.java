@@ -149,12 +149,18 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     public void channelLinked(ChannelUID channelUID) {
         try {
             nibeUplinkRestApi.addTrackedParameter(systemId, Integer.parseInt(channelUID.getIdWithoutGroup()));
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+        }
     }
 
     @Override
     public void channelUnlinked(ChannelUID channelUID) {
-        nibeUplinkRestApi.removeTrackedParameter(systemId, Integer.parseInt(channelUID.getId()));
+        if (!isLinked(channelUID)) {
+            try {
+                nibeUplinkRestApi.removeTrackedParameter(systemId, Integer.parseInt(channelUID.getIdWithoutGroup()));
+            } catch (NumberFormatException ignored) {
+            }
+        }
     }
 
 
