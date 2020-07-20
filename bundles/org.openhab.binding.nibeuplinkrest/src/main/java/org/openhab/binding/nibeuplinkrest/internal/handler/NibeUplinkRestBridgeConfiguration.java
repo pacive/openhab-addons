@@ -12,14 +12,17 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal.handler;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link NibeUplinkRestBridgeConfiguration} class contains fields mapping thing configuration parameters.
  *
  * @author Anders Alfredsson - Initial contribution
  */
+@NonNullByDefault
 public class NibeUplinkRestBridgeConfiguration {
-    public String clientId;
-    public String clientSecret;
+    public String clientId = "";
+    public String clientSecret = "";
     public long updateInterval;
     public long softwareUpdateCheckInterval;
 }

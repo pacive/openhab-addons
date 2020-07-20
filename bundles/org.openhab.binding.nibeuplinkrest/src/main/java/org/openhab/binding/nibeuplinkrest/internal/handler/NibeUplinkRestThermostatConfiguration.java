@@ -12,6 +12,7 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal.handler;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.List;
@@ -21,9 +22,10 @@ import java.util.List;
  *
  * @author Anders Alfredsson - Initial contribution
  */
+@NonNullByDefault
 public class NibeUplinkRestThermostatConfiguration {
     public int id;
     public int systemId;
-    public String name;
+    public String name = "";
     @Nullable public List<Integer> climateSystems;
 }
