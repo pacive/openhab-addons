@@ -24,6 +24,7 @@ import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.smarthome.core.auth.client.oauth2.*;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestHttpException;
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
 import org.slf4j.Logger;
@@ -507,8 +508,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
                 logger.debug("Nibe Uplink responded with an error: {}", e.getMessage());
             }
             return;
-        } catch (RuntimeException e) {
-            logger.debug("Failed to get data from Nibe Uplink: {}", e.getMessage());
+        } catch (NibeUplinkRestException e) {
+            logger.debug("Failed to get data from Nibe Uplink: {}", e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
             return;
         }
 
