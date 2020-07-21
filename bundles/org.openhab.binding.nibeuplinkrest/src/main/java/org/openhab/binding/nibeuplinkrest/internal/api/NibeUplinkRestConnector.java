@@ -467,20 +467,18 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             return;
         }
 
-        int systemId;
-        RequestType requestType;
-        NibeUplinkRestCallbackListener listener;
-        String resp;
+        if (req == null) {
+            return;
+        }
 
-        if (req == null) { return; }
+        int systemId = (int) req.getAttributes().get(NibeUplinkRestRequestHandler.SYSTEM_ID);
+        RequestType requestType = (RequestType) req.getAttributes().get(NibeUplinkRestRequestHandler.REQUEST_TYPE);
+        NibeUplinkRestCallbackListener listener = listeners.get(systemId);
+        String resp;
 
         if (queuedRequests.size() > MAX_QUEUE_SIZE - 5) {
             logger.warn("Request queue nearly full, consider increasing update interval");
         }
-
-        systemId = (int) req.getAttributes().get(NibeUplinkRestRequestHandler.SYSTEM_ID);
-        requestType = (RequestType) req.getAttributes().get(NibeUplinkRestRequestHandler.REQUEST_TYPE);
-        listener = listeners.get(systemId);
 
         if (listener == null) {
             logger.debug("No listener for systemId {}", systemId);
