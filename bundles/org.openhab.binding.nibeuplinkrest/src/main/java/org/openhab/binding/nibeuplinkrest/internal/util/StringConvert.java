@@ -16,9 +16,11 @@ package org.openhab.binding.nibeuplinkrest.internal.util;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -42,5 +44,12 @@ public class StringConvert {
         }
         match.appendTail(output);
         return output.toString();
+    }
+
+    public static String capitalize(String input) {
+        return Arrays.asList(input.split("\\s"))
+                .stream()
+                .map((str) -> str.substring(0, 1).toUpperCase(Locale.ROOT) + str.substring(1))
+                .collect(Collectors.joining(" "));
     }
 }

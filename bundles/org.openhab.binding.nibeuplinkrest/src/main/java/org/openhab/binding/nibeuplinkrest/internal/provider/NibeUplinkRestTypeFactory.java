@@ -16,7 +16,6 @@ package org.openhab.binding.nibeuplinkrest.internal.provider;
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 import static org.openhab.binding.nibeuplinkrest.internal.provider.TypeFactoryConstants.*;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
@@ -93,7 +92,7 @@ public class NibeUplinkRestTypeFactory {
 
         // Construct the thing-type
         ThingTypeUID thingTypeUID = new ThingTypeUID(BINDING_ID,
-                StringUtils.deleteWhitespace(system.getProductName()).toLowerCase(Locale.ROOT));
+                system.getProductName().toLowerCase(Locale.ROOT).replaceAll("\\s", ""));
         ThingType thingType = ThingTypeBuilder.instance(thingTypeUID, system.getProductName())
                 .withSupportedBridgeTypeUIDs(Collections.singletonList(THING_TYPE_APIBRIDGE.getAsString()))
                 .withChannelGroupDefinitions(groupDefinitions)
@@ -127,7 +126,7 @@ public class NibeUplinkRestTypeFactory {
         }
 
         return ChannelGroupTypeBuilder.instance(channelGroupTypeUID,
-                StringUtils.capitalize(category.getName()))
+                StringConvert.capitalize(category.getName()))
                 .withChannelDefinitions(channelDefinitions)
                 .isAdvanced(isCategoryAdvanced(category.getCategoryId()))
                 .build();
@@ -171,7 +170,7 @@ public class NibeUplinkRestTypeFactory {
         int scalingFactor = getScalingFactor(parameter, type);
 
         return new ChannelDefinitionBuilder(parameter.getName(), uid)
-                .withLabel(StringUtils.capitalize(parameter.getTitle()))
+                .withLabel(StringConvert.capitalize(parameter.getTitle()))
                 .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR, Integer.toString(scalingFactor)))
                 .build();
     }

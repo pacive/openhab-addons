@@ -12,16 +12,19 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal.auth;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.BundleContext;
@@ -69,7 +72,11 @@ public class NibeUplinkRestOAuthServletTemplate  {
             throw new FileNotFoundException("File not found: " + fileName);
         }
         try (InputStream reader = file.openStream()) {
-            this.template = IOUtils.toString(reader);
+            String content = new BufferedReader(
+                    new InputStreamReader(reader, StandardCharsets.UTF_8))
+                    .lines()
+                    .collect(Collectors.joining("\r\n"));
+            this.template = content;
         }
     }
 

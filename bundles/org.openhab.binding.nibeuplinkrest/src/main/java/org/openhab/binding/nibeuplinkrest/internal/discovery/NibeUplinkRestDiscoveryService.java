@@ -13,7 +13,6 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.discovery;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
@@ -112,7 +111,7 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
         properties.put(PROPERTY_SERIAL_NUMBER, system.getSerialNumber());
 
         ThingTypeUID thingTypeUID = new ThingTypeUID(BINDING_ID,
-                StringUtils.deleteWhitespace(system.getProductName()).toLowerCase(Locale.ROOT));
+                system.getProductName().replaceAll("\\s", "").toLowerCase(Locale.ROOT));
 
         if (!typeFactory.hasThingType(thingTypeUID)) {
             typeFactory.createThingType(system, categories);
