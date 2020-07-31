@@ -72,22 +72,22 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         if (command == RefreshType.REFRESH) {
             switch (channelId) {
                 case CHANNEL_MODE_ID:
-                    modeUpdated(nibeUplinkRestApi.getMode(systemId));
+                    nibeUplinkRestApi.requestMode(systemId);
                     break;
                 case CHANNEL_LAST_ACTIVITY_ID:
                 case CHANNEL_HAS_ALARMED_ID:
-                    systemUpdated(nibeUplinkRestApi.getSystem(systemId));
+                    nibeUplinkRestApi.requestSystem(systemId);
                     break;
                 case CHANNEL_SOFTWARE_UPDATE_ID:
                 case CHANNEL_LATEST_SOFTWARE_ID:
-                    softwareUpdateAvailable(nibeUplinkRestApi.getSoftwareInfo(systemId));
+                    nibeUplinkRestApi.requestSoftwareInfo(systemId);
                     break;
                 default:
                     try {
-                        parametersUpdated(nibeUplinkRestApi.getParameters(systemId,
-                                Collections.singleton(Integer.parseInt(channelId))));
+                        nibeUplinkRestApi.requestParameters(systemId,
+                                Collections.singleton(Integer.parseInt(channelId)));
                     } catch (NumberFormatException e) {
-                        logger.warn("Failed to update channel {}", channelId);
+                        logger.debug("Failed to parse channel id: {}", channelId);
                     }
             }
         } else if (groupId.equals(CHANNEL_GROUP_CONTROL_ID)) {
@@ -127,21 +127,16 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
             }
         } else {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_UNINITIALIZED, "No bridge found");
+            return;
         }
         scheduler.execute(() -> {
-            updateProperties();
+            nibeUplinkRestApi.requestSystem(systemId);
             thing.getChannels().stream().filter(c -> isLinked(c.getUID())).forEach(c -> {
                 try {
                     nibeUplinkRestApi.addTrackedParameter(systemId, Integer.parseInt(c.getUID().getIdWithoutGroup()));
                 } catch (NumberFormatException ignored) {
-                    return;
                 }
             });
-            if (isOnline()) {
-                updateStatus(ThingStatus.ONLINE);
-            } else {
-                updateStatus(ThingStatus.OFFLINE);
-            }
         });
     }
 
@@ -173,32 +168,6 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     public void dispose() {
         logger.debug("Disposing thinghandler for thing {}", thing.getUID().getAsString());
         nibeUplinkRestApi.removeCallbackListener(systemId);
-    }
-
-    /**
-     * Checks whether the system is online
-     *
-     * @return false if the system is marked OFFLINE, otherwise true
-     */
-    public boolean isOnline() {
-        ConnectionStatus status = nibeUplinkRestApi.getSystem(config.systemId).getConnectionStatus();
-        return status != ConnectionStatus.OFFLINE;
-    }
-
-    /**
-     * Gets information about the system configuration and software from Nibe uplink
-     * and adds them as Thing properties
-     */
-    private void updateProperties() {
-        SystemConfig systemConfig = nibeUplinkRestApi.getSystemConfig(systemId);
-        SoftwareInfo softwareInfo = nibeUplinkRestApi.getSoftwareInfo(systemId);
-        Map<String, String> properties = editProperties();
-        properties.put(PROPERTY_HAS_COOLING, Boolean.toString(systemConfig.hasCooling()));
-        properties.put(PROPERTY_HAS_HEATING, Boolean.toString(systemConfig.hasHeating()));
-        properties.put(PROPERTY_HAS_HOT_WATER, Boolean.toString(systemConfig.hasHotWater()));
-        properties.put(PROPERTY_HAS_VENTILATION, Boolean.toString(systemConfig.hasVentilation()));
-        properties.put(PROPERTY_SOFTWARE_VERSION, softwareInfo.getCurrentVersion());
-        updateProperties(properties);
     }
 
     @Override
@@ -242,8 +211,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         updateState(CHANNEL_LAST_ACTIVITY, new DateTimeType(system.getLastActivityDate()));
         updateState(CHANNEL_HAS_ALARMED, OnOffType.from(system.hasAlarmed()));
         if (system.hasAlarmed()) {
-            AlarmInfo alarmInfo = nibeUplinkRestApi.getLatestAlarm(systemId);
-            updateState(CHANNEL_ALARM_INFO, new StringType(alarmInfo.toString()));
+            nibeUplinkRestApi.requestLatestAlarm(systemId);
         }
         if (system.getConnectionStatus() == ConnectionStatus.OFFLINE) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.NONE, "Nibe reports the system as offline");
@@ -260,12 +228,22 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         } else {
             updateState(CHANNEL_SOFTWARE_UPDATE, OnOffType.OFF);
             updateState(CHANNEL_LATEST_SOFTWARE, new StringType(softwareInfo.getCurrentVersion()));
+            if (!softwareInfo.getCurrentVersion().equals(thing.getProperties().get(PROPERTY_SOFTWARE_VERSION))) {
+                Map<String, String> properties = editProperties();
+                properties.put(PROPERTY_SOFTWARE_VERSION, softwareInfo.getCurrentVersion());
+                updateProperties(properties);
+            }
         }
     }
 
     @Override
     public void modeUpdated(Mode mode) {
         updateState(CHANNEL_MODE, new StringType(mode.toString()));
+    }
+
+    @Override
+    public void alarmInfoUpdated(AlarmInfo alarmInfo) {
+        updateState(CHANNEL_ALARM_INFO, new StringType(alarmInfo.toString()));
     }
 
     private DecimalType transformIncoming(Channel channel, int incomingValue) {

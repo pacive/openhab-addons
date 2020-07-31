@@ -14,7 +14,7 @@ package org.openhab.binding.nibeuplinkrest.internal.api;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 
 import java.util.List;
 import java.util.Map;
@@ -37,45 +37,53 @@ public interface NibeUplinkRestApi {
     List<NibeSystem> getConnectedSystems();
 
     /**
-     * Get info on a specific system
+     * Get info on the systems configuration - if it supports heating, cooling, hot water and ventilation
      *
-     * @param systemId Id of the system to get
-     * @return A {@link NibeSystem} object with info on the system
+     * @param systemId Id of the system
+     * @return A {@link SystemConfig} object holding info on the system
      */
-    NibeSystem getSystem(int systemId);
-
-    /**
-     * Get info on a latest alarm on the system
-     *
-     * @param systemId Id of the system to get
-     * @return A {@link NibeSystem} object with info on the system
-     */
-    AlarmInfo getLatestAlarm(int systemId);
+    SystemConfig getSystemConfig(int systemId) throws NibeUplinkRestException;
 
     /**
      * Get a list of categories that represents different components of the system
+     *
      * @param systemId Id of the system
      * @param includeParameters Whether parameters related to the categories should be retrieved as well
      * @return A list of {@link Category} objects
      */
-    List<Category> getCategories(int systemId, boolean includeParameters);
+    List<Category> getCategories(int systemId, boolean includeParameters) throws NibeUplinkRestException;
 
     /**
-     * Get info on the systems configuration - if it supports heating, cooling, hot water and ventilation
-     * @param systemId Id of the system
-     * @return A {@link SystemConfig} object holding info on the system
+     * Get info on a specific system. The request is placed at the head of the queue and the response
+     * gets sent to the {@link NibeUplinkRestCallbackListener} registered for the systemId.
+     *
+     * @param systemId Id of the system to get
+     * @return A {@link NibeSystem} object with info on the system
      */
-    SystemConfig getSystemConfig(int systemId);
+    void requestSystem(int systemId);
 
     /**
-     * Get info on the software version installed on the system as well as any available upgrade
+     * Get info on a latest alarm on the system. The request is placed at the head of the queue and the response
+     * gets sent to the {@link NibeUplinkRestCallbackListener} registered for the systemId.
+     *
+     * @param systemId Id of the system to get
+     * @return A {@link NibeSystem} object with info on the system
+     */
+    void requestLatestAlarm(int systemId);
+
+    /**
+     * Get info on the software version installed on the system as well as any available upgrade. The request is placed
+     * at the head of the queue and the response gets sent to the {@link NibeUplinkRestCallbackListener} registered for
+     * the systemId.
+     *
      * @param systemId Id of the system
      * @return A {@link SoftwareInfo} object holding infomration on the software
      */
-    SoftwareInfo getSoftwareInfo(int systemId);
+    void requestSoftwareInfo(int systemId);
 
     /**
      * Add a parameter to be tracked, to be included in requests
+     *
      * @param systemId Id of the system
      * @param parameterId Id of the parameter
      */
@@ -83,34 +91,39 @@ public interface NibeUplinkRestApi {
 
     /**
      * Remove a parameter from being tracked. It will no longer be included in requests.
+     *
      * @param systemId Id of the system
      * @param parameterId Id of the parameter
      */
     void removeTrackedParameter(int systemId, int parameterId);
 
     /**
-     * Set writeable parameters to a specified value
+     * Get a list of parameter. The request is placed at the head of the queue and the response
+     * gets sent to the {@link NibeUplinkRestCallbackListener} registered for the systemId.
+     *
      * @param systemId Id of the system
-     * @param parameters A {@link Map} of parameters and corresponding values to be set
+     * @param parameterIds A {@link Set} of parameters to get
      */
-    List<Parameter> getParameters(int systemId, Set<Integer> parameterIds);
+    void requestParameters(int systemId, Set<Integer> parameterIds);
 
     /**
      * Set writeable parameters to a specified value
+     *
      * @param systemId Id of the system
      * @param parameters A {@link Map} of parameters and corresponding values to be set
      */
-    void setParameters(int systemId, Map<Integer, Integer> parameters);
+    void setParameters(int systemId, Map<Integer, Integer> parameters) throws NibeUplinkRestException;
 
     /**
-     * Gets the system operating mode - Default, away or vacation
+     * Gets the system operating mode - Default, away or vacation. The request is placed at the head of the queue and
+     * the response gets sent to the {@link NibeUplinkRestCallbackListener} registered for the systemId.
      * @param systemId Id of the system
-     * @return A {@link Mode} enum
      */
-    Mode getMode(int systemId);
+    void requestMode(int systemId);
 
     /**
      * Set the system operating mode - Default, away or vacation
+     *
      * @param systemId Id of the system
      * @param mode One of {@link Mode}'s enums
      */
@@ -118,6 +131,7 @@ public interface NibeUplinkRestApi {
 
     /**
      * Adds or updates a virtual thermostat connected to Nibe uplink that influences the system
+     *
      * @param systemId Id of the system
      * @param thermostat A {@link Thermostat} object holding info to be sent to Nibe uplink
      */
@@ -134,6 +148,7 @@ public interface NibeUplinkRestApi {
     /**
      * Add a callback listener that should receive updates for a specific system. There can only be one for
      * each system.
+     *
      * @param systemId Id of the system
      * @param listener A {@link NibeUplinkRestCallbackListener} that should receive updates
      */
@@ -147,7 +162,7 @@ public interface NibeUplinkRestApi {
 
     /**
      * Set the amount of seconds between updates to the parameters and system info
-     * @param updateInterval Tiem in seconds
+     * @param updateInterval Time in seconds
      */
     void setUpdateInterval(int updateInterval);
 

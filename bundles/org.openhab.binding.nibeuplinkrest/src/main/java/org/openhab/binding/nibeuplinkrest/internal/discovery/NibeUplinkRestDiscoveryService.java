@@ -23,6 +23,7 @@ import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerService;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
@@ -70,11 +71,15 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
             NibeUplinkRestApi connection = bridgeHandler.getApiConnection();
             connection.getConnectedSystems().forEach(system -> {
                 logger.debug("Found system with id {}", system.getSystemId());
-                if (!system.isConfigSet()) {
-                    system.setConfig(connection.getSystemConfig(system.getSystemId()));
+                try {
+                    if (!system.isConfigSet()) {
+                        system.setConfig(connection.getSystemConfig(system.getSystemId()));
+                    }
+                    List<Category> categories = connection.getCategories(system.getSystemId(), true);
+                    thingDiscovered(system, categories);
+                } catch (NibeUplinkRestException e) {
+                    logger.warn("Error retrieving properties for system {}", system.getSystemId());
                 }
-                List<Category> categories = connection.getCategories(system.getSystemId(), true);
-                thingDiscovered(system, categories);
             });
         }
     }
@@ -109,6 +114,10 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
         properties.put(PROPERTY_PRODUCT_NAME, system.getProductName());
         properties.put(PROPERTY_SECURITY_LEVEL, system.getSecurityLevel());
         properties.put(PROPERTY_SERIAL_NUMBER, system.getSerialNumber());
+        properties.put(PROPERTY_HAS_COOLING, system.hasCooling());
+        properties.put(PROPERTY_HAS_HEATING, system.hasHeating());
+        properties.put(PROPERTY_HAS_HOT_WATER, system.hasHotWater());
+        properties.put(PROPERTY_HAS_VENTILATION, system.hasVentilation());
 
         ThingTypeUID thingTypeUID = new ThingTypeUID(BINDING_ID,
                 system.getProductName().replaceAll("\\s", "").toLowerCase(Locale.ROOT));
@@ -120,9 +129,12 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
         ThingUID thingUID = new ThingUID(thingTypeUID, bridgeUID,
                 Integer.toString(system.getSystemId()));
 
-        DiscoveryResult result = DiscoveryResultBuilder.create(thingUID).withBridge(bridgeUID)
-                .withProperties(properties).withRepresentationProperty(PROPERTY_SYSTEM_ID)
-                .withLabel(system.getName()).build();
+        DiscoveryResult result = DiscoveryResultBuilder.create(thingUID)
+                .withLabel(system.getName())
+                .withBridge(bridgeUID)
+                .withProperties(properties)
+                .withRepresentationProperty(PROPERTY_SYSTEM_ID)
+                .build();
 
         thingDiscovered(result);
     }

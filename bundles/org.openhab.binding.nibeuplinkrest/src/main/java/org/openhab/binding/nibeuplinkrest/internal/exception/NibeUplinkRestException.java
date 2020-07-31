@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault
-public class NibeUplinkRestException extends RuntimeException {
+public class NibeUplinkRestException extends Exception {
 
     private static final long serialVersionUID = 9409575184589375L;
 

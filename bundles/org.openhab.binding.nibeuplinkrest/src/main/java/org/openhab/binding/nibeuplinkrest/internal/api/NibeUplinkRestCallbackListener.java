@@ -14,10 +14,7 @@
 package org.openhab.binding.nibeuplinkrest.internal.api;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.Parameter;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.SoftwareInfo;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 
 import java.util.List;
 
@@ -51,9 +48,16 @@ public interface NibeUplinkRestCallbackListener {
     void softwareUpdateAvailable(SoftwareInfo softwareInfo);
 
     /**
-     * Callback when a request for the systems opertaing mode has a response
+     * Callback when a request for the systems operating mode has a response
      *
      * @param mode A {@link Mode} enum value
      */
     void modeUpdated(Mode mode);
+
+    /**
+     * Callback when a request for the systems alarm ifo has a response
+     *
+     * @param alarmInfo A {@link Mode} enum value
+     */
+    void alarmInfoUpdated(AlarmInfo alarmInfo);
 }

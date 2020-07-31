@@ -51,7 +51,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     private final Map<Integer, @Nullable Map<Integer, Thermostat>> thermostats = new ConcurrentHashMap<>();
     private final Map<Integer, @Nullable Set<Integer>> trackedParameters = new ConcurrentHashMap<>();
     private final Map<Integer, @Nullable Mode> modes = new ConcurrentHashMap<>();
-    private final BlockingQueue<@Nullable Request> queuedRequests = new ArrayBlockingQueue<>(MAX_QUEUE_SIZE);
+    private final BlockingDeque<@Nullable Request> queuedRequests = new LinkedBlockingDeque<>(MAX_QUEUE_SIZE);
     private final Map<Integer, @Nullable NibeUplinkRestCallbackListener> listeners = new ConcurrentHashMap<>();
     private @Nullable Future<?> standardRequestProducer;
     private @Nullable Future<?> softwareRequestProducer;
@@ -102,9 +102,14 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     @Override
     public List<NibeSystem> getConnectedSystems() {
         logger.debug("Checking connected systems...");
+        List<NibeSystem> systems;
         Request req = requests.createConnectedSystemsRequest();
-        String resp = requests.makeRequestWithRetry(req);
-        List<NibeSystem> systems = parseSystemList(resp);
+        try {
+            String resp = requests.makeRequestWithRetry(req);
+            systems = parseSystemList(resp);
+        } catch (NibeUplinkRestException e) {
+            systems = Collections.emptyList();
+        }
         logger.debug("{} systems found", systems.size());
         for (NibeSystem system : systems) {
             cachedSystems.putIfAbsent(system.getSystemId(), system);
@@ -113,26 +118,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     @Override
-    public NibeSystem getSystem(int systemId) {
-        NibeSystem system = cachedSystems.get(systemId);
-        if (system == null) {
-            Request req = requests.createSystemRequest(systemId);
-            String resp = requests.makeRequestWithRetry(req);
-            system = parseSystem(resp);
-            cachedSystems.put(systemId, system);
-        }
-        return system;
-    }
-
-    @Override
-    public AlarmInfo getLatestAlarm(int systemId) {
-        Request req = requests.createAlarmInfoRequest(systemId);
-        String resp = requests.makeRequestWithRetry(req);
-        return parseAlarmInfoList(resp).get(0);
-    }
-
-    @Override
-    public SystemConfig getSystemConfig(int systemId) {
+    public SystemConfig getSystemConfig(int systemId) throws NibeUplinkRestException {
         NibeSystem system = cachedSystems.get(systemId);
         SystemConfig config = null;
         if (system != null) {
@@ -150,14 +136,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     @Override
-    public SoftwareInfo getSoftwareInfo(int systemId) {
-        Request req = requests.createSoftwareRequest(systemId);
-        String resp = requests.makeRequestWithRetry(req);
-        return parseSoftwareInfo(resp);
-    }
-
-    @Override
-    public List<Category> getCategories(int systemId, boolean includeParameters) {
+    public List<Category> getCategories(int systemId, boolean includeParameters) throws NibeUplinkRestException {
         Map<String, Category> cachedValues = cachedCategories.get(systemId);
         if (cachedValues == null || cachedValues.isEmpty()) {
             Request req = requests.createCategoriesRequest(systemId, includeParameters);
@@ -174,59 +153,49 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     @Override
-    public void addTrackedParameter(int systemId, int parameterId) {
-        Set<Integer> systemTrackedParameters = trackedParameters.get(systemId);
-        if (systemTrackedParameters == null) {
-            if (listeners.get(systemId) == null) {
-                logger.debug("No listener for system {} adding tracked parameters anyway.", systemId);
-            }
-            systemTrackedParameters = new ConcurrentHashSet<>();
-            trackedParameters.putIfAbsent(systemId, systemTrackedParameters);
-        }
-        if (systemTrackedParameters.add(parameterId)) {
-            logger.trace("System {} is now tracking parameter {}", systemId, parameterId);
-        }
+    public void requestSystem(int systemId) {
+        Request req = requests.createSystemRequest(systemId);
+        queuedRequests.addFirst(req);
     }
 
     @Override
-    public void removeTrackedParameter(int systemId, int parameterId) {
-        Set<Integer> systemTrackedParameters = trackedParameters.get(systemId);
-        if (systemTrackedParameters == null) {
-            logger.debug("No tracked parameters for system {}", systemId);
-            return;
-        }
-        if (systemTrackedParameters.remove(parameterId)) {
-            logger.trace("System {} is no longer tracking parameter {}", systemId, parameterId);
-        }
+    public void requestLatestAlarm(int systemId) {
+        Request req = requests.createAlarmInfoRequest(systemId);
+        queuedRequests.addFirst(req);
     }
 
     @Override
-    public List<Parameter> getParameters(int systemId, Set<Integer> parameterIds) {
+    public void requestSoftwareInfo(int systemId) {
+        Request req = requests.createSoftwareRequest(systemId);
+        queuedRequests.addFirst(req);
+    }
+
+    @Override
+    public void requestParameters(int systemId, Set<Integer> parameterIds) {
         logger.debug("Getting parameters: {}", parameterIds);
         Request req = requests.createGetParametersRequest(systemId, parameterIds);
-        return parseParameterList(requests.makeRequestWithRetry(req));
+        queuedRequests.addFirst(req);
     }
 
     @Override
     public void setParameters(int systemId, Map<Integer, Integer> parameters) {
         logger.debug("Setting parameters: {}", parameters);
         Request req = requests.createSetParametersRequest(systemId, parameters);
-        requests.makeRequestWithRetry(req);
+        queuedRequests.addFirst(req);
     }
 
     @Override
-    public Mode getMode(int systemId) {
+    public void requestMode(int systemId){
         logger.debug("Requesting mode from Nibe uplink");
         Request req = requests.createGetModeRequest(systemId);
-        String resp = requests.makeRequestWithRetry(req);
-        return parseMode(resp);
+        queuedRequests.addFirst(req);
     }
 
     @Override
     public void setMode(int systemId, Mode mode) {
         logger.debug("Setting mode: {}", mode);
         Request req = requests.createSetModeRequest(systemId, mode);
-        requests.makeRequestWithRetry(req);
+        queuedRequests.addFirst(req);
         if (mode != Mode.DEFAULT_OPERATION) {
             modes.put(systemId, mode);
         } else {
@@ -239,7 +208,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         logger.debug("Setting thermostat '{}': temperature {}, setpoint {}", thermostat.getName(),
                 thermostat.getActualTemp(), thermostat.getTargetTemp());
         Request req = requests.createSetThermostatRequest(systemId, thermostat);
-        requests.makeRequestWithRetry(req);
+        queuedRequests.addFirst(req);
 
         Map<Integer, Thermostat> systemThermostats = thermostats.get(systemId);
         if (systemThermostats != null) {
@@ -283,6 +252,33 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         }
         trackedParameters.remove(systemId);
         modes.remove(systemId);
+    }
+
+    @Override
+    public void addTrackedParameter(int systemId, int parameterId) {
+        Set<Integer> systemTrackedParameters = trackedParameters.get(systemId);
+        if (systemTrackedParameters == null) {
+            if (listeners.get(systemId) == null) {
+                logger.debug("No listener for system {} adding tracked parameters anyway.", systemId);
+            }
+            systemTrackedParameters = new ConcurrentHashSet<>();
+            trackedParameters.putIfAbsent(systemId, systemTrackedParameters);
+        }
+        if (systemTrackedParameters.add(parameterId)) {
+            logger.trace("System {} is now tracking parameter {}", systemId, parameterId);
+        }
+    }
+
+    @Override
+    public void removeTrackedParameter(int systemId, int parameterId) {
+        Set<Integer> systemTrackedParameters = trackedParameters.get(systemId);
+        if (systemTrackedParameters == null) {
+            logger.debug("No tracked parameters for system {}", systemId);
+            return;
+        }
+        if (systemTrackedParameters.remove(parameterId)) {
+            logger.trace("System {} is no longer tracking parameter {}", systemId, parameterId);
+        }
     }
 
     /**
@@ -524,7 +520,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         // Callback
         switch (requestType) {
             case SYSTEM:
-                listener.systemUpdated(parseSystem(resp));
+                NibeSystem system = parseSystem(resp);
+                cachedSystems.put(systemId, system);
+                listener.systemUpdated(system);
                 break;
             case PARAMETER_GET:
                 listener.parametersUpdated(parseParameterList(resp));
@@ -535,6 +533,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             case SOFTWARE:
                 listener.softwareUpdateAvailable(parseSoftwareInfo(resp));
                 break;
+            case ALARM:
+                listener.alarmInfoUpdated(parseAlarmInfoList(resp).get(0));
             default:
                 break;
         }

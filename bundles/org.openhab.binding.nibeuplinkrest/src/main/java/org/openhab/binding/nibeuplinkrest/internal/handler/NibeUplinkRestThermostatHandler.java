@@ -59,9 +59,6 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
             NibeUplinkRestBridgeHandler bridgeHandler = (NibeUplinkRestBridgeHandler) bridge.getHandler();
             if (bridgeHandler != null) {
                 nibeUplinkRestApi = bridgeHandler.getApiConnection();
-                readConnectedItem(CHANNEL_THERMOSTAT_CURRENT);
-                readConnectedItem(CHANNEL_THERMOSTAT_TARGET);
-                nibeUplinkRestApi.setThermostat(config.systemId, createThermostat());
             } else {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.BRIDGE_UNINITIALIZED);
                 return;
@@ -70,7 +67,12 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "No bridge configured");
             return;
         }
-        updateStatus(ThingStatus.ONLINE);
+        scheduler.execute(() -> {
+            readConnectedItem(CHANNEL_THERMOSTAT_CURRENT);
+            readConnectedItem(CHANNEL_THERMOSTAT_TARGET);
+            nibeUplinkRestApi.setThermostat(config.systemId, createThermostat());
+            updateStatus(ThingStatus.ONLINE);
+        });
     }
 
     @Override

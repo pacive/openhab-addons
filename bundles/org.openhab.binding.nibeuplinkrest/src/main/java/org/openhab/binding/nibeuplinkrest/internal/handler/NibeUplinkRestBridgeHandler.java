@@ -82,18 +82,20 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
                 config.updateInterval, config.softwareUpdateCheckInterval);
         scheduler.execute(() -> {
             logger.debug("Rebuilding thing-types");
-            try {
-                nibeUplinkRestApi.getConnectedSystems().forEach(system -> {
-                    system.setConfig(nibeUplinkRestApi.getSystemConfig(system.getSystemId()));
-                    List<Category> categories = nibeUplinkRestApi.getCategories(system.getSystemId(), true);
-                    typeFactory.createThingType(system, categories);
-                });
-            } catch (NibeUplinkRestException e) {
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_PENDING,
-                        "Waiting for OAuth authorization");
-            }
             if (isAuthorized()) {
                 updateStatus(ThingStatus.ONLINE);
+                nibeUplinkRestApi.getConnectedSystems().forEach(system -> {
+                    try {
+                        system.setConfig(nibeUplinkRestApi.getSystemConfig(system.getSystemId()));
+                        List<Category> categories = nibeUplinkRestApi.getCategories(system.getSystemId(), true);
+                        typeFactory.createThingType(system, categories);
+                    } catch (NibeUplinkRestException e) {
+                        logger.debug("Unable to build thing types: {}", e.getMessage());
+                    }
+                });
+            } else {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_PENDING,
+                        "Waiting for OAuth authorization");
             }
         });
     }

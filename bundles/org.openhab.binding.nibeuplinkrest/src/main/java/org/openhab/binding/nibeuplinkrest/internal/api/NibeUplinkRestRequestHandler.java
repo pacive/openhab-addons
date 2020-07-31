@@ -238,7 +238,7 @@ public class NibeUplinkRestRequestHandler {
      * @param req
      * @return
      */
-    private ContentResponse sendRequest(Request req) {
+    private ContentResponse sendRequest(Request req) throws NibeUplinkRestException {
         String token;
         try {
             AccessTokenResponse accessTokenResponse = oAuthClient.getAccessTokenResponse();
@@ -269,7 +269,7 @@ public class NibeUplinkRestRequestHandler {
      * @param resp
      * @return
      */
-    private String handleResponse(ContentResponse resp) {
+    private String handleResponse(ContentResponse resp) throws NibeUplinkRestHttpException {
         switch (resp.getStatus()) {
             case OK_200:
                 return resp.getContentAsString();
