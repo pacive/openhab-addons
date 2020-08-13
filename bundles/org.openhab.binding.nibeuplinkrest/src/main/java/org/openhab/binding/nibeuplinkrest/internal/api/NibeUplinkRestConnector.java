@@ -476,11 +476,6 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             logger.warn("Request queue nearly full, consider increasing update interval");
         }
 
-        if (listener == null) {
-            logger.debug("No listener for systemId {}", systemId);
-            return;
-        }
-
         // If mode has been reset to default, don't send.
         if (requestType == RequestType.MODE_SET && modes.get(systemId) == null) {
             return;
@@ -515,6 +510,11 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             isAliveRequestProducer = null;
             bridgeHandler.signalServerOnline();
             startPolling();
+        }
+
+        if (listener == null) {
+            logger.debug("No listener for systemId {}", systemId);
+            return;
         }
 
         // Callback
