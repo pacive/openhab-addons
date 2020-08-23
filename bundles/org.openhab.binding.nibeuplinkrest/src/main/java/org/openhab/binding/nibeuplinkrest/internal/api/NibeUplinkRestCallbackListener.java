@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Interface that specifies callback methods to inform the handler of updates
@@ -55,9 +56,16 @@ public interface NibeUplinkRestCallbackListener {
     void modeUpdated(Mode mode);
 
     /**
-     * Callback when a request for the systems alarm ifo has a response
+     * Callback when a request for the systems alarm info has a response
      *
      * @param alarmInfo A {@link Mode} enum value
      */
     void alarmInfoUpdated(AlarmInfo alarmInfo);
+
+    /**
+     * Callback when a request for the systems status has a response
+     *
+     * @param activeComponents A {@link Set} of the Ids of the active components
+     */
+    void statusUpdated(Set<String> activeComponents);
 }

@@ -18,10 +18,13 @@ import com.google.gson.reflect.TypeToken;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
+import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
 
 import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -148,6 +151,7 @@ public class NibeUplinkRestResponseParser {
 
     /**
      * Parse a json string with system info
+     *
      * @param json
      * @return
      */
@@ -157,6 +161,7 @@ public class NibeUplinkRestResponseParser {
 
     /**
      * Parse a json string with a list of systems
+     *
      * @param json
      * @return
      */
@@ -165,7 +170,24 @@ public class NibeUplinkRestResponseParser {
     }
 
     /**
+     * Parse a json string with status info
+     *
+     * @param json
+     * @return
+     */
+    public static Set<String> parseStatus(String json) {
+        Set<String> activeComponents = new HashSet<>();
+        JsonParser parser = new JsonParser();
+        JsonArray items = parser.parse(json).getAsJsonArray();
+        items.forEach((item) -> {
+            String title = item.getAsJsonObject().get("title").getAsString();
+            activeComponents.add(StringConvert.toCamelCase(title));
+        });
+        return activeComponents;
+    }
+    /**
      * Parse a json string with notification info
+     *
      * @param json
      * @return
      */
@@ -175,6 +197,7 @@ public class NibeUplinkRestResponseParser {
 
     /**
      * Parse a json string with system config information
+     *
      * @param json
      * @return
      */
@@ -184,6 +207,7 @@ public class NibeUplinkRestResponseParser {
 
     /**
      * Parse a json string with software info
+     *
      * @param json
      * @return
      */
@@ -193,6 +217,7 @@ public class NibeUplinkRestResponseParser {
 
     /**
      * Parse a json string with a list of categories
+     *
      * @param json
      * @return
      */
@@ -202,6 +227,7 @@ public class NibeUplinkRestResponseParser {
 
     /**
      * Parse a json string with a list of parameters
+     *
      * @param json
      * @return
      */
@@ -211,6 +237,7 @@ public class NibeUplinkRestResponseParser {
 
     /**
      * Parse a json string with info on the mode of the system
+     *
      * @param json
      * @return
      */

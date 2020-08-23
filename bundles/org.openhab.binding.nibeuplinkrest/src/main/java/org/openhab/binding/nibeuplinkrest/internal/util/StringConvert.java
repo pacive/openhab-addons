@@ -26,16 +26,15 @@ import java.util.stream.Stream;
 public class StringConvert {
 
     public static String snakeCaseToCamelCase(String input) {
-        String[] parts = input.toLowerCase(Locale.ROOT).split("_");
+        return toCamelCase(input.replace("_", " "));
+    }
+
+    public static String toCamelCase(String input) {
+        String[] parts = input.toLowerCase(Locale.ROOT).split("\\s");
         StringBuilder output = new StringBuilder();
 
         for (int i = 0; i < parts.length; i++) {
-            String part;
-            if (i == 0) {
-                part = parts[i];
-            } else {
-                part = parts[i].substring(0, 1).toUpperCase(Locale.ROOT) + parts[i].substring(1);
-            }
+            String part = i > 0 ? parts[i].substring(0, 1).toUpperCase(Locale.ROOT) + parts[i].substring(1) : parts[i];
             output.append(part);
         }
         return output.toString();

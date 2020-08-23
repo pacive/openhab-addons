@@ -51,6 +51,7 @@ public class NibeUplinkRestRequestHandler {
      */
     public enum RequestType {
         SYSTEM,
+        STATUS,
         PARAMETER_GET,
         SOFTWARE,
         MODE_GET,
@@ -96,6 +97,15 @@ public class NibeUplinkRestRequestHandler {
      */
     public Request createSystemRequest(int systemId) {
         return prepareRequest(HttpMethod.GET, API_SYSTEM_WITH_ID, systemId, RequestType.SYSTEM);
+    }
+
+    /**
+     * Create a request for a specific system
+     * @param systemId
+     * @return
+     */
+    public Request createStatusRequest(int systemId) {
+        return prepareRequest(HttpMethod.GET, API_STATUS, systemId, RequestType.STATUS);
     }
 
     /**

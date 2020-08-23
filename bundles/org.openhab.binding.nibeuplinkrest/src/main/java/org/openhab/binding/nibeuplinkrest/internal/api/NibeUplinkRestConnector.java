@@ -356,8 +356,10 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             if (listener != null) {
                 logger.trace("Queueing system request for {}", systemId);
                 try {
-                    Request req = requests.createSystemRequest(systemId);
-                    queuedRequests.add(req);
+                    Request systemRequest = requests.createSystemRequest(systemId);
+                    Request statusRequest = requests.createStatusRequest(systemId);
+                    queuedRequests.add(systemRequest);
+                    queuedRequests.add(statusRequest);
                 } catch (RuntimeException e) {
                     logger.warn("{}", e.getMessage());
                 }
@@ -524,6 +526,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
                 cachedSystems.put(systemId, system);
                 listener.systemUpdated(system);
                 break;
+            case STATUS:
+                listener.statusUpdated(parseStatus(resp));
             case PARAMETER_GET:
                 listener.parametersUpdated(parseParameterList(resp));
                 break;
