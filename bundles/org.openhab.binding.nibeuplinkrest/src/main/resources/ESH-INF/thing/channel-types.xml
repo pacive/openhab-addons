@@ -109,6 +109,49 @@
 		<state readOnly="true" />
 	</channel-type>
 
+	<channel-type id="compressor">
+		<item-type>Switch</item-type>
+		<label>Compressor</label>
+		<description>Status of the compressor</description>
+		<state readOnly="true" />
+	</channel-type>
+	<channel-type id="ventilation">
+		<item-type>Switch</item-type>
+		<label>Ventilation</label>
+		<description>Status of the ventilation system</description>
+		<state readOnly="true" />
+	</channel-type>
+	<channel-type id="addition">
+		<item-type>Switch</item-type>
+		<label>Electric addition</label>
+		<description>Status of the electric addition</description>
+		<state readOnly="true" />
+	</channel-type>
+	<channel-type id="heatingMediumPump">
+		<item-type>Switch</item-type>
+		<label>Heating medium pump</label>
+		<description>Status of the heating medium pump</description>
+		<state readOnly="true" />
+	</channel-type>
+	<channel-type id="hotWater">
+		<item-type>Switch</item-type>
+		<label>Hot water production</label>
+		<description>Whether the system is currently producing hot water</description>
+		<state readOnly="true" />
+	</channel-type>
+	<channel-type id="heating">
+		<item-type>Switch</item-type>
+		<label>Heating</label>
+		<description>Whether the system is currently working on heating</description>
+		<state readOnly="true" />
+	</channel-type>
+	<channel-type id="cooling">
+		<item-type>Switch</item-type>
+		<label>Heating</label>
+		<description>Whether the system is currently working on cooling</description>
+		<state readOnly="true" />
+	</channel-type>
+
 	<channel-group-type id="default_control">
 		<label>Control</label>
 		<description>Channels to control the operation of the system</description>
