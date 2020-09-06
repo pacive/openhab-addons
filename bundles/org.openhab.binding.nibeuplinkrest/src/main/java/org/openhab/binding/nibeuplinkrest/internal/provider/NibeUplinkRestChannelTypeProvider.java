@@ -13,6 +13,9 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.provider;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.type.*;
@@ -20,9 +23,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Provides generated channel-types to the framework
@@ -47,6 +47,7 @@ public class NibeUplinkRestChannelTypeProvider implements ChannelTypeProvider {
 
     /**
      * Add a channel-type
+     * 
      * @param type
      */
     public void add(ChannelType type) {
@@ -55,6 +56,7 @@ public class NibeUplinkRestChannelTypeProvider implements ChannelTypeProvider {
 
     /**
      * Remove a channel-type
+     * 
      * @param uid
      */
     public void remove(ChannelTypeUID uid) {
@@ -63,7 +65,6 @@ public class NibeUplinkRestChannelTypeProvider implements ChannelTypeProvider {
 
     @Activate
     protected void activate(ComponentContext componentContext) {
-
     }
 
     @Deactivate

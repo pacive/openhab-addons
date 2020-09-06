@@ -13,18 +13,19 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.api;
 
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
-import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
-
 import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
+import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
+
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -38,10 +39,8 @@ public class NibeUplinkRestResponseParser {
     private static class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime> {
         @Override
         public ZonedDateTime deserialize(@Nullable JsonElement json, @Nullable Type type,
-                                         @Nullable JsonDeserializationContext jsonDeserializationContext)
-                throws JsonParseException {
-            if (json == null)
-            {
+                @Nullable JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+            if (json == null) {
                 throw new JsonParseException("null");
             }
             return ZonedDateTime.parse(json.getAsJsonPrimitive().getAsString());
@@ -54,10 +53,8 @@ public class NibeUplinkRestResponseParser {
     private static class ModeDeserializer implements JsonDeserializer<Mode> {
         @Override
         public Mode deserialize(@Nullable JsonElement json, @Nullable Type type,
-                                         @Nullable JsonDeserializationContext jsonDeserializationContext)
-                throws JsonParseException {
-            if (json == null)
-            {
+                @Nullable JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+            if (json == null) {
                 throw new JsonParseException("null");
             }
             return Mode.from(json.getAsJsonObject().get("mode").getAsString());
@@ -71,16 +68,15 @@ public class NibeUplinkRestResponseParser {
 
         @Override
         public List<NibeSystem> deserialize(@Nullable JsonElement json, @Nullable Type type,
-                                            @Nullable JsonDeserializationContext jsonDeserializationContext)
-                throws JsonParseException {
-            if (json == null)
-            {
+                @Nullable JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+            if (json == null) {
                 throw new JsonParseException("null");
             }
             JsonElement inner = json.getAsJsonObject().get("objects");
 
-            return new GsonBuilder().registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeDeserializer())
-                    .create().fromJson(inner, new TypeToken<List<NibeSystem>>(){}.getType());
+            return new GsonBuilder().registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeDeserializer()).create()
+                    .fromJson(inner, new TypeToken<List<NibeSystem>>() {
+                    }.getType());
         }
     }
 
@@ -91,10 +87,8 @@ public class NibeUplinkRestResponseParser {
 
         @Override
         public AlarmInfo deserialize(@Nullable JsonElement json, @Nullable Type type,
-                                            @Nullable JsonDeserializationContext jsonDeserializationContext)
-                throws JsonParseException {
-            if (json == null)
-            {
+                @Nullable JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+            if (json == null) {
                 throw new JsonParseException("null");
             }
 
@@ -109,16 +103,15 @@ public class NibeUplinkRestResponseParser {
 
         @Override
         public List<AlarmInfo> deserialize(@Nullable JsonElement json, @Nullable Type type,
-                                     @Nullable JsonDeserializationContext jsonDeserializationContext)
-                throws JsonParseException {
-            if (json == null)
-            {
+                @Nullable JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+            if (json == null) {
                 throw new JsonParseException("null");
             }
 
             JsonElement objects = json.getAsJsonObject().get("objects");
 
-            return new Gson().fromJson(objects, new TypeToken<List<AlarmInfo>>(){}.getType());
+            return new Gson().fromJson(objects, new TypeToken<List<AlarmInfo>>() {
+            }.getType());
         }
     }
 
@@ -126,10 +119,8 @@ public class NibeUplinkRestResponseParser {
 
         @Override
         public SoftwareInfo deserialize(@Nullable JsonElement json, @Nullable Type type,
-                                            @Nullable JsonDeserializationContext jsonDeserializationContext)
-                throws JsonParseException {
-            if (json == null)
-            {
+                @Nullable JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+            if (json == null) {
                 throw new JsonParseException("null");
             }
             JsonElement current = json.getAsJsonObject().get("current").getAsJsonObject().get("name");
@@ -144,10 +135,11 @@ public class NibeUplinkRestResponseParser {
             .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeDeserializer())
             .registerTypeAdapter(Mode.class, new ModeDeserializer())
             .registerTypeAdapter(SoftwareInfo.class, new SoftwareInfoDeserializer())
-            .registerTypeAdapter(new TypeToken<List<NibeSystem>>(){}.getType(), new NibeSystemListDeserializer())
+            .registerTypeAdapter(new TypeToken<List<NibeSystem>>() {
+            }.getType(), new NibeSystemListDeserializer())
             .registerTypeAdapter(AlarmInfo.class, new AlarmInfoDeserializer())
-            .registerTypeAdapter(new TypeToken<List<AlarmInfo>>(){}.getType(), new AlarmInfoListDeserializer())
-            .create();
+            .registerTypeAdapter(new TypeToken<List<AlarmInfo>>() {
+            }.getType(), new AlarmInfoListDeserializer()).create();
 
     /**
      * Parse a json string with system info
@@ -166,7 +158,8 @@ public class NibeUplinkRestResponseParser {
      * @return
      */
     public static List<NibeSystem> parseSystemList(String json) {
-        return gson.fromJson(json, new TypeToken<List<NibeSystem>>(){}.getType());
+        return gson.fromJson(json, new TypeToken<List<NibeSystem>>() {
+        }.getType());
     }
 
     /**
@@ -185,6 +178,7 @@ public class NibeUplinkRestResponseParser {
         });
         return activeComponents;
     }
+
     /**
      * Parse a json string with notification info
      *
@@ -192,7 +186,8 @@ public class NibeUplinkRestResponseParser {
      * @return
      */
     public static List<AlarmInfo> parseAlarmInfoList(String json) {
-        return gson.fromJson(json, new TypeToken<List<AlarmInfo>>(){}.getType());
+        return gson.fromJson(json, new TypeToken<List<AlarmInfo>>() {
+        }.getType());
     }
 
     /**
@@ -222,7 +217,8 @@ public class NibeUplinkRestResponseParser {
      * @return
      */
     public static List<Category> parseCategoryList(String json) {
-        return gson.fromJson(json, new TypeToken<List<Category>>(){}.getType());
+        return gson.fromJson(json, new TypeToken<List<Category>>() {
+        }.getType());
     }
 
     /**
@@ -232,7 +228,8 @@ public class NibeUplinkRestResponseParser {
      * @return
      */
     public static List<Parameter> parseParameterList(String json) {
-        return gson.fromJson(json, new TypeToken<List<Parameter>>(){}.getType());
+        return gson.fromJson(json, new TypeToken<List<Parameter>>() {
+        }.getType());
     }
 
     /**

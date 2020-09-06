@@ -12,13 +12,13 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal.api;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
-import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 
 /**
  * The interface between the handlers and the classes that handles the http requests to and responses
@@ -117,6 +117,7 @@ public interface NibeUplinkRestApi {
     /**
      * Gets the system operating mode - Default, away or vacation. The request is placed at the head of the queue and
      * the response gets sent to the {@link NibeUplinkRestCallbackListener} registered for the systemId.
+     * 
      * @param systemId Id of the system
      */
     void requestMode(int systemId);
@@ -156,18 +157,21 @@ public interface NibeUplinkRestApi {
 
     /**
      * Removes the callback listener for the specified system
+     * 
      * @param SystemId Id of the system
      */
     void removeCallbackListener(int SystemId);
 
     /**
      * Set the amount of seconds between updates to the parameters and system info
+     * 
      * @param updateInterval Time in seconds
      */
     void setUpdateInterval(int updateInterval);
 
     /**
      * Set the number of days between checks for software updates
+     * 
      * @param softwareUpdateCheckInterval Time in days
      */
     void setSoftwareUpdateCheckInterval(int softwareUpdateCheckInterval);
