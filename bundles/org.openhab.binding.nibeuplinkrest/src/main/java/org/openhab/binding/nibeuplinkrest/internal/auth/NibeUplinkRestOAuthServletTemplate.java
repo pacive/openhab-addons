@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author Anders Alfredsson - Initial contribution
  */
 @NonNullByDefault
-public class NibeUplinkRestOAuthServletTemplate  {
+public class NibeUplinkRestOAuthServletTemplate {
 
     private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestOAuthServletTemplate.class);
 
@@ -55,13 +55,14 @@ public class NibeUplinkRestOAuthServletTemplate  {
     }
 
     public NibeUplinkRestOAuthServletTemplate(BundleContext bundleContext, String filename,
-                                              Map<String, String> replaceMap) throws IOException {
+            Map<String, String> replaceMap) throws IOException {
         this(bundleContext, filename);
         this.replaceMap = replaceMap;
     }
 
     /**
      * Load a html file from the bundle's resources to be used as a template
+     * 
      * @param fileName
      * @throws IOException
      */
@@ -72,9 +73,7 @@ public class NibeUplinkRestOAuthServletTemplate  {
             throw new FileNotFoundException("File not found: " + fileName);
         }
         try (InputStream reader = file.openStream()) {
-            String content = new BufferedReader(
-                    new InputStreamReader(reader, StandardCharsets.UTF_8))
-                    .lines()
+            String content = new BufferedReader(new InputStreamReader(reader, StandardCharsets.UTF_8)).lines()
                     .collect(Collectors.joining("\r\n"));
             this.template = content;
         }
@@ -82,6 +81,7 @@ public class NibeUplinkRestOAuthServletTemplate  {
 
     /**
      * Add a string key to replace with another
+     * 
      * @param from
      * @param to
      */
@@ -98,6 +98,7 @@ public class NibeUplinkRestOAuthServletTemplate  {
 
     /**
      * Replace all template strings with their corresponding values
+     * 
      * @return A string with the rendered html content
      */
     public String replaceAll() {
