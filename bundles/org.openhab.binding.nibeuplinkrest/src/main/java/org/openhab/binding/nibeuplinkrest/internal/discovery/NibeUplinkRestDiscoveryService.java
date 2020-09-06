@@ -13,8 +13,18 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.discovery;
 
+import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
+
+import java.util.*;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
+import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
+import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestTypeFactory;
 import org.openhab.core.config.discovery.AbstractDiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultBuilder;
@@ -22,18 +32,8 @@ import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.thing.*;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerService;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
-import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
-import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
-import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
-import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-
-import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -90,7 +90,6 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
             bridgeHandler = (NibeUplinkRestBridgeHandler) handler;
             typeFactory = bridgeHandler.getTypeFactory();
         }
-
     }
 
     @Override
@@ -126,14 +125,10 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
             typeFactory.createThingType(system, categories);
         }
 
-        ThingUID thingUID = new ThingUID(thingTypeUID, bridgeUID,
-                Integer.toString(system.getSystemId()));
+        ThingUID thingUID = new ThingUID(thingTypeUID, bridgeUID, Integer.toString(system.getSystemId()));
 
-        DiscoveryResult result = DiscoveryResultBuilder.create(thingUID)
-                .withLabel(system.getName())
-                .withBridge(bridgeUID)
-                .withProperties(properties)
-                .withRepresentationProperty(PROPERTY_SYSTEM_ID)
+        DiscoveryResult result = DiscoveryResultBuilder.create(thingUID).withLabel(system.getName())
+                .withBridge(bridgeUID).withProperties(properties).withRepresentationProperty(PROPERTY_SYSTEM_ID)
                 .build();
 
         thingDiscovered(result);
