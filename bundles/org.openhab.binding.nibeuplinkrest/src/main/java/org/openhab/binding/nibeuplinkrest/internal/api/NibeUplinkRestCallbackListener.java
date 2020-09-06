@@ -13,11 +13,11 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.api;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
-
 import java.util.List;
 import java.util.Set;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 
 /**
  * Interface that specifies callback methods to inform the handler of updates

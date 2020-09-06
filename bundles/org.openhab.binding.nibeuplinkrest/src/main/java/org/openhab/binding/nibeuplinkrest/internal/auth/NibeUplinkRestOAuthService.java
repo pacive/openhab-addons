@@ -12,10 +12,18 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal.auth;
 
+import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
+
+import java.io.IOException;
+import java.util.*;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.thing.ThingUID;
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
+import org.openhab.core.thing.ThingUID;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -26,13 +34,6 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import java.io.IOException;
-import java.util.*;
-
-import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 
 /**
  * @author Anders Alfredsson - Initial Contribution
@@ -67,20 +68,22 @@ public class NibeUplinkRestOAuthService {
 
     /**
      * Create a servlet to enable OAuth flow
+     * 
      * @return
      * @throws IOException
      */
     private HttpServlet createServlet() throws IOException {
         Map<String, @Nullable NibeUplinkRestOAuthServletTemplate> templates = new HashMap<>();
-        templates.put(SERVLET_TEMPLATE_INDEX, new NibeUplinkRestOAuthServletTemplate(bundleContext,
-                SERVLET_TEMPLATE_INDEX_FILE));
-        templates.put(SERVLET_TEMPLATE_ACCOUNT, new NibeUplinkRestOAuthServletTemplate(bundleContext,
-                SERVLET_TEMPLATE_ACCOUNT_FILE));
+        templates.put(SERVLET_TEMPLATE_INDEX,
+                new NibeUplinkRestOAuthServletTemplate(bundleContext, SERVLET_TEMPLATE_INDEX_FILE));
+        templates.put(SERVLET_TEMPLATE_ACCOUNT,
+                new NibeUplinkRestOAuthServletTemplate(bundleContext, SERVLET_TEMPLATE_ACCOUNT_FILE));
         return new NibeUplinkRestOAuthServlet(this, templates);
     }
 
     /**
      * Inject a bridge handler to make callbacks to
+     * 
      * @param handler
      */
     public void addBridgeHandler(NibeUplinkRestBridgeHandler handler) {
@@ -91,6 +94,7 @@ public class NibeUplinkRestOAuthService {
 
     /**
      * Get all bridge handlers using the service
+     * 
      * @return
      */
     public List<NibeUplinkRestBridgeHandler> getBridgeHandlers() {
@@ -99,6 +103,7 @@ public class NibeUplinkRestOAuthService {
 
     /**
      * Get a speceific bridge handler
+     * 
      * @param thingUID
      * @return
      */
@@ -108,6 +113,7 @@ public class NibeUplinkRestOAuthService {
 
     /**
      * Get a specific bridge handler
+     * 
      * @param thingUID
      * @return
      */
@@ -118,11 +124,14 @@ public class NibeUplinkRestOAuthService {
                 handler = h;
         }
         return handler;
-
     }
 
     @Reference
-    protected void setHttpService(HttpService httpService) { this.httpService = httpService; }
+    protected void setHttpService(HttpService httpService) {
+        this.httpService = httpService;
+    }
 
-    protected void unsetHttpService(HttpService httpService) { this.httpService = null; }
+    protected void unsetHttpService(HttpService httpService) {
+        this.httpService = null;
+    }
 }

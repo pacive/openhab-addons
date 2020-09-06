@@ -13,21 +13,8 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.api;
 
-import com.google.gson.Gson;
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.util.StringContentProvider;
-import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.http.HttpMethod;
-import org.openhab.core.auth.client.oauth2.*;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
-import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
-import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestHttpException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.eclipse.jetty.http.HttpStatus.*;
+import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -36,8 +23,22 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static org.eclipse.jetty.http.HttpStatus.*;
-import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.client.util.StringContentProvider;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpMethod;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestHttpException;
+import org.openhab.core.auth.client.oauth2.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -84,6 +85,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Create a request for connected systems
+     * 
      * @return
      */
     public Request createConnectedSystemsRequest() {
@@ -92,6 +94,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Create a request for a specific system
+     * 
      * @param systemId
      * @return
      */
@@ -101,6 +104,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Create a request for a specific system
+     * 
      * @param systemId
      * @return
      */
@@ -110,6 +114,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Create a request for alarm info
+     * 
      * @param systemId
      * @return
      */
@@ -119,6 +124,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Create a request for system configuration
+     * 
      * @param systemId
      * @return
      */
@@ -128,6 +134,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Create a request for software info
+     * 
      * @param systemId
      * @return
      */
@@ -137,6 +144,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Create a request for the system's categories
+     * 
      * @param systemId
      * @param includeParameters
      * @return
@@ -149,6 +157,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Create a request to get parameters
+     * 
      * @param systemId
      * @param parameterIds
      * @return
@@ -163,6 +172,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Create a request to set parameters
+     * 
      * @param systemId
      * @param parameters
      * @return
@@ -176,6 +186,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Create a request to get the system's mode
+     * 
      * @param systemId
      * @return
      */
@@ -185,6 +196,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Create a request to set the system's mode
+     * 
      * @param systemId
      * @param mode
      * @return
@@ -198,6 +210,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Create a request to set a thermostat
+     * 
      * @param systemId
      * @param thermostat
      * @return
@@ -210,6 +223,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Prepare the request with default values
+     * 
      * @param method
      * @param endPoint
      * @param systemId
@@ -217,9 +231,8 @@ public class NibeUplinkRestRequestHandler {
      * @return
      */
     private Request prepareRequest(HttpMethod method, String endPoint, int systemId, RequestType requestType) {
-        Request req = systemId == NO_SYSTEM_ID ?
-                httpClient.newRequest(endPoint) :
-                httpClient.newRequest(String.format(endPoint, systemId));
+        Request req = systemId == NO_SYSTEM_ID ? httpClient.newRequest(endPoint)
+                : httpClient.newRequest(String.format(endPoint, systemId));
         req.method(method);
         req.accept(CONTENT_TYPE);
         req.followRedirects(true);
@@ -230,6 +243,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Make the request, and retry if Nibe Uplink responds with a 401
+     * 
      * @param req The request to send
      * @return The body of the response as a String
      * @throws NibeUplinkRestException
@@ -245,6 +259,7 @@ public class NibeUplinkRestRequestHandler {
 
     /**
      * Add OAuth token and send the request. Catch any errors an re-throw a {@link NibeUplinkRestException}
+     * 
      * @param req
      * @return
      */
@@ -262,8 +277,7 @@ public class NibeUplinkRestRequestHandler {
         req.header(HttpHeader.AUTHORIZATION, BEARER + token);
 
         logger.trace("Sending {} request to {} {}", req.getMethod(), req.getPath(),
-                req.getContent() != null ?
-                        "with data " + new String(req.getContent().iterator().next().array()) : "");
+                req.getContent() != null ? "with data " + new String(req.getContent().iterator().next().array()) : "");
         ContentResponse resp;
         try {
             resp = req.send();
@@ -276,6 +290,7 @@ public class NibeUplinkRestRequestHandler {
     /**
      * Check the response code and act accordingly. Throws an exception holding the response
      * code on error, to be handled elsewhere.
+     * 
      * @param resp
      * @return
      */
@@ -291,11 +306,10 @@ public class NibeUplinkRestRequestHandler {
             case NOT_FOUND_404:
                 throw new NibeUplinkRestHttpException(
                         String.format("Bad request: %s, message: %s", resp.getStatus(), resp.getContentAsString()),
-                resp.getStatus());
+                        resp.getStatus());
             case TOO_MANY_REQUESTS_429:
                 throw new NibeUplinkRestHttpException(
-                        String.format("Rate limit exceeded: %s", resp.getContentAsString()),
-                        resp.getStatus());
+                        String.format("Rate limit exceeded: %s", resp.getContentAsString()), resp.getStatus());
             case INTERNAL_SERVER_ERROR_500:
             case NOT_IMPLEMENTED_501:
             case BAD_GATEWAY_502:

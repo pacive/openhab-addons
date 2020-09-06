@@ -14,23 +14,24 @@ package org.openhab.binding.nibeuplinkrest.internal.auth;
 
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.util.MultiMap;
-import org.eclipse.jetty.util.UrlEncoded;
-import org.openhab.core.auth.client.oauth2.OAuthException;
-import org.openhab.core.auth.client.oauth2.OAuthResponseException;
-import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.util.MultiMap;
+import org.eclipse.jetty.util.UrlEncoded;
+import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
+import org.openhab.core.auth.client.oauth2.OAuthException;
+import org.openhab.core.auth.client.oauth2.OAuthResponseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -54,7 +55,7 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
     private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestOAuthServlet.class);
 
     public NibeUplinkRestOAuthServlet(NibeUplinkRestOAuthService oAuthService,
-                                      Map<String, @Nullable NibeUplinkRestOAuthServletTemplate> templates) {
+            Map<String, @Nullable NibeUplinkRestOAuthServletTemplate> templates) {
         this.oAuthService = oAuthService;
         this.templates = templates;
     }
@@ -62,13 +63,17 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
     @Override
     protected void doGet(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
             throws ServletException, IOException {
-        if (req == null || resp == null) { throw new ServletException(); }
+        if (req == null || resp == null) {
+            throw new ServletException();
+        }
 
         logger.debug("Received GET request: {}", req.getRequestURI());
         final String servletBaseURL = req.getRequestURL().toString();
         final NibeUplinkRestOAuthServletTemplate indexTemplate = templates.get(SERVLET_TEMPLATE_INDEX);
 
-        if (indexTemplate == null) { throw new ServletException(); }
+        if (indexTemplate == null) {
+            throw new ServletException();
+        }
 
         handleCallback(req.getQueryString(), servletBaseURL);
         resp.setContentType(CONTENT_TYPE);
@@ -80,6 +85,7 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
 
     /**
      * Adds a list of available accounts to the response, with links for authentication
+     * 
      * @param baseURL
      * @return
      */
@@ -87,7 +93,9 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
         StringBuilder accounts = new StringBuilder();
         NibeUplinkRestOAuthServletTemplate template = templates.get(SERVLET_TEMPLATE_ACCOUNT);
 
-        if (template == null) { throw new ServletException(); }
+        if (template == null) {
+            throw new ServletException();
+        }
 
         oAuthService.getBridgeHandlers().forEach(h -> {
             String authURL = h.getAuthorizationUrl(baseURL);
@@ -101,6 +109,7 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
 
     /**
      * Handle requests to the servlet
+     * 
      * @param queryString
      * @param baseURL
      */

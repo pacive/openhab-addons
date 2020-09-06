@@ -13,6 +13,9 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.provider;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.type.*;
@@ -20,9 +23,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Provides generated channel-group-types to the framework
@@ -41,12 +41,14 @@ public class NibeUplinkRestChannelGroupTypeProvider implements ChannelGroupTypeP
     }
 
     @Override
-    public @Nullable ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID, @Nullable Locale locale) {
+    public @Nullable ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID,
+            @Nullable Locale locale) {
         return channelGroupTypes.get(channelGroupTypeUID);
     }
 
     /**
      * Adnna channel-group-type
+     * 
      * @param type
      */
     public void add(ChannelGroupType type) {
@@ -87,7 +89,6 @@ public class NibeUplinkRestChannelGroupTypeProvider implements ChannelGroupTypeP
 
     @Activate
     protected void activate(ComponentContext componentContext) {
-
     }
 
     @Deactivate

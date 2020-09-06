@@ -12,11 +12,11 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal.api.model;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-
 import java.time.ZonedDateTime;
 import java.util.Objects;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Class for holding general info on the system
@@ -36,7 +36,7 @@ public class NibeSystem {
     private @Nullable SystemConfig config;
 
     public NibeSystem(int systemId, String name, String productName, String securityLevel, String serialNumber,
-                      ZonedDateTime lastActivityDate, ConnectionStatus connectionStatus, boolean hasAlarmed) {
+            ZonedDateTime lastActivityDate, ConnectionStatus connectionStatus, boolean hasAlarmed) {
         this.systemId = systemId;
         this.name = name;
         this.productName = productName;
@@ -47,41 +47,77 @@ public class NibeSystem {
         this.hasAlarmed = hasAlarmed;
     }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public void setProductName(String productName) { this.productName = productName; }
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
 
-    public void setSecurityLevel(String securityLevel) { this.securityLevel = securityLevel; }
+    public void setSecurityLevel(String securityLevel) {
+        this.securityLevel = securityLevel;
+    }
 
-    public void setSerialNumber(String serialNumber) { this.serialNumber = serialNumber; }
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
 
-    public void setLastActivityDate(ZonedDateTime lastActivityDate) { this.lastActivityDate = lastActivityDate; }
+    public void setLastActivityDate(ZonedDateTime lastActivityDate) {
+        this.lastActivityDate = lastActivityDate;
+    }
 
-    public void setConnectionStatus(ConnectionStatus connectionStatus) { this.connectionStatus = connectionStatus; }
+    public void setConnectionStatus(ConnectionStatus connectionStatus) {
+        this.connectionStatus = connectionStatus;
+    }
 
-    public void setHasAlarmed(boolean hasAlarmed) { this.hasAlarmed = hasAlarmed; }
+    public void setHasAlarmed(boolean hasAlarmed) {
+        this.hasAlarmed = hasAlarmed;
+    }
 
-    public void setConfig(@Nullable SystemConfig config) { this.config = config; }
+    public void setConfig(@Nullable SystemConfig config) {
+        this.config = config;
+    }
 
-    public int getSystemId() { return systemId; }
+    public int getSystemId() {
+        return systemId;
+    }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public String getProductName() { return productName; }
+    public String getProductName() {
+        return productName;
+    }
 
-    public String getSecurityLevel() { return securityLevel; }
+    public String getSecurityLevel() {
+        return securityLevel;
+    }
 
-    public String getSerialNumber() { return serialNumber; }
+    public String getSerialNumber() {
+        return serialNumber;
+    }
 
-    public ZonedDateTime getLastActivityDate() { return lastActivityDate; }
+    public ZonedDateTime getLastActivityDate() {
+        return lastActivityDate;
+    }
 
-    public ConnectionStatus getConnectionStatus() { return connectionStatus; }
+    public ConnectionStatus getConnectionStatus() {
+        return connectionStatus;
+    }
 
-    public boolean hasAlarmed() { return hasAlarmed; }
+    public boolean hasAlarmed() {
+        return hasAlarmed;
+    }
 
-    public @Nullable SystemConfig getConfig() { return config; }
+    public @Nullable SystemConfig getConfig() {
+        return config;
+    }
 
-    public boolean isConfigSet() { return config != null; }
+    public boolean isConfigSet() {
+        return config != null;
+    }
 
     public boolean hasCooling() {
         SystemConfig localRef = config;
@@ -105,8 +141,10 @@ public class NibeSystem {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         NibeSystem nibeSystem = (NibeSystem) o;
         return systemId == nibeSystem.systemId;
     }

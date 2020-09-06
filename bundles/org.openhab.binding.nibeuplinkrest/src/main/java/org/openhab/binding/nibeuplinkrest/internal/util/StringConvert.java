@@ -13,11 +13,11 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.util;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * @author Anders Alfredsson - Initial contribution

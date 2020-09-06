@@ -12,10 +12,10 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal.api.model;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-
-import java.util.Objects;
 
 /**
  * Class for holding info on a parameter
@@ -32,8 +32,8 @@ public class Parameter {
     private String displayValue;
     private int rawValue;
 
-    public Parameter(int parameterId, String name, String title, String designation, String unit,
-                     String displayValue, int rawValue) {
+    public Parameter(int parameterId, String name, String title, String designation, String unit, String displayValue,
+            int rawValue) {
         this.parameterId = parameterId;
         this.name = name;
         this.title = title;
@@ -43,36 +43,64 @@ public class Parameter {
         this.rawValue = rawValue;
     }
 
-    public int getParameterId() { return parameterId; }
+    public int getParameterId() {
+        return parameterId;
+    }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public String getTitle() { return title; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getDesignation() { return designation; }
+    public String getDesignation() {
+        return designation;
+    }
 
-    public String getUnit() { return unit; }
+    public String getUnit() {
+        return unit;
+    }
 
-    public String getDisplayValue() { return displayValue; }
+    public String getDisplayValue() {
+        return displayValue;
+    }
 
-    public int getRawValue() { return rawValue; }
+    public int getRawValue() {
+        return rawValue;
+    }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public void setTitle(String title) { this.title = title; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public void setDesignation(String designation) { this.designation = designation; }
+    public void setDesignation(String designation) {
+        this.designation = designation;
+    }
 
-    public void setUnit(String unit) { this.unit = unit; }
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
 
-    public void setDisplayValue(String displayValue) { this.displayValue = displayValue; }
+    public void setDisplayValue(String displayValue) {
+        this.displayValue = displayValue;
+    }
 
-    public void setRawValue(int rawValue) { this.rawValue = rawValue; }
+    public void setRawValue(int rawValue) {
+        this.rawValue = rawValue;
+    }
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Parameter parameter = (Parameter) o;
         return parameterId == parameter.parameterId;
     }

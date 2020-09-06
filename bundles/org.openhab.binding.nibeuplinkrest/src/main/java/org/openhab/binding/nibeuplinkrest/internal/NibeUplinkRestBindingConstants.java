@@ -74,48 +74,42 @@ public class NibeUplinkRestBindingConstants {
     public static final String CHANNEL_THERMOSTAT_TARGET = "targetTemperature";
 
     // Channel group type UIDs
-    public static final ChannelGroupTypeUID CHANNEL_GROUP_TYPE_DEFAULT_CONTROL =
-            new ChannelGroupTypeUID(BINDING_ID, "default_control");
-    public static final ChannelGroupTypeUID CHANNEL_GROUP_TYPE_CONTROL =
-            new ChannelGroupTypeUID(BINDING_ID, CHANNEL_GROUP_CONTROL_ID);
+    public static final ChannelGroupTypeUID CHANNEL_GROUP_TYPE_DEFAULT_CONTROL = new ChannelGroupTypeUID(BINDING_ID,
+            "default_control");
+    public static final ChannelGroupTypeUID CHANNEL_GROUP_TYPE_CONTROL = new ChannelGroupTypeUID(BINDING_ID,
+            CHANNEL_GROUP_CONTROL_ID);
 
     // Channel type UIDs
-    public static final ChannelTypeUID CHANNEL_TYPE_PARALLEL_ADJUST_HEAT =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_PARALLEL_ADJUST_HEAT_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_PARALLEL_ADJUST_COOL =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_PARALLEL_ADJUST_COOL_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_TARGET_TEMP_HEAT =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_TARGET_TEMP_HEAT_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_TARGET_TEMP_COOL =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_TARGET_TEMP_COOL_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_VENTILATION_BOOST =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_VENTILATION_BOOST_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_HOT_WATER_BOOST =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_HOT_WATER_BOOST_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_LAST_ACTIVITY =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_LAST_ACTIVITY_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_HAS_ALARMED =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_HAS_ALARMED_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_ALARM_INFO =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_ALARM_INFO_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_SOFTWARE_UPDATE =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_SOFTWARE_UPDATE_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_LATEST_SOFTWARE =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_LATEST_SOFTWARE_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_COMPRESSOR =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_COMPRESSOR_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_VENTILATION =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_VENTILATION_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_ADDITION =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_ADDITION_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_HEATING_MEDIUM_PUMP =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_HEATING_MEDIUM_PUMP_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_HOT_WATER =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_HOT_WATER_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_HEATING =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_HEATING_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_COOLING =
-            new ChannelTypeUID(BINDING_ID, CHANNEL_COOLING_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_PARALLEL_ADJUST_HEAT = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_PARALLEL_ADJUST_HEAT_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_PARALLEL_ADJUST_COOL = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_PARALLEL_ADJUST_COOL_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_TARGET_TEMP_HEAT = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_TARGET_TEMP_HEAT_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_TARGET_TEMP_COOL = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_TARGET_TEMP_COOL_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_VENTILATION_BOOST = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_VENTILATION_BOOST_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_HOT_WATER_BOOST = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_HOT_WATER_BOOST_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_LAST_ACTIVITY = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_LAST_ACTIVITY_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_HAS_ALARMED = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_HAS_ALARMED_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_ALARM_INFO = new ChannelTypeUID(BINDING_ID, CHANNEL_ALARM_INFO_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_SOFTWARE_UPDATE = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_SOFTWARE_UPDATE_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_LATEST_SOFTWARE = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_LATEST_SOFTWARE_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_COMPRESSOR = new ChannelTypeUID(BINDING_ID, CHANNEL_COMPRESSOR_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_VENTILATION = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_VENTILATION_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_ADDITION = new ChannelTypeUID(BINDING_ID, CHANNEL_ADDITION_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_HEATING_MEDIUM_PUMP = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_HEATING_MEDIUM_PUMP_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_HOT_WATER = new ChannelTypeUID(BINDING_ID, CHANNEL_HOT_WATER_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_HEATING = new ChannelTypeUID(BINDING_ID, CHANNEL_HEATING_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_COOLING = new ChannelTypeUID(BINDING_ID, CHANNEL_COOLING_ID);
 
     public static final String CHANNEL_PROPERTY_SCALING_FACTOR = "scalingFactor";
 
@@ -168,5 +162,6 @@ public class NibeUplinkRestBindingConstants {
     public static final String SERVLET_TEMPLATE_INDEX = "index";
     public static final String SERVLET_TEMPLATE_INDEX_FILE = SERVLET_RESOURCE_DIR + SERVLET_TEMPLATE_INDEX + ".html";
     public static final String SERVLET_TEMPLATE_ACCOUNT = "account";
-    public static final String SERVLET_TEMPLATE_ACCOUNT_FILE = SERVLET_RESOURCE_DIR + SERVLET_TEMPLATE_ACCOUNT + ".html";
+    public static final String SERVLET_TEMPLATE_ACCOUNT_FILE = SERVLET_RESOURCE_DIR + SERVLET_TEMPLATE_ACCOUNT
+            + ".html";
 }

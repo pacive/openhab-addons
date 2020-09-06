@@ -12,11 +12,12 @@
  */
 package org.openhab.binding.nibeuplinkrest.internal.api.model;
 
-import com.google.gson.annotations.SerializedName;
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import java.util.List;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Class representing a virtual thermostat that can affect the system
@@ -33,7 +34,7 @@ public class Thermostat {
     private @Nullable Integer targetTemp;
 
     public Thermostat(int id, String name, @Nullable List<Integer> climateSystems, @Nullable Double actualTemp,
-                      @Nullable Double targetTemp) {
+            @Nullable Double targetTemp) {
         this.id = id;
         this.name = name;
         this.climateSystems = climateSystems;
@@ -41,11 +42,17 @@ public class Thermostat {
         this.targetTemp = targetTemp == null ? null : (int) (targetTemp * 10);
     }
 
-    public int getId() { return id; }
+    public int getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public @Nullable List<Integer> getClimateSystems() { return climateSystems; }
+    public @Nullable List<Integer> getClimateSystems() {
+        return climateSystems;
+    }
 
     public @Nullable Double getActualTemp() {
         Integer localRef = actualTemp;
@@ -57,14 +64,20 @@ public class Thermostat {
         return localRef == null ? null : (double) localRef / 10;
     }
 
-    public void setActualTemp(int actualTemp) { this.actualTemp = actualTemp; }
+    public void setActualTemp(int actualTemp) {
+        this.actualTemp = actualTemp;
+    }
 
-    public void setTargetTemp(int targetTemp) { this.targetTemp = targetTemp; }
+    public void setTargetTemp(int targetTemp) {
+        this.targetTemp = targetTemp;
+    }
 
     @Override
     public boolean equals(@Nullable Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Thermostat that = (Thermostat) o;
         return id == that.id;
     }

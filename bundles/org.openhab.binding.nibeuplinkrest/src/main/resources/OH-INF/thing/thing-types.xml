@@ -8,7 +8,7 @@
 	<bridge-type id="apibridge">
 		<label>NibeUplink REST API Bridge</label>
 		<description>Connection to the Nibe Uplink Rest API</description>
-		<config-description-ref uri="thing-type:nibeuplinkrest:apibridge" />
+		<config-description-ref uri="thing-type:nibeuplinkrest:apibridge"/>
 	</bridge-type>
 
 	<thing-type id="system">
@@ -17,23 +17,23 @@
 		</supported-bridge-type-refs>
 		<label>System</label>
 		<channel-groups>
-			<channel-group id="control" typeId="control" />
+			<channel-group id="control" typeId="control"/>
 		</channel-groups>
 		<properties>
-			<property name="name" />
-			<property name="productName" />
-			<property name="securityLevel" />
-			<property name="serialNumber" />
-			<property name="hasCooling" />
-			<property name="hasHeating" />
-			<property name="hasHotWater" />
-			<property name="hasVentilation" />
-			<property name="softwareVersion" />
+			<property name="name"/>
+			<property name="productName"/>
+			<property name="securityLevel"/>
+			<property name="serialNumber"/>
+			<property name="hasCooling"/>
+			<property name="hasHeating"/>
+			<property name="hasHotWater"/>
+			<property name="hasVentilation"/>
+			<property name="softwareVersion"/>
 		</properties>
 
 		<representation-property>systemId</representation-property>
 
-		<config-description-ref uri="thing-type:nibeuplinkrest:system" />
+		<config-description-ref uri="thing-type:nibeuplinkrest:system"/>
 	</thing-type>
 
 	<thing-type id="thermostat">
@@ -51,7 +51,7 @@
 			</channel>
 		</channels>
 		<representation-property>id</representation-property>
-		<config-description-ref uri="thing-type:nibeuplinkrest:thermostat" />
+		<config-description-ref uri="thing-type:nibeuplinkrest:thermostat"/>
 	</thing-type>
 
 </thing:thing-descriptions>
