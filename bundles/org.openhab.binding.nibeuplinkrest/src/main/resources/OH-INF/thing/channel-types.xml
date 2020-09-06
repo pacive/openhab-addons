@@ -9,14 +9,16 @@
 		<label>Current temperature</label>
 		<description>The current indoor temperature. This needs to be supplied by a separate sensor, but you can use the
 			follow-profile to automatically update the Item connected to this channel. When a command is sent to this
-			channel the value is immediately sent to Nibe Uplink.</description>
+			channel the
+			value is immediately sent to Nibe Uplink.</description>
 		<category>Temperature</category>
 	</channel-type>
 	<channel-type id="thermostatTargetTemperature">
 		<item-type>Number</item-type>
 		<label>Target temperature</label>
 		<description>The target temperature for the climate system. When a command is sent to this
-			channel the value is immediately sent to Nibe Uplink.</description>
+			channel the value is
+			immediately sent to Nibe Uplink.</description>
 		<category>Heating</category>
 	</channel-type>
 
@@ -60,103 +62,103 @@
 	<channel-type id="parallelAdjustmentHeating">
 		<item-type>Number</item-type>
 		<label>Parallel adjustment when heating</label>
-		<state min="-10" max="10" step="1" />
+		<state min="-10" max="10" step="1"/>
 	</channel-type>
 	<channel-type id="parallelAdjustmentCooling">
 		<item-type>Number</item-type>
 		<label>Parallel adjustment when cooling</label>
-		<state min="-10" max="10" step="1" />
+		<state min="-10" max="10" step="1"/>
 	</channel-type>
 	<channel-type id="targetTemperatureHeating">
 		<item-type>Number</item-type>
 		<label>Target temperature when heating</label>
-		<state min="5" max="30" step="0.5" />
+		<state min="5" max="30" step="0.5"/>
 	</channel-type>
 	<channel-type id="targetTemperatureCooling">
 		<item-type>Number</item-type>
 		<label>Target temperature when cooling</label>
-		<state min="5" max="35" step="0.5" />
+		<state min="5" max="35" step="0.5"/>
 	</channel-type>
 
 	<channel-type id="lastActivity">
 		<item-type>DateTime</item-type>
 		<label>Last update</label>
 		<description>Last time the system connected to Nibe uplink</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 	<channel-type id="hasAlarmed">
 		<item-type>Switch</item-type>
 		<label>Alarm</label>
 		<description>There is an active alarm on the system</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 	<channel-type id="alarmInfo">
 		<item-type>String</item-type>
 		<label>Alarm Info</label>
 		<description>Info on the current alarm</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 	<channel-type id="softwareUpdate">
 		<item-type>Switch</item-type>
 		<label>Software update available</label>
 		<description>Indicates if there's a new software update for your system</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 	<channel-type id="latestSoftware">
 		<item-type>String</item-type>
 		<label>Latest software version</label>
 		<description>The latest software version for your system</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<channel-type id="compressor">
 		<item-type>Switch</item-type>
 		<label>Compressor</label>
 		<description>Status of the compressor</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 	<channel-type id="ventilation">
 		<item-type>Switch</item-type>
 		<label>Ventilation</label>
 		<description>Status of the ventilation system</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 	<channel-type id="addition">
 		<item-type>Switch</item-type>
 		<label>Electric addition</label>
 		<description>Status of the electric addition</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 	<channel-type id="heatingMediumPump">
 		<item-type>Switch</item-type>
 		<label>Heating medium pump</label>
 		<description>Status of the heating medium pump</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 	<channel-type id="hotWater">
 		<item-type>Switch</item-type>
 		<label>Hot water production</label>
 		<description>Whether the system is currently producing hot water</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 	<channel-type id="heating">
 		<item-type>Switch</item-type>
 		<label>Heating</label>
 		<description>Whether the system is currently working on heating</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 	<channel-type id="cooling">
 		<item-type>Switch</item-type>
 		<label>Heating</label>
 		<description>Whether the system is currently working on cooling</description>
-		<state readOnly="true" />
+		<state readOnly="true"/>
 	</channel-type>
 
 	<channel-group-type id="default_control">
 		<label>Control</label>
 		<description>Channels to control the operation of the system</description>
 		<channels>
-			<channel id="mode" typeId="mode" />
+			<channel id="mode" typeId="mode"/>
 		</channels>
 	</channel-group-type>
 

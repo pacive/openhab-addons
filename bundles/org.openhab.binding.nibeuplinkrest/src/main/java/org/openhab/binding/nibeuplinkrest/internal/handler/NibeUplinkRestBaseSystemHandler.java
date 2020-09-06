@@ -13,8 +13,17 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.handler;
 
+import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
+
+import java.util.*;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
+import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestCallbackListener;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
+import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
+import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelGroupTypeProvider;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.DecimalType;
@@ -26,18 +35,8 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
-import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
-import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestCallbackListener;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
-import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
-import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelGroupTypeProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-
-import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
-
 
 /**
  * Handles Things for a heating system connected to Nibe uplink
@@ -104,8 +103,8 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                     parameter.put(Integer.parseInt(channelId), outValue);
                     nibeUplinkRestApi.setParameters(systemId, parameter);
                 } catch (Exception e) {
-                    logger.warn("Failed to send command to channel {} with value {}. Reason: {}",
-                            channelId, command.toFullString(), e.getMessage());
+                    logger.warn("Failed to send command to channel {} with value {}. Reason: {}", channelId,
+                            command.toFullString(), e.getMessage());
                 }
             }
         }
@@ -156,7 +155,6 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         }
     }
 
-
     @Override
     public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
         super.handleConfigurationUpdate(configurationParameters);
@@ -173,9 +171,11 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         parameterValues.forEach(p -> {
             // Gets the full channel id (group#channel)
             String channelId = groupTypeProvider.getChannelFromID(p.getName());
-            @Nullable Channel channel = thing.getChannel(channelId);
+            @Nullable
+            Channel channel = thing.getChannel(channelId);
             if (channel != null) {
-                @Nullable String itemType = channel.getAcceptedItemType();
+                @Nullable
+                String itemType = channel.getAcceptedItemType();
                 if (itemType == null) {
                     logger.warn("No item type defined for channel {}", channel.getUID());
                     return;
@@ -221,9 +221,9 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     @Override
     public void statusUpdated(Set<String> activeComponents) {
         thing.getChannelsOfGroup(CHANNEL_GROUP_STATUS_ID).stream()
-                .filter(c -> Objects.equals(c.getAcceptedItemType(), CoreItemFactory.SWITCH) &&
-                        !c.getUID().getId().equals(CHANNEL_HAS_ALARMED) &&
-                        !c.getUID().getId().equals(CHANNEL_SOFTWARE_UPDATE))
+                .filter(c -> Objects.equals(c.getAcceptedItemType(), CoreItemFactory.SWITCH)
+                        && !c.getUID().getId().equals(CHANNEL_HAS_ALARMED)
+                        && !c.getUID().getId().equals(CHANNEL_SOFTWARE_UPDATE))
                 .forEach(channel -> {
                     if (activeComponents.contains(channel.getUID().getIdWithoutGroup())) {
                         updateState(channel.getUID(), OnOffType.ON);
@@ -271,7 +271,8 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         if (scalingFactor != null) {
             try {
                 transformed = new DecimalType((double) incomingValue / Integer.parseInt(scalingFactor));
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         }
         return transformed;
     }
@@ -288,7 +289,8 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         if (scalingFactor != null) {
             try {
                 transformed = transformed * Integer.parseInt(scalingFactor);
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         }
         return (int) transformed;
     }

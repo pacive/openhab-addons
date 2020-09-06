@@ -31,13 +31,23 @@ public class SoftwareInfo {
         this.upgrade = upgrade;
     }
 
-    public void setCurrentVersion(String currentVersion) { this.currentVersion = currentVersion; }
+    public void setCurrentVersion(String currentVersion) {
+        this.currentVersion = currentVersion;
+    }
 
-    public void setUpgradeAvailable(String upgrade) { this.upgrade = upgrade; }
+    public void setUpgradeAvailable(String upgrade) {
+        this.upgrade = upgrade;
+    }
 
-    public String getCurrentVersion() { return currentVersion; }
+    public String getCurrentVersion() {
+        return currentVersion;
+    }
 
-    public @Nullable String getUpgradeAvailable() { return upgrade; }
+    public @Nullable String getUpgradeAvailable() {
+        return upgrade;
+    }
 
-    public boolean isUpgradeAvailable() { return upgrade != null; }
+    public boolean isUpgradeAvailable() {
+        return upgrade != null;
+    }
 }
