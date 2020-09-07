@@ -14,10 +14,7 @@ package org.openhab.binding.nibeuplinkrest.internal;
 
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 
-import java.util.Collections;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -49,8 +46,8 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = ThingHandlerFactory.class, configurationPid = "binding.nibeuplinkrest")
 public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.unmodifiableSet(
-            Stream.of(THING_TYPE_APIBRIDGE, THING_TYPE_SYSTEM, THING_TYPE_THERMOSTAT).collect(Collectors.toSet()));
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_APIBRIDGE, THING_TYPE_SYSTEM,
+            THING_TYPE_THERMOSTAT);
 
     private @NonNullByDefault({}) OAuthFactory oAuthFactory;
     private @NonNullByDefault({}) NibeUplinkRestOAuthService oAuthService;
