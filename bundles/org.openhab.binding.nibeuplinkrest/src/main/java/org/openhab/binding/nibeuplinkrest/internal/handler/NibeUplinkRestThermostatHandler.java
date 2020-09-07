@@ -95,13 +95,6 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
     }
 
     @Override
-    public void handleUpdate(ChannelUID channelUID, State newState) {
-        if (newState instanceof DecimalType) {
-            handleCommand(channelUID, (Command) newState);
-        }
-    }
-
-    @Override
     public void handleRemoval() {
         nibeUplinkRestApi.removeThermostat(config.systemId, config.id);
         super.handleRemoval();
