@@ -260,8 +260,8 @@ public class NibeUplinkRestTypeFactory {
                                     .withLabel(
                                             String.format(HEAT_CONTROL_CHANNEL_LABEL, index, targetTempHeat.getLabel()))
                                     .withDescription(targetTempHeat.getDescription())
-                                    .withProperties(Map.of(CHANNEL_PROPERTY_SCALING_FACTOR,
-                                            Integer.toString(SCALE_FACTOR_TEN)))
+                                    .withProperties(
+                                            Map.of(CHANNEL_PROPERTY_SCALING_FACTOR, Integer.toString(SCALE_FACTOR_TEN)))
                                     .build());
                 }
                 // Add cooling control if the system has cooling
@@ -278,8 +278,8 @@ public class NibeUplinkRestTypeFactory {
                                     .withLabel(
                                             String.format(HEAT_CONTROL_CHANNEL_LABEL, index, targetTempCool.getLabel()))
                                     .withDescription(targetTempCool.getDescription())
-                                    .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR,
-                                            Integer.toString(SCALE_FACTOR_TEN)))
+                                    .withProperties(
+                                            Map.of(CHANNEL_PROPERTY_SCALING_FACTOR, Integer.toString(SCALE_FACTOR_TEN)))
                                     .build());
                 }
             }
