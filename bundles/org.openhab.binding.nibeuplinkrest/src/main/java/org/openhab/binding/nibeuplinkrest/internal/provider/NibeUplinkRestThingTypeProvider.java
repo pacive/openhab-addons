@@ -38,7 +38,7 @@ import org.osgi.service.component.annotations.Deactivate;
 @NonNullByDefault
 public class NibeUplinkRestThingTypeProvider implements ThingTypeProvider {
 
-    private Map<ThingTypeUID, ThingType> thingTypes = new ConcurrentHashMap<>();
+    private final Map<ThingTypeUID, ThingType> thingTypes = new ConcurrentHashMap<>();
 
     @Override
     public Collection<ThingType> getThingTypes(@Nullable Locale locale) {

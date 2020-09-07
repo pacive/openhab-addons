@@ -39,14 +39,19 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Anders Alfredsson - Initial contribution
  */
-@Component(immediate = true, service = { NibeUplinkRestTypeFactory.class })
+@Component(service = { NibeUplinkRestTypeFactory.class })
 @NonNullByDefault
 public class NibeUplinkRestTypeFactory {
 
+    @Reference
     private @NonNullByDefault({}) NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider;
+    @Reference
     private @NonNullByDefault({}) NibeUplinkRestChannelTypeProvider channelTypeProvider;
+    @Reference
     private @NonNullByDefault({}) NibeUplinkRestThingTypeProvider thingTypeProvider;
+    @Reference
     private @NonNullByDefault({}) ChannelGroupTypeRegistry channelGroupTypeRegistry;
+    @Reference
     private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
 
     @Activate
@@ -148,8 +153,7 @@ public class NibeUplinkRestTypeFactory {
 
         return ChannelTypeBuilder.state(channelTypeUID, type.toString().toLowerCase(Locale.ROOT), getItemType(type))
                 .withConfigDescriptionURI(CHANNEL_CONFIG).isAdvanced(isChannelAdvanced(type))
-                .withStateDescription(
-                        StateDescriptionFragmentBuilder.create().withReadOnly(true).build().toStateDescription())
+                .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build())
                 .build();
     }
 
@@ -241,35 +245,35 @@ public class NibeUplinkRestTypeFactory {
             // these are reported as SYSTEM_X in the categories. Add channels to control each of
             // their setpoints and heating curves
             if (c.getCategoryId().startsWith("SYSTEM") && !c.getCategoryId().equals("SYSTEM_INFO")) {
-                int index = Integer.parseInt(c.getCategoryId().substring(7));
+                int index = Integer.parseInt(c.getCategoryId().substring(7)) - 1;
                 // Add heating controls if the system has heating
                 if (system.hasHeating() && parAdjustHeat != null && targetTempHeat != null) {
                     definitions.add(new ChannelDefinitionBuilder(
-                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(CHANNEL_PARALLEL_ADJUST_HEAT_ID).get(index)),
+                            HEAT_CONTROL_PARAMETERS.get(CHANNEL_PARALLEL_ADJUST_HEAT_ID).get(index),
                             CHANNEL_TYPE_PARALLEL_ADJUST_HEAT)
                                     .withLabel(
                                             String.format(HEAT_CONTROL_CHANNEL_LABEL, index, parAdjustHeat.getLabel()))
                                     .withDescription(parAdjustHeat.getDescription()).build());
                     definitions.add(new ChannelDefinitionBuilder(
-                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(CHANNEL_TARGET_TEMP_HEAT_ID).get(index)),
+                            HEAT_CONTROL_PARAMETERS.get(CHANNEL_TARGET_TEMP_HEAT_ID).get(index),
                             CHANNEL_TYPE_TARGET_TEMP_HEAT)
                                     .withLabel(
                                             String.format(HEAT_CONTROL_CHANNEL_LABEL, index, targetTempHeat.getLabel()))
                                     .withDescription(targetTempHeat.getDescription())
-                                    .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR,
+                                    .withProperties(Map.of(CHANNEL_PROPERTY_SCALING_FACTOR,
                                             Integer.toString(SCALE_FACTOR_TEN)))
                                     .build());
                 }
                 // Add cooling control if the system has cooling
                 if (system.hasCooling() && parAdjustCool != null && targetTempCool != null) {
                     definitions.add(new ChannelDefinitionBuilder(
-                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(CHANNEL_PARALLEL_ADJUST_COOL_ID).get(index)),
+                            HEAT_CONTROL_PARAMETERS.get(CHANNEL_PARALLEL_ADJUST_COOL_ID).get(index),
                             CHANNEL_TYPE_PARALLEL_ADJUST_COOL)
                                     .withLabel(
                                             String.format(HEAT_CONTROL_CHANNEL_LABEL, index, parAdjustCool.getLabel()))
                                     .withDescription(parAdjustCool.getDescription()).build());
                     definitions.add(new ChannelDefinitionBuilder(
-                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(CHANNEL_TARGET_TEMP_COOL_ID).get(index)),
+                            HEAT_CONTROL_PARAMETERS.get(CHANNEL_TARGET_TEMP_COOL_ID).get(index),
                             CHANNEL_TYPE_TARGET_TEMP_COOL)
                                     .withLabel(
                                             String.format(HEAT_CONTROL_CHANNEL_LABEL, index, targetTempCool.getLabel()))
@@ -284,7 +288,7 @@ public class NibeUplinkRestTypeFactory {
     }
 
     /**
-     * Decide the parameter's typa based on
+     * Decide the parameter's type based on
      * 1. It's reported unit
      * 2. It's reported value (if it's a boolean value)
      * 3. Static mappings if it can't be decided otherwise
@@ -425,50 +429,5 @@ public class NibeUplinkRestTypeFactory {
      */
     public NibeUplinkRestChannelGroupTypeProvider getGroupTypeProvider() {
         return channelGroupTypeProvider;
-    }
-
-    @Reference
-    protected void setChannelGroupTypeProvider(NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider) {
-        this.channelGroupTypeProvider = channelGroupTypeProvider;
-    }
-
-    protected void unsetChannelGroupTypeProvider(NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider) {
-        this.channelGroupTypeProvider = null;
-    }
-
-    @Reference
-    protected void setChannelTypeProvider(NibeUplinkRestChannelTypeProvider channelTypeProvider) {
-        this.channelTypeProvider = channelTypeProvider;
-    }
-
-    protected void unsetChannelTypeProvider(NibeUplinkRestChannelTypeProvider channelTypeProvider) {
-        this.channelTypeProvider = null;
-    }
-
-    @Reference
-    protected void setThingTypeProvider(NibeUplinkRestThingTypeProvider thingTypeProvider) {
-        this.thingTypeProvider = thingTypeProvider;
-    }
-
-    protected void unsetThingTypeProvider(NibeUplinkRestThingTypeProvider thingTypeProvider) {
-        this.thingTypeProvider = null;
-    }
-
-    @Reference
-    protected void setChannelGroupTypeRegistry(ChannelGroupTypeRegistry channelGroupTypeRegistry) {
-        this.channelGroupTypeRegistry = channelGroupTypeRegistry;
-    }
-
-    protected void unsetChannelGroupTypeRegistry(ChannelGroupTypeRegistry channelGroupTypeRegistry) {
-        this.channelGroupTypeRegistry = null;
-    }
-
-    @Reference
-    protected void setChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = channelTypeRegistry;
-    }
-
-    protected void unsetChannelTypeRegistry(ChannelTypeRegistry channelTypeRegistry) {
-        this.channelTypeRegistry = null;
     }
 }
