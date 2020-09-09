@@ -86,6 +86,9 @@ public class TypeFactoryConstants {
             CHANNEL_TYPE_HEATING, CHANNEL_TYPE_COOLING, CHANNEL_TYPE_LAST_ACTIVITY, CHANNEL_TYPE_HAS_ALARMED,
             CHANNEL_TYPE_ALARM_INFO, CHANNEL_TYPE_SOFTWARE_UPDATE, CHANNEL_TYPE_LATEST_SOFTWARE);
 
+    public static final Set<String> STANDARD_CHANNEL_GROUPS = Set.of("STATUS", "SYSTEM_1", "SYSTEM_2", "SYSTEM_3",
+            "SYSTEM_4", "SYSTEM_5", "SYSTEM_6", "SYSTEM_7", "SYSTEM_8", "CONTROL");
+
     // References to XML defined config descriptions
     public static final URI CHANNEL_CONFIG = URI.create("channel-type:nibeuplinkrest:channels");
     public static final URI SYSTEM_CONFIG = URI.create("thing-type:nibeuplinkrest:system");
