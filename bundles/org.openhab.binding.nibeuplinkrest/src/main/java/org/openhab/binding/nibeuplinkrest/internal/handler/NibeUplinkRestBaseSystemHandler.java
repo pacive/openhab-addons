@@ -17,6 +17,8 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 
 import java.util.*;
 
+import javax.measure.Unit;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
@@ -25,16 +27,14 @@ import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelGroupTypeProvider;
 import org.openhab.core.library.CoreItemFactory;
-import org.openhab.core.library.types.DateTimeType;
-import org.openhab.core.library.types.DecimalType;
-import org.openhab.core.library.types.OnOffType;
-import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.types.*;
 import org.openhab.core.thing.*;
 import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
+import org.openhab.core.types.util.UnitUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +99,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                     if (channel == null) {
                         throw new NibeUplinkRestException("Channel doesn't exist");
                     }
-                    int outValue = transformOutgoing(channel, (DecimalType) command);
+                    int outValue = transformOutgoing(channel, (Number) command);
                     parameter.put(Integer.parseInt(channelId), outValue);
                     nibeUplinkRestApi.setParameters(systemId, parameter);
                 } catch (Exception e) {
@@ -182,14 +182,6 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                 }
                 State state;
                 switch (itemType) {
-                    case CoreItemFactory.NUMBER:
-                        // Nibe sends -32768 to mark a value as invalid
-                        if (p.getRawValue() == (int) Short.MIN_VALUE) {
-                            state = UnDefType.UNDEF;
-                            break;
-                        }
-                        state = transformIncoming(channel, p.getRawValue());
-                        break;
                     case CoreItemFactory.SWITCH:
                         state = OnOffType.from(String.valueOf(p.getRawValue()));
                         break;
@@ -197,7 +189,16 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                         state = new StringType(p.getDisplayValue());
                         break;
                     default:
-                        state = UnDefType.UNDEF;
+                        if (itemType.startsWith(CoreItemFactory.NUMBER)) {
+                            // Nibe sends -32768 to mark a value as invalid
+                            if (p.getRawValue() == Short.MIN_VALUE) {
+                                state = UnDefType.UNDEF;
+                            } else {
+                                state = transformIncoming(channel, p);
+                            }
+                        } else {
+                            state = UnDefType.UNDEF;
+                        }
                 }
                 updateState(channelId, state);
             }
@@ -259,9 +260,11 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         updateState(CHANNEL_ALARM_INFO, new StringType(alarmInfo.toString()));
     }
 
-    private DecimalType transformIncoming(Channel channel, int incomingValue) {
-        DecimalType transformed = new DecimalType(incomingValue);
-        String scalingFactor = "1";
+    private State transformIncoming(Channel channel, Parameter parameter) {
+        double rawValue = parameter.getRawValue();
+        @Nullable
+        Unit<?> unit = UnitUtils.parseUnit(parameter.getUnit());
+        String scalingFactor;
         // Check first channel configuration, then property to get scaling for the raw value
         if (channel.getConfiguration().containsKey(CHANNEL_PROPERTY_SCALING_FACTOR)) {
             scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR).toString();
@@ -270,16 +273,20 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         }
         if (scalingFactor != null) {
             try {
-                transformed = new DecimalType((double) incomingValue / Integer.parseInt(scalingFactor));
+                rawValue = rawValue / Integer.parseInt(scalingFactor);
             } catch (NumberFormatException ignored) {
             }
         }
-        return transformed;
+        if (unit == null) {
+            return new DecimalType(rawValue);
+        } else {
+            return new QuantityType<>(rawValue, unit);
+        }
     }
 
-    private int transformOutgoing(Channel channel, DecimalType outgoingValue) {
+    private int transformOutgoing(Channel channel, Number outgoingValue) {
         double transformed = outgoingValue.doubleValue();
-        String scalingFactor = "1";
+        String scalingFactor;
         // Check first channel configuration, then property to get scaling for the raw value
         if (channel.getConfiguration().containsKey(CHANNEL_PROPERTY_SCALING_FACTOR)) {
             scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR).toString();

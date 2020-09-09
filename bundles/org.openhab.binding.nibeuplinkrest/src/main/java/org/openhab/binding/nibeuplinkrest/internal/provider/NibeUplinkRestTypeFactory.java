@@ -19,6 +19,8 @@ import static org.openhab.binding.nibeuplinkrest.internal.provider.TypeFactoryCo
 import java.util.*;
 import java.util.regex.Matcher;
 
+import javax.measure.Unit;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
@@ -29,6 +31,7 @@ import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.type.*;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.types.util.UnitUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -122,7 +125,7 @@ public class NibeUplinkRestTypeFactory {
 
         List<ChannelDefinition> channelDefinitions = new ArrayList<>();
         category.getParameters().forEach(p -> {
-            ChannelType type = createChannelType(p);
+            ChannelType type = createChannelType(p, category.getCategoryId());
             channelTypeProvider.add(type);
             channelDefinitions.add(createChannelDefinition(type.getUID(), p));
         });
@@ -147,12 +150,12 @@ public class NibeUplinkRestTypeFactory {
      * @param parameter
      * @return
      */
-    private ChannelType createChannelType(Parameter parameter) {
-        ParameterType type = getParameterType(parameter);
-        ChannelTypeUID channelTypeUID = new ChannelTypeUID(BINDING_ID, type.toString().toLowerCase(Locale.ROOT));
+    private ChannelType createChannelType(Parameter parameter, String categoryId) {
+        ChannelTypeUID channelTypeUID = new ChannelTypeUID(BINDING_ID, StringConvert.toCamelCase(parameter.getTitle()));
 
-        return ChannelTypeBuilder.state(channelTypeUID, type.toString().toLowerCase(Locale.ROOT), getItemType(type))
-                .withConfigDescriptionURI(CHANNEL_CONFIG).isAdvanced(isChannelAdvanced(type))
+        return ChannelTypeBuilder.state(channelTypeUID, parameter.getTitle(), getItemType(parameter))
+                .withConfigDescriptionURI(CHANNEL_CONFIG)
+                .isAdvanced(isChannelAdvanced(parameter) || isCategoryAdvanced(categoryId))
                 .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build())
                 .build();
     }
@@ -381,11 +384,11 @@ public class NibeUplinkRestTypeFactory {
     /**
      * Mark some channels as advanced
      * 
-     * @param type
+     * @param parameter
      * @return
      */
-    private boolean isChannelAdvanced(ParameterType type) {
-        switch (type) {
+    private boolean isChannelAdvanced(Parameter parameter) {
+        switch (getParameterType(parameter)) {
             case CURRENT:
             case STRING:
             case TIME_FACTOR:
@@ -396,20 +399,44 @@ public class NibeUplinkRestTypeFactory {
     }
 
     /**
-     * Get the correspoding OH Item type based on the parameter type
-     * 
-     * @param type
+     * Mark some channels as advanced
+     *
+     * @param categoryId
      * @return
      */
-    private String getItemType(ParameterType type) {
-        switch (type) {
+    private boolean isCategoryAdvanced(String categoryId) {
+        return !STANDARD_CHANNEL_GROUPS.contains(categoryId);
+    }
+
+    /**
+     * Get the correspoding OH Item type based on the parameter type
+     * 
+     * @param parameter
+     * @return
+     */
+    private String getItemType(Parameter parameter) {
+        switch (getParameterType(parameter)) {
             case STRING:
+            case OTHER:
                 return CoreItemFactory.STRING;
             case BOOLEAN:
                 return CoreItemFactory.SWITCH;
             default:
-                return CoreItemFactory.NUMBER;
+                return CoreItemFactory.NUMBER + ":" + getDimension(parameter);
         }
+    }
+
+    private String getDimension(Parameter parameter) {
+        String unitSymbol = parameter.getUnit();
+        if (unitSymbol.equals("%")) {
+            return "Dimensionless";
+        }
+        Unit<?> unit = UnitUtils.parseUnit(unitSymbol);
+        if (unit == null) {
+            return "Dimensionless";
+        }
+        String dimension = UnitUtils.getDimensionName(unit);
+        return dimension == null ? "Dimensionless" : dimension;
     }
 
     /**
