@@ -5,7 +5,7 @@
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
 	<channel-type id="thermostatCurrentTemperature">
-		<item-type>Number</item-type>
+		<item-type>Number:Temperature</item-type>
 		<label>Current temperature</label>
 		<description>The current indoor temperature. This needs to be supplied by a separate sensor, but you can use the
 			follow-profile to automatically update the Item connected to this channel. When a command is sent to this
@@ -14,7 +14,7 @@
 		<category>Temperature</category>
 	</channel-type>
 	<channel-type id="thermostatTargetTemperature">
-		<item-type>Number</item-type>
+		<item-type>Number:Temperature</item-type>
 		<label>Target temperature</label>
 		<description>The target temperature for the climate system. When a command is sent to this
 			channel the value is
@@ -60,22 +60,22 @@
 		</command>
 	</channel-type>
 	<channel-type id="parallelAdjustmentHeating">
-		<item-type>Number</item-type>
+		<item-type>Number:Dimensionless</item-type>
 		<label>Parallel adjustment when heating</label>
 		<state min="-10" max="10" step="1"/>
 	</channel-type>
 	<channel-type id="parallelAdjustmentCooling">
-		<item-type>Number</item-type>
+		<item-type>Number:Dimensionless</item-type>
 		<label>Parallel adjustment when cooling</label>
 		<state min="-10" max="10" step="1"/>
 	</channel-type>
 	<channel-type id="targetTemperatureHeating">
-		<item-type>Number</item-type>
+		<item-type>Number:Temperature</item-type>
 		<label>Target temperature when heating</label>
 		<state min="5" max="30" step="0.5"/>
 	</channel-type>
 	<channel-type id="targetTemperatureCooling">
-		<item-type>Number</item-type>
+		<item-type>Number:Temperature</item-type>
 		<label>Target temperature when cooling</label>
 		<state min="5" max="35" step="0.5"/>
 	</channel-type>

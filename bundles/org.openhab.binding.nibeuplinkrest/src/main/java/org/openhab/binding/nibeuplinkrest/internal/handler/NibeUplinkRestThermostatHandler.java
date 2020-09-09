@@ -18,12 +18,16 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 
 import java.util.Set;
 
+import javax.measure.quantity.Temperature;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.thing.*;
 import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
@@ -75,6 +79,7 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void handleCommand(ChannelUID channelUID, Command command) {
         if (command instanceof DecimalType) {
             switch (channelUID.getId()) {
@@ -90,6 +95,16 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
                         nibeUplinkRestApi.setThermostat(config.systemId, createThermostat());
                     }
                     break;
+            }
+        } else if (command instanceof QuantityType) {
+            @Nullable
+            QuantityType<Temperature> celsius = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
+            if (celsius != null) {
+                @Nullable
+                DecimalType dt = celsius.as(DecimalType.class);
+                if (dt != null) {
+                    handleCommand(channelUID, dt);
+                }
             }
         }
     }
