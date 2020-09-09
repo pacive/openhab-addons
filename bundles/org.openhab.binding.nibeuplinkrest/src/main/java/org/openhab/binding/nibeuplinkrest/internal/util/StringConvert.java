@@ -35,9 +35,13 @@ public class StringConvert {
 
         for (int i = 0; i < parts.length; i++) {
             String part = i > 0 ? parts[i].substring(0, 1).toUpperCase(Locale.ROOT) + parts[i].substring(1) : parts[i];
-            output.append(part);
+            output.append(clean(part));
         }
         return output.toString();
+    }
+
+    public static String clean(String input) {
+        return input.replaceAll("\\W", "");
     }
 
     public static String capitalize(String input) {
