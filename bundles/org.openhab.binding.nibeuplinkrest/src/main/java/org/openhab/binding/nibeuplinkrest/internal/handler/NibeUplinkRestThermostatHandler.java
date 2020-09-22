@@ -13,22 +13,22 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.handler;
 
+import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.CHANNEL_THERMOSTAT_CURRENT;
+import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.CHANNEL_THERMOSTAT_TARGET;
+
+import java.util.Set;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.items.Item;
+import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
-import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
-
-import java.util.Set;
-
-import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.CHANNEL_THERMOSTAT_CURRENT;
-import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.CHANNEL_THERMOSTAT_TARGET;
 
 /**
  * Handles virtual thermostat Things connecting openHAB to Nibe uplink
@@ -45,7 +45,6 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
 
     private @Nullable Double currentTemperature;
     private @Nullable Double targetTemperature;
-
 
     public NibeUplinkRestThermostatHandler(Thing thing, ItemChannelLinkRegistry itemChannelLinkRegistry) {
         super(thing);
@@ -119,8 +118,7 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
      * @return A {@link Thermostat}
      */
     public Thermostat createThermostat() {
-        return new Thermostat(config.id, config.name, config.climateSystems,
-                currentTemperature, targetTemperature);
+        return new Thermostat(config.id, config.name, config.climateSystems, currentTemperature, targetTemperature);
     }
 
     /**

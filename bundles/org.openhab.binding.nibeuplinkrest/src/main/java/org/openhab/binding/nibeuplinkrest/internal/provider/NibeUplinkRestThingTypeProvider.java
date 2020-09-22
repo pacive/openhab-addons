@@ -13,6 +13,11 @@
 
 package org.openhab.binding.nibeuplinkrest.internal.provider;
 
+import java.util.Collection;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
@@ -22,12 +27,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 
 /**
  * Provides generated thing-types to the framework
@@ -53,6 +52,7 @@ public class NibeUplinkRestThingTypeProvider implements ThingTypeProvider {
 
     /**
      * Add a thing type to the provider
+     * 
      * @param thingTypeUID
      * @param thingType
      */
@@ -62,7 +62,6 @@ public class NibeUplinkRestThingTypeProvider implements ThingTypeProvider {
 
     @Activate
     protected void activate(ComponentContext componentContext) {
-
     }
 
     @Deactivate

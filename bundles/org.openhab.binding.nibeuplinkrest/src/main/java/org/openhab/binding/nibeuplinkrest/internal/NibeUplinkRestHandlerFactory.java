@@ -49,9 +49,8 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = ThingHandlerFactory.class, configurationPid = "binding.nibeuplinkrest")
 public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections
-            .unmodifiableSet(Stream.of(THING_TYPE_APIBRIDGE, THING_TYPE_SYSTEM, THING_TYPE_THERMOSTAT)
-                    .collect(Collectors.toSet()));
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.unmodifiableSet(
+            Stream.of(THING_TYPE_APIBRIDGE, THING_TYPE_SYSTEM, THING_TYPE_THERMOSTAT).collect(Collectors.toSet()));
 
     private @NonNullByDefault({}) OAuthFactory oAuthFactory;
     private @NonNullByDefault({}) NibeUplinkRestOAuthService oAuthService;
@@ -69,8 +68,8 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (THING_TYPE_APIBRIDGE.equals(thingTypeUID)) {
-            final NibeUplinkRestBridgeHandler handler = new NibeUplinkRestBridgeHandler
-                    ((Bridge) thing, oAuthFactory, httpClient, typeFactory);
+            final NibeUplinkRestBridgeHandler handler = new NibeUplinkRestBridgeHandler((Bridge) thing, oAuthFactory,
+                    httpClient, typeFactory);
             oAuthService.addBridgeHandler(handler);
             return handler;
         }
@@ -103,9 +102,13 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
     }
 
     @Reference
-    protected void setOAuthService(NibeUplinkRestOAuthService oAuthService) { this.oAuthService = oAuthService; }
+    protected void setOAuthService(NibeUplinkRestOAuthService oAuthService) {
+        this.oAuthService = oAuthService;
+    }
 
-    protected void unsetOAuthService(NibeUplinkRestOAuthService oAuthService) { this.oAuthService = null; }
+    protected void unsetOAuthService(NibeUplinkRestOAuthService oAuthService) {
+        this.oAuthService = null;
+    }
 
     @Reference
     protected void setTypeFactory(NibeUplinkRestTypeFactory typeFactory) {

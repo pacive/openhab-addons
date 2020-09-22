@@ -14,8 +14,11 @@
 package org.openhab.binding.nibeuplinkrest.internal.api;
 
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
-import static org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestResponseParser.*;
 import static org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestRequestHandler.RequestType;
+import static org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestResponseParser.*;
+
+import java.util.*;
+import java.util.concurrent.*;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -29,9 +32,6 @@ import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestHttpE
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.concurrent.*;
 
 /**
  * @author Anders Alfredsson - Initial contribution
@@ -63,9 +63,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestConnector.class);
     private final NibeUplinkRestRequestHandler requests;
 
-    public NibeUplinkRestConnector(NibeUplinkRestBridgeHandler bridgeHandler, OAuthClientService oAuthClient, HttpClient httpClient,
-                                   ScheduledExecutorService scheduler, long updateInterval,
-                                   long softwareUpdateCheckInterval) {
+    public NibeUplinkRestConnector(NibeUplinkRestBridgeHandler bridgeHandler, OAuthClientService oAuthClient,
+            HttpClient httpClient, ScheduledExecutorService scheduler, long updateInterval,
+            long softwareUpdateCheckInterval) {
         this.bridgeHandler = bridgeHandler;
         this.scheduler = scheduler;
         this.updateInterval = updateInterval;
@@ -81,8 +81,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         if (localRef != null) {
             localRef.cancel(false);
         }
-        standardRequestProducer = scheduler.scheduleWithFixedDelay(this::queueStandardRequests, 1,
-                updateInterval, TimeUnit.SECONDS);
+        standardRequestProducer = scheduler.scheduleWithFixedDelay(this::queueStandardRequests, 1, updateInterval,
+                TimeUnit.SECONDS);
     }
 
     @Override
@@ -185,7 +185,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     @Override
-    public void requestMode(int systemId){
+    public void requestMode(int systemId) {
         logger.debug("Requesting mode from Nibe uplink");
         Request req = requests.createGetModeRequest(systemId);
         queuedRequests.addFirst(req);
@@ -307,8 +307,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         localRef = softwareRequestProducer;
         if (softwareUpdateCheckInterval > 0) {
             if (localRef == null || localRef.isCancelled()) {
-                softwareRequestProducer = scheduler.scheduleWithFixedDelay(this::queueSoftwareRequests,
-                        0, softwareUpdateCheckInterval, TimeUnit.DAYS);
+                softwareRequestProducer = scheduler.scheduleWithFixedDelay(this::queueSoftwareRequests, 0,
+                        softwareUpdateCheckInterval, TimeUnit.DAYS);
                 logger.trace("Software request producer started with interval {} days", softwareUpdateCheckInterval);
             }
         }
@@ -320,8 +320,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         }
         localRef = modeRequestProducer;
         if (localRef == null || localRef.isCancelled()) {
-            modeRequestProducer = scheduler.scheduleWithFixedDelay(this::queueModeRequests,
-                    MODE_UPDATE_INTERVAL / 2, MODE_UPDATE_INTERVAL, TimeUnit.MINUTES);
+            modeRequestProducer = scheduler.scheduleWithFixedDelay(this::queueModeRequests, MODE_UPDATE_INTERVAL / 2,
+                    MODE_UPDATE_INTERVAL, TimeUnit.MINUTES);
             logger.trace("Mode request producer started");
         }
         localRef = requestProcessor;
@@ -338,13 +338,21 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     private synchronized void cancelPolling() {
         logger.debug("Stopping all request producers and clearing queue");
         Future<?> localRef = standardRequestProducer;
-        if (localRef != null) { localRef.cancel(false); }
+        if (localRef != null) {
+            localRef.cancel(false);
+        }
         localRef = softwareRequestProducer;
-        if (localRef != null) { localRef.cancel(false); }
+        if (localRef != null) {
+            localRef.cancel(false);
+        }
         localRef = modeRequestProducer;
-        if (localRef != null) { localRef.cancel(false); }
+        if (localRef != null) {
+            localRef.cancel(false);
+        }
         localRef = thermostatRequestProducer;
-        if (localRef != null) { localRef.cancel(false); }
+        if (localRef != null) {
+            localRef.cancel(false);
+        }
         queuedRequests.clear();
     }
 
@@ -377,7 +385,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
                     parameters.add(i.next());
                     counter++;
                     if (counter == MAX_PARAMETERS_PER_REQUEST) {
-                        logger.trace("Queueing parameter request for {} with {} parameters", systemId, parameters.size());
+                        logger.trace("Queueing parameter request for {} with {} parameters", systemId,
+                                parameters.size());
                         try {
                             Request req = requests.createGetParametersRequest(systemId, parameters);
                             queuedRequests.add(req);
@@ -500,7 +509,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             }
             return;
         } catch (NibeUplinkRestException e) {
-            logger.debug("Failed to get data from Nibe Uplink: {}", e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+            logger.debug("Failed to get data from Nibe Uplink: {}",
+                    e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
             return;
         }
 

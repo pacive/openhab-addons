@@ -14,6 +14,11 @@ package org.openhab.binding.nibeuplinkrest.internal.handler;
 
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.smarthome.core.auth.client.oauth2.*;
@@ -32,11 +37,6 @@ import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestExcep
 import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * The {@link NibeUplinkRestBridgeHandler} handles the connection to the Nibe Uplink API.
@@ -57,7 +57,7 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
     private @NonNullByDefault({}) NibeUplinkRestBridgeConfiguration config;
 
     public NibeUplinkRestBridgeHandler(Bridge bridge, OAuthFactory oAuthFactory, HttpClient httpClient,
-                                       NibeUplinkRestTypeFactory typeFactory) {
+            NibeUplinkRestTypeFactory typeFactory) {
         super(bridge);
         this.oAuthFactory = oAuthFactory;
         this.httpClient = httpClient;
@@ -70,16 +70,17 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
     }
 
     @Override
-    public void handleCommand(ChannelUID channelUID, Command command) {}
+    public void handleCommand(ChannelUID channelUID, Command command) {
+    }
 
     @Override
     public void initialize() {
         logger.debug("Initializing Rest Api Bridge");
         config = getConfigAs(NibeUplinkRestBridgeConfiguration.class);
-        oAuthClient = oAuthFactory.createOAuthClientService(thing.getUID().getAsString(), TOKEN_ENDPOINT,
-                AUTH_ENDPOINT, config.clientId, config.clientSecret, SCOPE, false);
-        nibeUplinkRestApi = new NibeUplinkRestConnector(this, oAuthClient, httpClient, scheduler,
-                config.updateInterval, config.softwareUpdateCheckInterval);
+        oAuthClient = oAuthFactory.createOAuthClientService(thing.getUID().getAsString(), TOKEN_ENDPOINT, AUTH_ENDPOINT,
+                config.clientId, config.clientSecret, SCOPE, false);
+        nibeUplinkRestApi = new NibeUplinkRestConnector(this, oAuthClient, httpClient, scheduler, config.updateInterval,
+                config.softwareUpdateCheckInterval);
         scheduler.execute(() -> {
             logger.debug("Rebuilding thing-types");
             if (isAuthorized()) {
@@ -182,6 +183,7 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
 
     /**
      * Get a handle to the {@link NibeUplinkRestTypeFactory} that handles the creation of thing types
+     * 
      * @return
      */
     public NibeUplinkRestTypeFactory getTypeFactory() {

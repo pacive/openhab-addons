@@ -16,6 +16,9 @@ package org.openhab.binding.nibeuplinkrest.internal.provider;
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 import static org.openhab.binding.nibeuplinkrest.internal.provider.TypeFactoryConstants.*;
 
+import java.util.*;
+import java.util.regex.Matcher;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.CoreItemFactory;
@@ -29,9 +32,6 @@ import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-
-import java.util.*;
-import java.util.regex.Matcher;
 
 /**
  * Handles the creation of thing-types, channel-group-types and channel-types
@@ -50,16 +50,19 @@ public class NibeUplinkRestTypeFactory {
     private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
 
     @Activate
-    public NibeUplinkRestTypeFactory() {}
+    public NibeUplinkRestTypeFactory() {
+    }
 
     /**
      * Create a new thing-type based on a system and it's categories
+     * 
      * @param system
      * @param categories
      */
     public void createThingType(NibeSystem system, List<Category> categories) {
-        @Nullable ChannelGroupType defaultControlGroup = channelGroupTypeRegistry.getChannelGroupType(
-                CHANNEL_GROUP_TYPE_DEFAULT_CONTROL);
+        @Nullable
+        ChannelGroupType defaultControlGroup = channelGroupTypeRegistry
+                .getChannelGroupType(CHANNEL_GROUP_TYPE_DEFAULT_CONTROL);
 
         List<ChannelGroupDefinition> groupDefinitions = new ArrayList<>();
         List<ChannelDefinition> controlChannels = new ArrayList<>();
@@ -85,8 +88,7 @@ public class NibeUplinkRestTypeFactory {
         // Add control channels that aren't included
         controlChannels.addAll(createHeatControlChannels(system, categories));
         ChannelGroupType controlChannelGroup = ChannelGroupTypeBuilder.instance(CHANNEL_GROUP_TYPE_CONTROL, "Control")
-                .withChannelDefinitions(controlChannels)
-                .build();
+                .withChannelDefinitions(controlChannels).build();
         channelGroupTypeProvider.add(controlChannelGroup);
         ChannelGroupDefinition controlChannelGroupDefinition = new ChannelGroupDefinition(CHANNEL_GROUP_CONTROL_ID,
                 CHANNEL_GROUP_TYPE_CONTROL);
@@ -97,17 +99,15 @@ public class NibeUplinkRestTypeFactory {
                 system.getProductName().toLowerCase(Locale.ROOT).replaceAll("\\s", ""));
         ThingType thingType = ThingTypeBuilder.instance(thingTypeUID, system.getProductName())
                 .withSupportedBridgeTypeUIDs(Collections.singletonList(THING_TYPE_APIBRIDGE.getAsString()))
-                .withChannelGroupDefinitions(groupDefinitions)
-                .withConfigDescriptionURI(SYSTEM_CONFIG)
-                .withLabel(system.getProductName())
-                .withRepresentationProperty(PROPERTY_SYSTEM_ID)
-                .build();
+                .withChannelGroupDefinitions(groupDefinitions).withConfigDescriptionURI(SYSTEM_CONFIG)
+                .withLabel(system.getProductName()).withRepresentationProperty(PROPERTY_SYSTEM_ID).build();
 
         thingTypeProvider.addThingType(thingTypeUID, thingType);
     }
 
     /**
      * Create a channel group from a category, with the parameters as channels
+     * 
      * @param category
      * @return
      */
@@ -117,19 +117,18 @@ public class NibeUplinkRestTypeFactory {
 
         List<ChannelDefinition> channelDefinitions = new ArrayList<>();
         category.getParameters().forEach(p -> {
-                    ChannelType type = createChannelType(p);
-                    channelTypeProvider.add(type);
-                    channelDefinitions.add(createChannelDefinition(type.getUID(), p));
-                });
+            ChannelType type = createChannelType(p);
+            channelTypeProvider.add(type);
+            channelDefinitions.add(createChannelDefinition(type.getUID(), p));
+        });
 
-        return ChannelGroupTypeBuilder.instance(channelGroupTypeUID,
-                StringConvert.capitalize(category.getName()))
-                .withChannelDefinitions(channelDefinitions)
-                .build();
+        return ChannelGroupTypeBuilder.instance(channelGroupTypeUID, StringConvert.capitalize(category.getName()))
+                .withChannelDefinitions(channelDefinitions).build();
     }
 
     /**
      * Create a channel group definition for the thing-type
+     * 
      * @param uid
      * @return
      */
@@ -139,6 +138,7 @@ public class NibeUplinkRestTypeFactory {
 
     /**
      * Create a channel type from a parameter
+     * 
      * @param parameter
      * @return
      */
@@ -146,17 +146,16 @@ public class NibeUplinkRestTypeFactory {
         ParameterType type = getParameterType(parameter);
         ChannelTypeUID channelTypeUID = new ChannelTypeUID(BINDING_ID, type.toString().toLowerCase(Locale.ROOT));
 
-        return ChannelTypeBuilder.state(channelTypeUID,
-                type.toString().toLowerCase(Locale.ROOT), getItemType(type))
-                .withConfigDescriptionURI(CHANNEL_CONFIG)
-                .isAdvanced(isChannelAdvanced(type))
-                .withStateDescription(StateDescriptionFragmentBuilder.create()
-                        .withReadOnly(true).build().toStateDescription())
+        return ChannelTypeBuilder.state(channelTypeUID, type.toString().toLowerCase(Locale.ROOT), getItemType(type))
+                .withConfigDescriptionURI(CHANNEL_CONFIG).isAdvanced(isChannelAdvanced(type))
+                .withStateDescription(
+                        StateDescriptionFragmentBuilder.create().withReadOnly(true).build().toStateDescription())
                 .build();
     }
 
     /**
      * Create a channel definition for a channel group
+     * 
      * @param uid
      * @param parameter
      * @return
@@ -167,12 +166,14 @@ public class NibeUplinkRestTypeFactory {
 
         return new ChannelDefinitionBuilder(parameter.getName(), uid)
                 .withLabel(StringConvert.capitalize(parameter.getTitle()))
-                .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR, Integer.toString(scalingFactor)))
+                .withProperties(
+                        Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR, Integer.toString(scalingFactor)))
                 .build();
     }
 
     /**
      * Generate some additional channels for the status group, based on templates in XML-files
+     * 
      * @return
      */
     private ChannelGroupType withExtraStatusChannels(ChannelGroupType original, NibeSystem system) {
@@ -180,63 +181,60 @@ public class NibeUplinkRestTypeFactory {
         definitions.addAll(original.getChannelDefinitions());
 
         STATUS_CHANNELS.forEach((channelTypeID) -> {
-            if ((channelTypeID.equals(CHANNEL_TYPE_VENTILATION) && !system.hasVentilation()) ||
-                    ((channelTypeID.equals(CHANNEL_TYPE_HEATING_MEDIUM_PUMP) ||
-                            channelTypeID.equals(CHANNEL_TYPE_HEATING)) && !system.hasHeating()) ||
-                    (channelTypeID.equals(CHANNEL_TYPE_HOT_WATER) && !system.hasHotWater()) ||
-                    (channelTypeID.equals(CHANNEL_TYPE_COOLING) && !system.hasCooling())) {
+            if ((channelTypeID.equals(CHANNEL_TYPE_VENTILATION) && !system.hasVentilation())
+                    || ((channelTypeID.equals(CHANNEL_TYPE_HEATING_MEDIUM_PUMP)
+                            || channelTypeID.equals(CHANNEL_TYPE_HEATING)) && !system.hasHeating())
+                    || (channelTypeID.equals(CHANNEL_TYPE_HOT_WATER) && !system.hasHotWater())
+                    || (channelTypeID.equals(CHANNEL_TYPE_COOLING) && !system.hasCooling())) {
                 return;
             }
 
-            @Nullable ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeID);
+            @Nullable
+            ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeID);
             if (channelType != null) {
                 ChannelDefinition definition = new ChannelDefinitionBuilder(channelTypeID.getId(), channelTypeID)
-                        .withLabel(channelType.getLabel())
-                        .withDescription(channelType.getDescription())
-                        .build();
+                        .withLabel(channelType.getLabel()).withDescription(channelType.getDescription()).build();
                 definitions.add(definition);
             }
         });
 
-
-
         return ChannelGroupTypeBuilder.instance(original.getUID(), original.getLabel())
-                .withChannelDefinitions(definitions)
-                .build();
+                .withChannelDefinitions(definitions).build();
     }
 
     /**
      * Creates control channels, based on the system's reported capabilities, based on templates
      * defined in XML-files
+     * 
      * @param system
      * @param categories
      * @return
      */
     private List<ChannelDefinition> createHeatControlChannels(NibeSystem system, List<Category> categories) {
-        @Nullable ChannelType parAdjustHeat = channelTypeRegistry.getChannelType(CHANNEL_TYPE_PARALLEL_ADJUST_HEAT);
-        @Nullable ChannelType parAdjustCool = channelTypeRegistry.getChannelType(CHANNEL_TYPE_PARALLEL_ADJUST_COOL);
-        @Nullable ChannelType targetTempHeat = channelTypeRegistry.getChannelType(CHANNEL_TYPE_TARGET_TEMP_HEAT);
-        @Nullable ChannelType targetTempCool = channelTypeRegistry.getChannelType(CHANNEL_TYPE_TARGET_TEMP_COOL);
-        @Nullable ChannelType ventilationBoost = channelTypeRegistry.getChannelType(CHANNEL_TYPE_VENTILATION_BOOST);
-        @Nullable ChannelType hotWaterBoost = channelTypeRegistry.getChannelType(CHANNEL_TYPE_HOT_WATER_BOOST);
+        @Nullable
+        ChannelType parAdjustHeat = channelTypeRegistry.getChannelType(CHANNEL_TYPE_PARALLEL_ADJUST_HEAT);
+        @Nullable
+        ChannelType parAdjustCool = channelTypeRegistry.getChannelType(CHANNEL_TYPE_PARALLEL_ADJUST_COOL);
+        @Nullable
+        ChannelType targetTempHeat = channelTypeRegistry.getChannelType(CHANNEL_TYPE_TARGET_TEMP_HEAT);
+        @Nullable
+        ChannelType targetTempCool = channelTypeRegistry.getChannelType(CHANNEL_TYPE_TARGET_TEMP_COOL);
+        @Nullable
+        ChannelType ventilationBoost = channelTypeRegistry.getChannelType(CHANNEL_TYPE_VENTILATION_BOOST);
+        @Nullable
+        ChannelType hotWaterBoost = channelTypeRegistry.getChannelType(CHANNEL_TYPE_HOT_WATER_BOOST);
 
         List<ChannelDefinition> definitions = new ArrayList<>();
 
         // Add ventilation boost if the system has ventilation
         if (system.hasVentilation() && ventilationBoost != null) {
-            definitions.add(new ChannelDefinitionBuilder(
-                    "47260", CHANNEL_TYPE_VENTILATION_BOOST)
-                    .withLabel(ventilationBoost.getLabel())
-                    .withDescription(ventilationBoost.getDescription())
-                    .build());
+            definitions.add(new ChannelDefinitionBuilder("47260", CHANNEL_TYPE_VENTILATION_BOOST)
+                    .withLabel(ventilationBoost.getLabel()).withDescription(ventilationBoost.getDescription()).build());
         }
         // Add hot water boost if the system produces hot water
         if (system.hasHotWater() && hotWaterBoost != null) {
-            definitions.add(new ChannelDefinitionBuilder(
-                    "48132", CHANNEL_TYPE_HOT_WATER_BOOST)
-                    .withLabel(hotWaterBoost.getLabel())
-                    .withDescription(hotWaterBoost.getDescription())
-                    .build());
+            definitions.add(new ChannelDefinitionBuilder("48132", CHANNEL_TYPE_HOT_WATER_BOOST)
+                    .withLabel(hotWaterBoost.getLabel()).withDescription(hotWaterBoost.getDescription()).build());
         }
         categories.forEach(c -> {
             // A system can support up to 8 sub-systems (e.g floor heating and radiator heating)
@@ -247,36 +245,38 @@ public class NibeUplinkRestTypeFactory {
                 // Add heating controls if the system has heating
                 if (system.hasHeating() && parAdjustHeat != null && targetTempHeat != null) {
                     definitions.add(new ChannelDefinitionBuilder(
-                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(CHANNEL_PARALLEL_ADJUST_HEAT_ID)
-                                    .get(index)), CHANNEL_TYPE_PARALLEL_ADJUST_HEAT)
-                            .withLabel(String.format(HEAT_CONTROL_CHANNEL_LABEL, index, parAdjustHeat.getLabel()))
-                            .withDescription(parAdjustHeat.getDescription())
-                            .build());
+                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(CHANNEL_PARALLEL_ADJUST_HEAT_ID).get(index)),
+                            CHANNEL_TYPE_PARALLEL_ADJUST_HEAT)
+                                    .withLabel(
+                                            String.format(HEAT_CONTROL_CHANNEL_LABEL, index, parAdjustHeat.getLabel()))
+                                    .withDescription(parAdjustHeat.getDescription()).build());
                     definitions.add(new ChannelDefinitionBuilder(
-                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(CHANNEL_TARGET_TEMP_HEAT_ID)
-                                    .get(index)), CHANNEL_TYPE_TARGET_TEMP_HEAT)
-                            .withLabel(String.format(HEAT_CONTROL_CHANNEL_LABEL, index, targetTempHeat.getLabel()))
-                            .withDescription(targetTempHeat.getDescription())
-                            .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR,
-                                    Integer.toString(SCALE_FACTOR_TEN)))
-                            .build());
+                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(CHANNEL_TARGET_TEMP_HEAT_ID).get(index)),
+                            CHANNEL_TYPE_TARGET_TEMP_HEAT)
+                                    .withLabel(
+                                            String.format(HEAT_CONTROL_CHANNEL_LABEL, index, targetTempHeat.getLabel()))
+                                    .withDescription(targetTempHeat.getDescription())
+                                    .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR,
+                                            Integer.toString(SCALE_FACTOR_TEN)))
+                                    .build());
                 }
                 // Add cooling control if the system has cooling
                 if (system.hasCooling() && parAdjustCool != null && targetTempCool != null) {
                     definitions.add(new ChannelDefinitionBuilder(
-                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(CHANNEL_PARALLEL_ADJUST_COOL_ID)
-                                    .get(index)), CHANNEL_TYPE_PARALLEL_ADJUST_COOL)
-                            .withLabel(String.format(HEAT_CONTROL_CHANNEL_LABEL, index, parAdjustCool.getLabel()))
-                            .withDescription(parAdjustCool.getDescription())
-                            .build());
+                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(CHANNEL_PARALLEL_ADJUST_COOL_ID).get(index)),
+                            CHANNEL_TYPE_PARALLEL_ADJUST_COOL)
+                                    .withLabel(
+                                            String.format(HEAT_CONTROL_CHANNEL_LABEL, index, parAdjustCool.getLabel()))
+                                    .withDescription(parAdjustCool.getDescription()).build());
                     definitions.add(new ChannelDefinitionBuilder(
-                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(CHANNEL_TARGET_TEMP_COOL_ID)
-                                    .get(index)), CHANNEL_TYPE_TARGET_TEMP_COOL)
-                            .withLabel(String.format(HEAT_CONTROL_CHANNEL_LABEL, index, targetTempCool.getLabel()))
-                            .withDescription(targetTempCool.getDescription())
-                            .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR,
-                                    Integer.toString(SCALE_FACTOR_TEN)))
-                            .build());
+                            String.valueOf(HEAT_CONTROL_PARAMETERS.get(CHANNEL_TARGET_TEMP_COOL_ID).get(index)),
+                            CHANNEL_TYPE_TARGET_TEMP_COOL)
+                                    .withLabel(
+                                            String.format(HEAT_CONTROL_CHANNEL_LABEL, index, targetTempCool.getLabel()))
+                                    .withDescription(targetTempCool.getDescription())
+                                    .withProperties(Collections.singletonMap(CHANNEL_PROPERTY_SCALING_FACTOR,
+                                            Integer.toString(SCALE_FACTOR_TEN)))
+                                    .build());
                 }
             }
         });
@@ -316,8 +316,7 @@ public class NibeUplinkRestTypeFactory {
         if (parameter.getDisplayValue().equals("yes") || parameter.getDisplayValue().equals("no")) {
             return ParameterType.BOOLEAN;
         }
-        if (STATIC_PARAMETER_TYPE_MAPPINGS.containsKey(parameter.getParameterId()))
-        {
+        if (STATIC_PARAMETER_TYPE_MAPPINGS.containsKey(parameter.getParameterId())) {
             return STATIC_PARAMETER_TYPE_MAPPINGS.get(parameter.getParameterId());
         }
         return ParameterType.OTHER;
@@ -328,6 +327,7 @@ public class NibeUplinkRestTypeFactory {
      * 1. Some static mappings
      * 2. Type
      * 3. Attempt to calculate based on display value and raw value
+     * 
      * @param parameter
      * @param type
      * @return
@@ -357,6 +357,7 @@ public class NibeUplinkRestTypeFactory {
     /**
      * Attempt to calculate the scaling factor by dividing the raw value with the
      * parsed display value string
+     * 
      * @param parameter
      * @return
      */
@@ -368,12 +369,14 @@ public class NibeUplinkRestTypeFactory {
                 result = Double.parseDouble(match.group(1));
                 return (int) Math.round(parameter.getRawValue() / result);
             }
-        } catch (Exception e) { }
+        } catch (Exception e) {
+        }
         return NO_SCALING;
     }
 
     /**
      * Mark some channels as advanced
+     * 
      * @param type
      * @return
      */
@@ -390,6 +393,7 @@ public class NibeUplinkRestTypeFactory {
 
     /**
      * Get the correspoding OH Item type based on the parameter type
+     * 
      * @param type
      * @return
      */
@@ -406,6 +410,7 @@ public class NibeUplinkRestTypeFactory {
 
     /**
      * Convenience method to query the thing-type provider if it has a certain thing-type
+     * 
      * @param thingTypeUID
      * @return
      */
@@ -415,6 +420,7 @@ public class NibeUplinkRestTypeFactory {
 
     /**
      * Convenience method to get access to the {@link NibeUplinkRestChannelGroupTypeProvider}
+     * 
      * @return
      */
     public NibeUplinkRestChannelGroupTypeProvider getGroupTypeProvider() {
