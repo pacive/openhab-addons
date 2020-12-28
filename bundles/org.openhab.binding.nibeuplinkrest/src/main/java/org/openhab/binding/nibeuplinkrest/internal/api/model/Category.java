@@ -28,11 +28,10 @@ import org.eclipse.jdt.annotation.Nullable;
 public class Category {
     private final String categoryId;
     private String name;
-    private List<Parameter> parameters = new ArrayList<>();
+    private List<Parameter> parameters;
 
     public Category(String categoryId, String name) {
-        this.categoryId = categoryId;
-        this.name = name;
+        this(categoryId, name, new ArrayList<>());
     }
 
     public Category(String categoryId, String name, List<Parameter> parameters) {

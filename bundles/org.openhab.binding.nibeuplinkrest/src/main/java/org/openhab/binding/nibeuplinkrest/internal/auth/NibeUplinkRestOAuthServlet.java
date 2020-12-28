@@ -49,13 +49,13 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
 
     private static final String CONTENT_TYPE = "text/html";
 
-    private NibeUplinkRestOAuthService oAuthService;
-    private final Map<String, @Nullable NibeUplinkRestOAuthServletTemplate> templates;
+    private final NibeUplinkRestOAuthService oAuthService;
+    private final Map<String, NibeUplinkRestOAuthServletTemplate> templates;
 
     private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestOAuthServlet.class);
 
     public NibeUplinkRestOAuthServlet(NibeUplinkRestOAuthService oAuthService,
-            Map<String, @Nullable NibeUplinkRestOAuthServletTemplate> templates) {
+            Map<String, NibeUplinkRestOAuthServletTemplate> templates) {
         this.oAuthService = oAuthService;
         this.templates = templates;
     }
@@ -68,8 +68,9 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
         }
 
         logger.debug("Received GET request: {}", req.getRequestURI());
-        final String servletBaseURL = req.getRequestURL().toString();
-        final NibeUplinkRestOAuthServletTemplate indexTemplate = templates.get(SERVLET_TEMPLATE_INDEX);
+
+        String servletBaseURL = req.getRequestURL().toString();
+        NibeUplinkRestOAuthServletTemplate indexTemplate = templates.get(SERVLET_TEMPLATE_INDEX);
 
         if (indexTemplate == null) {
             throw new ServletException();
@@ -97,11 +98,12 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
             throw new ServletException();
         }
 
-        oAuthService.getBridgeHandlers().forEach(h -> {
-            String authURL = h.getAuthorizationUrl(baseURL);
-            template.addReplacement(REPLACE_ACCOUNT_LABEL, h.getThing().getLabel());
+        oAuthService.getBridgeHandlers().values().forEach(handler -> {
+            String authURL = handler.getAuthorizationUrl(baseURL);
+            template.addReplacement(REPLACE_ACCOUNT_LABEL, handler.getThing().getLabel());
             template.addReplacement(REPLACE_ACCOUNT_REDIRECT, authURL);
-            template.addReplacement(REPLACE_ACCOUNT_AUTHORIZED, h.isAuthorized() ? "Authorized" : "Not authorized");
+            template.addReplacement(REPLACE_ACCOUNT_AUTHORIZED,
+                    handler.isAuthorized() ? "Authorized" : "Not authorized");
             accounts.append(template.replaceAll());
         });
         return accounts.toString();
@@ -120,6 +122,7 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
 
         final MultiMap<String> params = new MultiMap<>();
         UrlEncoded.decodeTo(queryString, params, StandardCharsets.UTF_8);
+        @Nullable
         NibeUplinkRestBridgeHandler handler = oAuthService.getBridgeHandler(params.getString("state"));
         if (handler == null) {
             logger.warn("No handler for thing {}", params.getString("state"));
