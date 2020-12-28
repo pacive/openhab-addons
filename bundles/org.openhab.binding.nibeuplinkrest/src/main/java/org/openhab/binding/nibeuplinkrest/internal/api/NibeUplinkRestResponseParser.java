@@ -17,6 +17,7 @@ import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -38,7 +39,7 @@ public class NibeUplinkRestResponseParser {
      */
     private static class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime> {
         @Override
-        public ZonedDateTime deserialize(@Nullable JsonElement json, @Nullable Type type,
+        public @Nullable ZonedDateTime deserialize(@Nullable JsonElement json, @Nullable Type type,
                 @Nullable JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             if (json == null) {
                 throw new JsonParseException("null");
@@ -52,7 +53,7 @@ public class NibeUplinkRestResponseParser {
      */
     private static class ModeDeserializer implements JsonDeserializer<Mode> {
         @Override
-        public Mode deserialize(@Nullable JsonElement json, @Nullable Type type,
+        public @Nullable Mode deserialize(@Nullable JsonElement json, @Nullable Type type,
                 @Nullable JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             if (json == null) {
                 throw new JsonParseException("null");
@@ -67,7 +68,7 @@ public class NibeUplinkRestResponseParser {
     private static class NibeSystemListDeserializer implements JsonDeserializer<List<NibeSystem>> {
 
         @Override
-        public List<NibeSystem> deserialize(@Nullable JsonElement json, @Nullable Type type,
+        public @Nullable List<NibeSystem> deserialize(@Nullable JsonElement json, @Nullable Type type,
                 @Nullable JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             if (json == null) {
                 throw new JsonParseException("null");
@@ -86,7 +87,7 @@ public class NibeUplinkRestResponseParser {
     private static class AlarmInfoDeserializer implements JsonDeserializer<AlarmInfo> {
 
         @Override
-        public AlarmInfo deserialize(@Nullable JsonElement json, @Nullable Type type,
+        public @Nullable AlarmInfo deserialize(@Nullable JsonElement json, @Nullable Type type,
                 @Nullable JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             if (json == null) {
                 throw new JsonParseException("null");
@@ -102,7 +103,7 @@ public class NibeUplinkRestResponseParser {
     private static class AlarmInfoListDeserializer implements JsonDeserializer<List<AlarmInfo>> {
 
         @Override
-        public List<AlarmInfo> deserialize(@Nullable JsonElement json, @Nullable Type type,
+        public @Nullable List<AlarmInfo> deserialize(@Nullable JsonElement json, @Nullable Type type,
                 @Nullable JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             if (json == null) {
                 throw new JsonParseException("null");
@@ -118,7 +119,7 @@ public class NibeUplinkRestResponseParser {
     private static class SoftwareInfoDeserializer implements JsonDeserializer<SoftwareInfo> {
 
         @Override
-        public SoftwareInfo deserialize(@Nullable JsonElement json, @Nullable Type type,
+        public @Nullable SoftwareInfo deserialize(@Nullable JsonElement json, @Nullable Type type,
                 @Nullable JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             if (json == null) {
                 throw new JsonParseException("null");
@@ -147,8 +148,8 @@ public class NibeUplinkRestResponseParser {
      * @param json
      * @return
      */
-    public static NibeSystem parseSystem(String json) {
-        return gson.fromJson(json, NibeSystem.class);
+    public static Optional<NibeSystem> parseSystem(String json) {
+        return Optional.ofNullable(gson.fromJson(json, NibeSystem.class));
     }
 
     /**
@@ -157,9 +158,9 @@ public class NibeUplinkRestResponseParser {
      * @param json
      * @return
      */
-    public static List<NibeSystem> parseSystemList(String json) {
-        return gson.fromJson(json, new TypeToken<List<NibeSystem>>() {
-        }.getType());
+    public static Optional<List<NibeSystem>> parseSystemList(String json) {
+        return Optional.ofNullable(gson.fromJson(json, new TypeToken<List<NibeSystem>>() {
+        }.getType()));
     }
 
     /**
@@ -185,9 +186,9 @@ public class NibeUplinkRestResponseParser {
      * @param json
      * @return
      */
-    public static List<AlarmInfo> parseAlarmInfoList(String json) {
-        return gson.fromJson(json, new TypeToken<List<AlarmInfo>>() {
-        }.getType());
+    public static Optional<List<AlarmInfo>> parseAlarmInfoList(String json) {
+        return Optional.ofNullable(gson.fromJson(json, new TypeToken<List<AlarmInfo>>() {
+        }.getType()));
     }
 
     /**
@@ -196,8 +197,8 @@ public class NibeUplinkRestResponseParser {
      * @param json
      * @return
      */
-    public static SystemConfig parseSystemConfig(String json) {
-        return gson.fromJson(json, SystemConfig.class);
+    public static Optional<SystemConfig> parseSystemConfig(String json) {
+        return Optional.ofNullable(gson.fromJson(json, SystemConfig.class));
     }
 
     /**
@@ -206,8 +207,8 @@ public class NibeUplinkRestResponseParser {
      * @param json
      * @return
      */
-    public static SoftwareInfo parseSoftwareInfo(String json) {
-        return gson.fromJson(json, SoftwareInfo.class);
+    public static Optional<SoftwareInfo> parseSoftwareInfo(String json) {
+        return Optional.ofNullable(gson.fromJson(json, SoftwareInfo.class));
     }
 
     /**
@@ -216,9 +217,9 @@ public class NibeUplinkRestResponseParser {
      * @param json
      * @return
      */
-    public static List<Category> parseCategoryList(String json) {
-        return gson.fromJson(json, new TypeToken<List<Category>>() {
-        }.getType());
+    public static Optional<List<Category>> parseCategoryList(String json) {
+        return Optional.ofNullable(gson.fromJson(json, new TypeToken<List<Category>>() {
+        }.getType()));
     }
 
     /**
@@ -227,9 +228,9 @@ public class NibeUplinkRestResponseParser {
      * @param json
      * @return
      */
-    public static List<Parameter> parseParameterList(String json) {
-        return gson.fromJson(json, new TypeToken<List<Parameter>>() {
-        }.getType());
+    public static Optional<List<Parameter>> parseParameterList(String json) {
+        return Optional.ofNullable(gson.fromJson(json, new TypeToken<List<Parameter>>() {
+        }.getType()));
     }
 
     /**
@@ -238,7 +239,7 @@ public class NibeUplinkRestResponseParser {
      * @param json
      * @return
      */
-    public static Mode parseMode(String json) {
-        return gson.fromJson(json, Mode.class);
+    public static Optional<Mode> parseMode(String json) {
+        return Optional.ofNullable(gson.fromJson(json, Mode.class));
     }
 }
