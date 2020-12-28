@@ -56,7 +56,7 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
 
     @Override
     public void activate() {
-        super.activate(new HashMap<String, @Nullable Object>());
+        super.activate(new HashMap<>());
     }
 
     @Override
