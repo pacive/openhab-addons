@@ -16,8 +16,8 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.HttpClient;
@@ -66,7 +66,7 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
 
     @Override
     public Collection<Class<? extends ThingHandlerService>> getServices() {
-        return Collections.singleton(NibeUplinkRestDiscoveryService.class);
+        return Set.of(NibeUplinkRestDiscoveryService.class);
     }
 
     @Override

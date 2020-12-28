@@ -24,7 +24,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestHttpException;
@@ -46,13 +45,13 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     private long updateInterval;
     private long softwareUpdateCheckInterval;
 
-    private final Map<Integer, @Nullable NibeSystem> cachedSystems = new ConcurrentHashMap<>();
-    private final Map<Integer, @Nullable Map<String, Category>> cachedCategories = new ConcurrentHashMap<>();
-    private final Map<Integer, @Nullable Map<Integer, Thermostat>> thermostats = new ConcurrentHashMap<>();
-    private final Map<Integer, @Nullable Set<Integer>> trackedParameters = new ConcurrentHashMap<>();
-    private final Map<Integer, @Nullable Mode> modes = new ConcurrentHashMap<>();
-    private final BlockingDeque<@Nullable Request> queuedRequests = new LinkedBlockingDeque<>(MAX_QUEUE_SIZE);
-    private final Map<Integer, @Nullable NibeUplinkRestCallbackListener> listeners = new ConcurrentHashMap<>();
+    private final Map<Integer, NibeSystem> cachedSystems = new ConcurrentHashMap<>();
+    private final Map<Integer, Map<String, Category>> cachedCategories = new ConcurrentHashMap<>();
+    private final Map<Integer, Map<Integer, Thermostat>> thermostats = new ConcurrentHashMap<>();
+    private final Map<Integer, Set<Integer>> trackedParameters = new ConcurrentHashMap<>();
+    private final Map<Integer, Mode> modes = new ConcurrentHashMap<>();
+    private final BlockingDeque<Request> queuedRequests = new LinkedBlockingDeque<>(MAX_QUEUE_SIZE);
+    private final Map<Integer, NibeUplinkRestCallbackListener> listeners = new ConcurrentHashMap<>();
     private @Nullable Future<?> standardRequestProducer;
     private @Nullable Future<?> softwareRequestProducer;
     private @Nullable Future<?> thermostatRequestProducer;
@@ -106,9 +105,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         Request req = requests.createConnectedSystemsRequest();
         try {
             String resp = requests.makeRequestWithRetry(req);
-            systems = parseSystemList(resp);
+            systems = parseSystemList(resp).orElse(List.of());
         } catch (NibeUplinkRestException e) {
-            systems = Collections.emptyList();
+            systems = List.of();
         }
         logger.debug("{} systems found", systems.size());
         for (NibeSystem system : systems) {
@@ -119,7 +118,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
 
     @Override
     public SystemConfig getSystemConfig(int systemId) throws NibeUplinkRestException {
+        @Nullable
         NibeSystem system = cachedSystems.get(systemId);
+        @Nullable
         SystemConfig config = null;
         if (system != null) {
             config = system.getConfig();
@@ -127,7 +128,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         if (config == null) {
             Request req = requests.createSystemConfigRequest(systemId);
             String resp = requests.makeRequestWithRetry(req);
-            config = parseSystemConfig(resp);
+            config = parseSystemConfig(resp).orElseThrow(() -> new NibeUplinkRestException("Unable to get config"));
         }
         if (system != null) {
             system.setConfig(config);
@@ -141,7 +142,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         if (cachedValues == null || cachedValues.isEmpty()) {
             Request req = requests.createCategoriesRequest(systemId, includeParameters);
             String resp = requests.makeRequestWithRetry(req);
-            List<Category> categories = parseCategoryList(resp);
+            List<Category> categories = parseCategoryList(resp).orElse(List.of());
             cachedValues = new HashMap<>();
             for (Category category : categories) {
                 cachedValues.putIfAbsent(category.getCategoryId(), category);
@@ -224,7 +225,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     public void removeThermostat(int systemId, int thermostatId) {
         Map<Integer, Thermostat> systemThermostats = thermostats.get(systemId);
         if (systemThermostats != null) {
-            logger.debug("Removing thermostat {}", systemThermostats.get(thermostatId).getName());
+            logger.debug("Removing thermostat {}", thermostatId);
             systemThermostats.remove(thermostatId);
             if (systemThermostats.isEmpty()) {
                 thermostats.remove(systemId);
@@ -256,14 +257,12 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
 
     @Override
     public void addTrackedParameter(int systemId, int parameterId) {
-        Set<Integer> systemTrackedParameters = trackedParameters.get(systemId);
-        if (systemTrackedParameters == null) {
-            if (listeners.get(systemId) == null) {
-                logger.debug("No listener for system {} adding tracked parameters anyway.", systemId);
-            }
-            systemTrackedParameters = new ConcurrentHashSet<>();
-            trackedParameters.putIfAbsent(systemId, systemTrackedParameters);
+        @Nullable
+        Set<Integer> systemTrackedParameters = trackedParameters.getOrDefault(systemId, new HashSet<>());
+        if (listeners.get(systemId) == null) {
+            logger.debug("No listener for system {} adding tracked parameters anyway.", systemId);
         }
+        trackedParameters.putIfAbsent(systemId, systemTrackedParameters);
         if (systemTrackedParameters.add(parameterId)) {
             logger.trace("System {} is now tracking parameter {}", systemId, parameterId);
         }
@@ -361,21 +360,19 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
      */
     private void queueStandardRequests() {
         listeners.forEach((systemId, listener) -> {
-            if (listener != null) {
-                logger.trace("Queueing system request for {}", systemId);
-                try {
-                    Request systemRequest = requests.createSystemRequest(systemId);
-                    Request statusRequest = requests.createStatusRequest(systemId);
-                    queuedRequests.add(systemRequest);
-                    queuedRequests.add(statusRequest);
-                } catch (RuntimeException e) {
-                    logger.warn("{}", e.getMessage());
-                }
+            logger.trace("Queueing system request for {}", systemId);
+            try {
+                Request systemRequest = requests.createSystemRequest(systemId);
+                Request statusRequest = requests.createStatusRequest(systemId);
+                queuedRequests.add(systemRequest);
+                queuedRequests.add(statusRequest);
+            } catch (RuntimeException e) {
+                logger.warn("{}", e.getMessage());
             }
         });
 
         trackedParameters.forEach((systemId, parameterSet) -> {
-            if (parameterSet != null && !parameterSet.isEmpty() && listeners.get(systemId) != null) {
+            if (!parameterSet.isEmpty() && listeners.get(systemId) != null) {
                 Iterator<Integer> i = parameterSet.iterator();
                 int counter = 0;
                 Set<Integer> parameters = new HashSet<>();
@@ -415,7 +412,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
      */
     private void queueThermostatRequests() {
         thermostats.forEach((systemId, thermostatMap) -> {
-            if (thermostatMap != null && !thermostatMap.isEmpty()) {
+            if (!thermostatMap.isEmpty()) {
                 thermostatMap.values().forEach((thermostat) -> {
                     logger.trace("Queueing thermostat request for {}, thermostat {}", systemId, thermostat.getName());
                     try {
@@ -434,7 +431,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
      */
     private void queueModeRequests() {
         modes.forEach((systemId, mode) -> {
-            if (mode != null && mode != Mode.DEFAULT_OPERATION) {
+            if (mode != Mode.DEFAULT_OPERATION) {
                 logger.trace("Queueing mode request for {} with mode {}", systemId, mode);
                 try {
                     Request req = requests.createSetModeRequest(systemId, mode);
@@ -474,12 +471,12 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             return;
         }
 
-        if (req == null) {
+        Integer systemId = (Integer) req.getAttributes().get(NibeUplinkRestRequestHandler.SYSTEM_ID);
+        RequestType requestType = (RequestType) req.getAttributes().get(NibeUplinkRestRequestHandler.REQUEST_TYPE);
+
+        if (systemId == null || requestType == null) {
             return;
         }
-
-        int systemId = (int) req.getAttributes().get(NibeUplinkRestRequestHandler.SYSTEM_ID);
-        RequestType requestType = (RequestType) req.getAttributes().get(NibeUplinkRestRequestHandler.REQUEST_TYPE);
         NibeUplinkRestCallbackListener listener = listeners.get(systemId);
         String resp;
 
@@ -515,6 +512,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         }
 
         // If we get to here the connection works
+        @Nullable
         Future<?> localRef = isAliveRequestProducer;
         if (localRef != null) {
             logger.debug("Nibe Uplink back online");
@@ -532,23 +530,25 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         // Callback
         switch (requestType) {
             case SYSTEM:
-                NibeSystem system = parseSystem(resp);
-                cachedSystems.put(systemId, system);
-                listener.systemUpdated(system);
+                Optional<NibeSystem> system = parseSystem(resp);
+                if (system.isPresent()) {
+                    cachedSystems.put(systemId, system.get());
+                    listener.systemUpdated(system.get());
+                }
                 break;
             case STATUS:
                 listener.statusUpdated(parseStatus(resp));
             case PARAMETER_GET:
-                listener.parametersUpdated(parseParameterList(resp));
+                parseParameterList(resp).ifPresent(listener::parametersUpdated);
                 break;
             case MODE_GET:
-                listener.modeUpdated(parseMode(resp));
+                parseMode(resp).ifPresent(listener::modeUpdated);
                 break;
             case SOFTWARE:
-                listener.softwareUpdateAvailable(parseSoftwareInfo(resp));
+                parseSoftwareInfo(resp).ifPresent(listener::softwareUpdateAvailable);
                 break;
             case ALARM:
-                listener.alarmInfoUpdated(parseAlarmInfoList(resp).get(0));
+                parseAlarmInfoList(resp).ifPresent(alarmInfo -> listener.alarmInfoUpdated(alarmInfo.get(0)));
             default:
                 break;
         }
