@@ -44,17 +44,19 @@ public class NibeUplinkRestOAuthService {
 
     private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestOAuthService.class);
 
-    private @NonNullByDefault({}) BundleContext bundleContext;
-    private @NonNullByDefault({}) HttpService httpService;
-    private final List<NibeUplinkRestBridgeHandler> bridgeHandlers = new ArrayList<>();
+    private final BundleContext bundleContext;
+    private final HttpService httpService;
+    private final Map<String, NibeUplinkRestBridgeHandler> bridgeHandlers = new HashMap<>();
 
     @Activate
-    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+    public NibeUplinkRestOAuthService(ComponentContext componentContext, Map<String, Object> properties,
+            @Reference HttpService httpService) {
+        this.bundleContext = componentContext.getBundleContext();
+        this.httpService = httpService;
         try {
-            this.bundleContext = componentContext.getBundleContext();
-            httpService.registerServlet(SERVLET_PATH, createServlet(), new Hashtable<>(),
-                    httpService.createDefaultHttpContext());
-            httpService.registerResources(SERVLET_IMG_PATH, SERVLET_RESOURCE_IMG_DIR, null);
+            this.httpService.registerServlet(SERVLET_PATH, createServlet(), new Hashtable<>(),
+                    this.httpService.createDefaultHttpContext());
+            this.httpService.registerResources(SERVLET_IMG_PATH, SERVLET_RESOURCE_IMG_DIR, null);
         } catch (ServletException | NamespaceException | IOException e) {
             logger.warn("Error starting OAuthService: {}", e.getMessage());
         }
@@ -73,7 +75,7 @@ public class NibeUplinkRestOAuthService {
      * @throws IOException
      */
     private HttpServlet createServlet() throws IOException {
-        Map<String, @Nullable NibeUplinkRestOAuthServletTemplate> templates = new HashMap<>();
+        Map<String, NibeUplinkRestOAuthServletTemplate> templates = new HashMap<>();
         templates.put(SERVLET_TEMPLATE_INDEX,
                 new NibeUplinkRestOAuthServletTemplate(bundleContext, SERVLET_TEMPLATE_INDEX_FILE));
         templates.put(SERVLET_TEMPLATE_ACCOUNT,
@@ -87,9 +89,7 @@ public class NibeUplinkRestOAuthService {
      * @param handler
      */
     public void addBridgeHandler(NibeUplinkRestBridgeHandler handler) {
-        if (!bridgeHandlers.contains(handler)) {
-            bridgeHandlers.add(handler);
-        }
+        bridgeHandlers.put(handler.getThing().getUID().getAsString(), handler);
     }
 
     /**
@@ -97,7 +97,7 @@ public class NibeUplinkRestOAuthService {
      * 
      * @return
      */
-    public List<NibeUplinkRestBridgeHandler> getBridgeHandlers() {
+    public Map<String, NibeUplinkRestBridgeHandler> getBridgeHandlers() {
         return bridgeHandlers;
     }
 
@@ -118,20 +118,6 @@ public class NibeUplinkRestOAuthService {
      * @return
      */
     public @Nullable NibeUplinkRestBridgeHandler getBridgeHandler(String thingUID) {
-        NibeUplinkRestBridgeHandler handler = null;
-        for (NibeUplinkRestBridgeHandler h : bridgeHandlers) {
-            if (h.getThing().getUID().getAsString().equals(thingUID))
-                handler = h;
-        }
-        return handler;
-    }
-
-    @Reference
-    protected void setHttpService(HttpService httpService) {
-        this.httpService = httpService;
-    }
-
-    protected void unsetHttpService(HttpService httpService) {
-        this.httpService = null;
+        return bridgeHandlers.get(thingUID);
     }
 }

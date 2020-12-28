@@ -18,8 +18,6 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 
 import java.util.Set;
 
-import javax.measure.quantity.Temperature;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
@@ -33,6 +31,8 @@ import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles virtual thermostat Things connecting openHAB to Nibe uplink
@@ -41,6 +41,8 @@ import org.openhab.core.types.State;
  */
 @NonNullByDefault
 public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
+
+    private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestThermostatHandler.class);
 
     private @NonNullByDefault({}) NibeUplinkRestApi nibeUplinkRestApi;
     private @NonNullByDefault({}) NibeUplinkRestThermostatConfiguration config;
@@ -79,7 +81,6 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void handleCommand(ChannelUID channelUID, Command command) {
         if (command instanceof DecimalType) {
             switch (channelUID.getId()) {
@@ -98,7 +99,7 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
             }
         } else if (command instanceof QuantityType) {
             @Nullable
-            QuantityType<Temperature> celsius = ((QuantityType<Temperature>) command).toUnit(SIUnits.CELSIUS);
+            QuantityType<?> celsius = ((QuantityType<?>) command).toUnit(SIUnits.CELSIUS);
             if (celsius != null) {
                 @Nullable
                 DecimalType dt = celsius.as(DecimalType.class);

@@ -46,19 +46,23 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class NibeUplinkRestTypeFactory {
 
-    @Reference
-    private @NonNullByDefault({}) NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider;
-    @Reference
-    private @NonNullByDefault({}) NibeUplinkRestChannelTypeProvider channelTypeProvider;
-    @Reference
-    private @NonNullByDefault({}) NibeUplinkRestThingTypeProvider thingTypeProvider;
-    @Reference
-    private @NonNullByDefault({}) ChannelGroupTypeRegistry channelGroupTypeRegistry;
-    @Reference
-    private @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistry;
+    private final NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider;
+    private final NibeUplinkRestChannelTypeProvider channelTypeProvider;
+    private final NibeUplinkRestThingTypeProvider thingTypeProvider;
+    private final ChannelGroupTypeRegistry channelGroupTypeRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
 
     @Activate
-    public NibeUplinkRestTypeFactory() {
+    public NibeUplinkRestTypeFactory(@Reference NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider,
+            @Reference NibeUplinkRestChannelTypeProvider channelTypeProvider,
+            @Reference NibeUplinkRestThingTypeProvider thingTypeProvider,
+            @Reference ChannelGroupTypeRegistry channelGroupTypeRegistry,
+            @Reference ChannelTypeRegistry channelTypeRegistry) {
+        this.channelGroupTypeProvider = channelGroupTypeProvider;
+        this.channelTypeProvider = channelTypeProvider;
+        this.thingTypeProvider = thingTypeProvider;
+        this.channelGroupTypeRegistry = channelGroupTypeRegistry;
+        this.channelTypeRegistry = channelTypeRegistry;
     }
 
     /**
@@ -323,10 +327,7 @@ public class NibeUplinkRestTypeFactory {
         if (parameter.getDisplayValue().equals("yes") || parameter.getDisplayValue().equals("no")) {
             return ParameterType.BOOLEAN;
         }
-        if (STATIC_PARAMETER_TYPE_MAPPINGS.containsKey(parameter.getParameterId())) {
-            return STATIC_PARAMETER_TYPE_MAPPINGS.get(parameter.getParameterId());
-        }
-        return ParameterType.OTHER;
+        return STATIC_PARAMETER_TYPE_MAPPINGS.getOrDefault(parameter.getParameterId(), ParameterType.OTHER);
     }
 
     /**
