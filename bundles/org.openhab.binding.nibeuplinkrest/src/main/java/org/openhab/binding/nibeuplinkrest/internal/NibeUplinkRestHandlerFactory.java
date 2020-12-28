@@ -33,6 +33,7 @@ import org.openhab.core.thing.binding.BaseThingHandlerFactory;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -49,11 +50,23 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_APIBRIDGE, THING_TYPE_SYSTEM,
             THING_TYPE_THERMOSTAT);
 
-    private @NonNullByDefault({}) OAuthFactory oAuthFactory;
-    private @NonNullByDefault({}) NibeUplinkRestOAuthService oAuthService;
-    private @NonNullByDefault({}) HttpClient httpClient;
-    private @NonNullByDefault({}) NibeUplinkRestTypeFactory typeFactory;
-    private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
+    private final HttpClient httpClient;
+    private final OAuthFactory oAuthFactory;
+    private final NibeUplinkRestOAuthService oAuthService;
+    private final NibeUplinkRestTypeFactory typeFactory;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
+
+    @Activate
+    public NibeUplinkRestHandlerFactory(@Reference HttpClientFactory httpClientFactory,
+            @Reference OAuthFactory oAuthFactory, @Reference NibeUplinkRestOAuthService oAuthService,
+            @Reference NibeUplinkRestTypeFactory typeFactory,
+            @Reference ItemChannelLinkRegistry itemChannelLinkRegistry) {
+        this.httpClient = httpClientFactory.getCommonHttpClient();
+        this.oAuthFactory = oAuthFactory;
+        this.oAuthService = oAuthService;
+        this.typeFactory = typeFactory;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -78,50 +91,5 @@ public class NibeUplinkRestHandlerFactory extends BaseThingHandlerFactory {
         }
 
         return null;
-    }
-
-    @Reference
-    protected void setOAuthFactory(OAuthFactory oAuthFactory) {
-        this.oAuthFactory = oAuthFactory;
-    }
-
-    protected void unsetOAuthFactory(OAuthFactory oAuthFactory) {
-        this.oAuthFactory = null;
-    }
-
-    @Reference
-    protected void setHttpClientFactory(HttpClientFactory httpClientFactory) {
-        this.httpClient = httpClientFactory.getCommonHttpClient();
-    }
-
-    protected void unsetHttpClientFactory(HttpClientFactory httpClientFactory) {
-        this.httpClient = null;
-    }
-
-    @Reference
-    protected void setOAuthService(NibeUplinkRestOAuthService oAuthService) {
-        this.oAuthService = oAuthService;
-    }
-
-    protected void unsetOAuthService(NibeUplinkRestOAuthService oAuthService) {
-        this.oAuthService = null;
-    }
-
-    @Reference
-    protected void setTypeFactory(NibeUplinkRestTypeFactory typeFactory) {
-        this.typeFactory = typeFactory;
-    }
-
-    protected void unsetTypeFactory(NibeUplinkRestTypeFactory typeFactory) {
-        this.typeFactory = null;
-    }
-
-    @Reference
-    protected void setItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
-    }
-
-    protected void unsetItemChannelLinkRegistry(ItemChannelLinkRegistry itemChannelLinkRegistry) {
-        this.itemChannelLinkRegistry = null;
     }
 }
