@@ -192,7 +192,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                         state = new StringType(p.getDisplayValue());
                         break;
                     case CoreItemFactory.NUMBER:
-                        state = new org.openhab.core.library.types.DecimalType(p.getRawValue());
+                        state = new DecimalType(p.getRawValue());
                         break;
                     default:
                         if (itemType.startsWith(CoreItemFactory.NUMBER)) {
@@ -206,6 +206,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                             state = UnDefType.UNDEF;
                         }
                 }
+                logger.trace("Setting channel {} to {}", channel.getUID().getId(), state.toString());
                 updateState(channelId, state);
             }
         });
