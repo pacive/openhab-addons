@@ -538,6 +538,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
                 break;
             case STATUS:
                 listener.statusUpdated(parseStatus(resp));
+                break;
             case PARAMETER_GET:
                 listener.parametersUpdated(parseParameterList(resp));
                 break;

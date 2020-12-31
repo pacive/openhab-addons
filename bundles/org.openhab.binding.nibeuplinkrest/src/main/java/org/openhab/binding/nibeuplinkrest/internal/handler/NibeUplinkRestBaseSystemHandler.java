@@ -188,6 +188,9 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                     case CoreItemFactory.STRING:
                         state = new StringType(p.getDisplayValue());
                         break;
+                    case CoreItemFactory.NUMBER:
+                        state = new DecimalType(p.getRawValue());
+                        break;
                     default:
                         if (itemType.startsWith(CoreItemFactory.NUMBER)) {
                             // Nibe sends -32768 to mark a value as invalid
@@ -200,6 +203,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                             state = UnDefType.UNDEF;
                         }
                 }
+                logger.debug("Setting channel {} to {}", channel.getUID().getId(), state.toString());
                 updateState(channelId, state);
             }
         });
@@ -261,44 +265,38 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     }
 
     private State transformIncoming(Channel channel, Parameter parameter) {
-        double rawValue = parameter.getRawValue();
         @Nullable
         Unit<?> unit = UnitUtils.parseUnit(parameter.getUnit());
-        String scalingFactor;
-        // Check first channel configuration, then property to get scaling for the raw value
-        if (channel.getConfiguration().containsKey(CHANNEL_PROPERTY_SCALING_FACTOR)) {
-            scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR).toString();
-        } else {
-            scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
-        }
-        if (scalingFactor != null) {
-            try {
-                rawValue = rawValue / Integer.parseInt(scalingFactor);
-            } catch (NumberFormatException ignored) {
-            }
-        }
+        int scalingFactor = getScalingFactor(channel);
+
+        double value = (double) parameter.getRawValue() / scalingFactor;
+
         if (unit == null) {
-            return new DecimalType(rawValue);
+            return new DecimalType(value);
         } else {
-            return new QuantityType<>(rawValue, unit);
+            return new QuantityType<>(value, unit);
         }
     }
 
     private int transformOutgoing(Channel channel, Number outgoingValue) {
         double transformed = outgoingValue.doubleValue();
+        int scalingFactor = getScalingFactor(channel);
+
+        return (int) transformed * scalingFactor;
+    }
+
+    private int getScalingFactor(Channel channel) {
         String scalingFactor;
-        // Check first channel configuration, then property to get scaling for the raw value
+        // Check first channel configuration, then property to get scaling factor
         if (channel.getConfiguration().containsKey(CHANNEL_PROPERTY_SCALING_FACTOR)) {
             scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR).toString();
         } else {
-            scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
+            scalingFactor = channel.getProperties().getOrDefault(CHANNEL_PROPERTY_SCALING_FACTOR, "1");
         }
-        if (scalingFactor != null) {
-            try {
-                transformed = transformed * Integer.parseInt(scalingFactor);
-            } catch (NumberFormatException ignored) {
-            }
+        try {
+            return Integer.parseInt(scalingFactor);
+        } catch (NumberFormatException e) {
+            return 1;
         }
-        return (int) transformed;
     }
 }
