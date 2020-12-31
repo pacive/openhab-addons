@@ -35,6 +35,8 @@ import org.openhab.core.types.util.UnitUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles the creation of thing-types, channel-group-types and channel-types
@@ -51,6 +53,8 @@ public class NibeUplinkRestTypeFactory {
     private final NibeUplinkRestThingTypeProvider thingTypeProvider;
     private final ChannelGroupTypeRegistry channelGroupTypeRegistry;
     private final ChannelTypeRegistry channelTypeRegistry;
+
+    private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestTypeFactory.class);
 
     @Activate
     public NibeUplinkRestTypeFactory(@Reference NibeUplinkRestChannelGroupTypeProvider channelGroupTypeProvider,
@@ -114,6 +118,7 @@ public class NibeUplinkRestTypeFactory {
                 .withChannelGroupDefinitions(groupDefinitions).withConfigDescriptionURI(SYSTEM_CONFIG)
                 .withLabel(system.getProductName()).withRepresentationProperty(PROPERTY_SYSTEM_ID).build();
 
+        logger.debug("Creating thing type with id {}", thingTypeUID.getId());
         thingTypeProvider.addThingType(thingTypeUID, thingType);
     }
 
@@ -429,15 +434,19 @@ public class NibeUplinkRestTypeFactory {
 
     private String getDimension(Parameter parameter) {
         String unitSymbol = parameter.getUnit();
-        if (unitSymbol.equals("%")) {
-            return "Dimensionless";
+        switch (unitSymbol) {
+            case "%":
+                return "Dimensionless";
+            case "Hz":
+                return "Frequency";
+            default:
+                Unit<?> unit = UnitUtils.parseUnit(unitSymbol);
+                if (unit == null) {
+                    return "Dimensionless";
+                }
+                String dimension = UnitUtils.getDimensionName(unit);
+                return dimension == null ? "Dimensionless" : dimension;
         }
-        Unit<?> unit = UnitUtils.parseUnit(unitSymbol);
-        if (unit == null) {
-            return "Dimensionless";
-        }
-        String dimension = UnitUtils.getDimensionName(unit);
-        return dimension == null ? "Dimensionless" : dimension;
     }
 
     /**
