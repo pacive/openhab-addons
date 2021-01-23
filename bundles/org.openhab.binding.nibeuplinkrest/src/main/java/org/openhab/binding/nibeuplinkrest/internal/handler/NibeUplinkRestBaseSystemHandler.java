@@ -28,7 +28,9 @@ import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestExcep
 import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestChannelGroupTypeProvider;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.*;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.thing.*;
+import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
@@ -168,6 +170,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void parametersUpdated(List<Parameter> parameterValues) {
+        logger.trace("Updating {} parameters for system {}", parameterValues.size(), this.systemId);
         parameterValues.forEach(p -> {
             // Gets the full channel id (group#channel)
             String channelId = groupTypeProvider.getChannelFromID(p.getName());
@@ -188,6 +191,9 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                     case CoreItemFactory.STRING:
                         state = new StringType(p.getDisplayValue());
                         break;
+                    case CoreItemFactory.NUMBER:
+                        state = new org.openhab.core.library.types.DecimalType(p.getRawValue());
+                        break;
                     default:
                         if (itemType.startsWith(CoreItemFactory.NUMBER)) {
                             // Nibe sends -32768 to mark a value as invalid
@@ -207,6 +213,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void systemUpdated(NibeSystem system) {
+        logger.trace("Updating system {}", this.systemId);
         updateState(CHANNEL_LAST_ACTIVITY, new DateTimeType(system.getLastActivityDate()));
         updateState(CHANNEL_HAS_ALARMED, OnOffType.from(system.hasAlarmed()));
         if (system.hasAlarmed()) {
@@ -221,6 +228,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void statusUpdated(Set<String> activeComponents) {
+        logger.trace("Updating status channels for system {}", this.systemId);
         thing.getChannelsOfGroup(CHANNEL_GROUP_STATUS_ID).stream()
                 .filter(c -> Objects.equals(c.getAcceptedItemType(), CoreItemFactory.SWITCH)
                         && !c.getUID().getId().equals(CHANNEL_HAS_ALARMED)
@@ -236,6 +244,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void softwareUpdateAvailable(SoftwareInfo softwareInfo) {
+        logger.trace("Updating software channels for system {}", this.systemId);
         if (softwareInfo.isUpgradeAvailable()) {
             updateState(CHANNEL_SOFTWARE_UPDATE, OnOffType.ON);
             updateState(CHANNEL_LATEST_SOFTWARE, new StringType(softwareInfo.getUpgradeAvailable()));
@@ -252,53 +261,49 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void modeUpdated(Mode mode) {
+        logger.trace("Updating mode for system {}", this.systemId);
         updateState(CHANNEL_MODE, new StringType(mode.toString()));
     }
 
     @Override
     public void alarmInfoUpdated(AlarmInfo alarmInfo) {
+        logger.trace("Updating alarm info for system {}", this.systemId);
         updateState(CHANNEL_ALARM_INFO, new StringType(alarmInfo.toString()));
     }
 
     private State transformIncoming(Channel channel, Parameter parameter) {
-        double rawValue = parameter.getRawValue();
         @Nullable
         Unit<?> unit = UnitUtils.parseUnit(parameter.getUnit());
-        String scalingFactor;
-        // Check first channel configuration, then property to get scaling for the raw value
-        if (channel.getConfiguration().containsKey(CHANNEL_PROPERTY_SCALING_FACTOR)) {
-            scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR).toString();
-        } else {
-            scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
-        }
-        if (scalingFactor != null) {
-            try {
-                rawValue = rawValue / Integer.parseInt(scalingFactor);
-            } catch (NumberFormatException ignored) {
-            }
-        }
+        int scalingFactor = getScalingFactor(channel);
+
+        double value = (double) parameter.getRawValue() / scalingFactor;
+
         if (unit == null) {
-            return new DecimalType(rawValue);
+            return new DecimalType(value);
         } else {
-            return new QuantityType<>(rawValue, unit);
+            return new QuantityType<>(value, unit);
         }
     }
 
     private int transformOutgoing(Channel channel, Number outgoingValue) {
         double transformed = outgoingValue.doubleValue();
+        int scalingFactor = getScalingFactor(channel);
+
+        return (int) transformed * scalingFactor;
+    }
+
+    private int getScalingFactor(Channel channel) {
         String scalingFactor;
-        // Check first channel configuration, then property to get scaling for the raw value
+        // Check first channel configuration, then property to get scaling factor
         if (channel.getConfiguration().containsKey(CHANNEL_PROPERTY_SCALING_FACTOR)) {
             scalingFactor = channel.getConfiguration().get(CHANNEL_PROPERTY_SCALING_FACTOR).toString();
         } else {
-            scalingFactor = channel.getProperties().get(CHANNEL_PROPERTY_SCALING_FACTOR);
+            scalingFactor = channel.getProperties().getOrDefault(CHANNEL_PROPERTY_SCALING_FACTOR, "1");
         }
-        if (scalingFactor != null) {
-            try {
-                transformed = transformed * Integer.parseInt(scalingFactor);
-            } catch (NumberFormatException ignored) {
-            }
+        try {
+            return Integer.parseInt(scalingFactor);
+        } catch (NumberFormatException e) {
+            return 1;
         }
-        return (int) transformed;
     }
 }
