@@ -478,8 +478,20 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             return;
         }
 
-        int systemId = (int) req.getAttributes().get(NibeUplinkRestRequestHandler.SYSTEM_ID);
+        @Nullable
+        Integer systemId = (Integer) req.getAttributes().get(NibeUplinkRestRequestHandler.SYSTEM_ID);
+        @Nullable
         RequestType requestType = (RequestType) req.getAttributes().get(NibeUplinkRestRequestHandler.REQUEST_TYPE);
+
+        if (systemId == null) {
+            logger.debug("SystemId null, ignoring");
+            return;
+        }
+        if (requestType == null) {
+            logger.debug("Request Type null, ignoring");
+            return;
+        }
+
         NibeUplinkRestCallbackListener listener = listeners.get(systemId);
         String resp;
 
@@ -522,6 +534,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             isAliveRequestProducer = null;
             bridgeHandler.signalServerOnline();
             startPolling();
+            return;
         }
 
         if (listener == null) {

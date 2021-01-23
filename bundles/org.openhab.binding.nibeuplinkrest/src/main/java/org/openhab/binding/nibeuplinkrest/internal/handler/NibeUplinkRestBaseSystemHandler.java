@@ -168,6 +168,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void parametersUpdated(List<Parameter> parameterValues) {
+        logger.trace("Updating {} parameters for system {}", parameterValues.size(), this.systemId);
         parameterValues.forEach(p -> {
             // Gets the full channel id (group#channel)
             String channelId = groupTypeProvider.getChannelFromID(p.getName());
@@ -203,7 +204,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                             state = UnDefType.UNDEF;
                         }
                 }
-                logger.debug("Setting channel {} to {}", channel.getUID().getId(), state.toString());
+                logger.trace("Setting channel {} to {}", channel.getUID().getId(), state.toString());
                 updateState(channelId, state);
             }
         });
@@ -211,6 +212,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void systemUpdated(NibeSystem system) {
+        logger.trace("Updating system {}", this.systemId);
         updateState(CHANNEL_LAST_ACTIVITY, new DateTimeType(system.getLastActivityDate()));
         updateState(CHANNEL_HAS_ALARMED, OnOffType.from(system.hasAlarmed()));
         if (system.hasAlarmed()) {
@@ -225,6 +227,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void statusUpdated(Set<String> activeComponents) {
+        logger.trace("Updating status channels for system {}", this.systemId);
         thing.getChannelsOfGroup(CHANNEL_GROUP_STATUS_ID).stream()
                 .filter(c -> Objects.equals(c.getAcceptedItemType(), CoreItemFactory.SWITCH)
                         && !c.getUID().getId().equals(CHANNEL_HAS_ALARMED)
@@ -240,6 +243,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void softwareUpdateAvailable(SoftwareInfo softwareInfo) {
+        logger.trace("Updating software channels for system {}", this.systemId);
         if (softwareInfo.isUpgradeAvailable()) {
             updateState(CHANNEL_SOFTWARE_UPDATE, OnOffType.ON);
             updateState(CHANNEL_LATEST_SOFTWARE, new StringType(softwareInfo.getUpgradeAvailable()));
@@ -256,11 +260,13 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void modeUpdated(Mode mode) {
+        logger.trace("Updating mode for system {}", this.systemId);
         updateState(CHANNEL_MODE, new StringType(mode.toString()));
     }
 
     @Override
     public void alarmInfoUpdated(AlarmInfo alarmInfo) {
+        logger.trace("Updating alarm info for system {}", this.systemId);
         updateState(CHANNEL_ALARM_INFO, new StringType(alarmInfo.toString()));
     }
 
