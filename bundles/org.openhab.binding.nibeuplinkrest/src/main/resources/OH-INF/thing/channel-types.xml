@@ -60,12 +60,12 @@
 		</command>
 	</channel-type>
 	<channel-type id="parallelAdjustmentHeating">
-		<item-type>Number:Dimensionless</item-type>
+		<item-type>Number</item-type>
 		<label>Parallel adjustment when heating</label>
 		<state min="-10" max="10" step="1"/>
 	</channel-type>
 	<channel-type id="parallelAdjustmentCooling">
-		<item-type>Number:Dimensionless</item-type>
+		<item-type>Number</item-type>
 		<label>Parallel adjustment when cooling</label>
 		<state min="-10" max="10" step="1"/>
 	</channel-type>
