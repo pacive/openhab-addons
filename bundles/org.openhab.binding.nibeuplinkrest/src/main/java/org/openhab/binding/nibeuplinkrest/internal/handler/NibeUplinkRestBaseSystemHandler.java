@@ -15,6 +15,7 @@ package org.openhab.binding.nibeuplinkrest.internal.handler;
 
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 
+import java.time.ZoneId;
 import java.util.*;
 
 import javax.measure.Unit;
@@ -213,7 +214,8 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
     @Override
     public void systemUpdated(NibeSystem system) {
         logger.trace("Updating system {}", this.systemId);
-        updateState(CHANNEL_LAST_ACTIVITY, new DateTimeType(system.getLastActivityDate()));
+        updateState(CHANNEL_LAST_ACTIVITY,
+                new DateTimeType(system.getLastActivityDate().withZoneSameInstant(ZoneId.systemDefault())));
         updateState(CHANNEL_HAS_ALARMED, OnOffType.from(system.hasAlarmed()));
         if (system.hasAlarmed()) {
             nibeUplinkRestApi.requestLatestAlarm(systemId);
