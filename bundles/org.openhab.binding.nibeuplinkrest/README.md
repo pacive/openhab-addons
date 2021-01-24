@@ -1,40 +1,42 @@
 # NibeUplinkRest Binding
 
-_This is not supposed to be a standalone binding, but will be integrated in the current Nibe Uplink binding. I just created a new binding in order to make development and testing easier._
+This binding connects to the Nibe Uplink public REST API to integrate Nibe heatpumps.
+
 
 
 ## Supported Things
 
-_Please describe the different supported things / devices within this section._
-_Which different types are supported, which models were tested etc.?_
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/ESH-INF/thing``` of your binding._
+The binding supports a Bridge that handles the connection to Nibe uplink, a System thing that gets
+automatically created by querying the API and creates a corresponding OpenHAB Thing, and a Thermostat
+Thing that can control the temperature for the heating system.
 
 ## Discovery
 
-_Describe the available auto-discovery features here. Mention for what it works and what needs to be kept in mind when using it._
-
-## Binding Configuration
-
-_If your binding requires or supports general configuration settings, please create a folder ```cfg``` and place the configuration file ```<bindingId>.cfg``` inside it. In this section, you should link to this file and provide some information about the options. The file could e.g. look like:_
-
-```
-# Configuration for the Philips Hue Binding
-#
-# Default secret key for the pairing of the Philips Hue Bridge.
-# It has to be between 10-40 (alphanumeric) characters
-# This may be changed by the user for security reasons.
-secret=openHABSecret
-```
-
-_Note that it is planned to generate some part of this based on the information that is available within ```src/main/resources/ESH-INF/binding``` of your binding._
-
-_If your binding does not offer any generic configurations, you can remove this section completely._
+The bridge and thermostat needs to be configured manually. After the Bridge is created it can automatically
+discover System Things with channels depending on the configuration Nibe Uplink reports.
 
 ## Thing Configuration
 
-_Describe what is needed to manually configure a thing, either through the (Paper) UI or via a thing-file. This should be mainly about its mandatory and optional configuration parameters. A short example entry for a thing file can help!_
+To use the binding you first need a developer account at Nibe Uplink.
+You can create one by logging in to https://api.nibeuplink.com with your regular
+Nibe Uplink account.
 
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/ESH-INF/thing``` of your binding._
+After that you need to create an Application: go to "My Applications" and click "Create application".
+Fill in a name and description as you prefer. For the Callback URL you need to input 
+`http(s)://<YOUR-OPENHAB-ADDRESS>:<PORT>/nibeuplinkconnect`. This doesn't need to be accessible from
+outside your network, but needs to be reachable with a browser. E.g if your OpenHAB is running on a computer
+with ip-address 192.168.0.100 you can input `http://192.168.0.100:8080/nibeuplinkconnect`. If it runs on the same
+computer that you are using you can input `http://localhost:8080/nibeuplinkconnect`
+
+After the application is created, create a NibeUplink REST API Bridge and fill in the Client Identifier and
+Client Secret you recieved for your application. Then use a browser to navigate to the address you typed in as
+Callback URL. Your bridge should show up with an "Authorize" button. Clicking it will redirect you to a Nibe Uplink
+login page, where you need to authorize access to your account. After you have done that you will be redirected back
+to the previous page, which should state that the Bridge is authorized.
+
+Finally, go back to the OpenHAB UI and scan for Things. Your system should show up and can be added.
+Note that there might be a lot of channels created, but some are hidden, you need to click "Show advanced" to see all
+of them.
 
 ## Channels
 
