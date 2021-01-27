@@ -119,7 +119,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
 
     @Override
     public SystemConfig getSystemConfig(int systemId) throws NibeUplinkRestException {
+        @Nullable
         NibeSystem system = cachedSystems.get(systemId);
+        @Nullable
         SystemConfig config = null;
         if (system != null) {
             config = system.getConfig();
