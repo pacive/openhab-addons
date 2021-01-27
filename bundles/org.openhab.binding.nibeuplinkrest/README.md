@@ -11,8 +11,9 @@ Thing that can control the temperature for the heating system.
 
 ## Discovery
 
-The bridge and thermostat needs to be configured manually. After the Bridge is created it can automatically
+The bridge needs to be configured manually. After the Bridge is created it can automatically
 discover System Things with channels depending on the configuration Nibe Uplink reports.
+For every climate system the heatpump controls, a Thermostat Thing is also added to the inbox.
 
 ## Thing Configuration
 
@@ -64,6 +65,7 @@ be listed here.
 The channels are grouped based on the components that Nibe Uplink reports, but to reduce clutter in the UI, many of them
 are hidden by default, but can be seen by checking the "Show advanced" box at the top of the list. By default the
 following groups are displayed:
+
 * Status - General information e.g:
   - Outdoor temp
   - Hot water temp

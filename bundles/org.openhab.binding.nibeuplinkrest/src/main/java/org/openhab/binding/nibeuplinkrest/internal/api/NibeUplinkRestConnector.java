@@ -256,7 +256,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     @Override
-    public void addTrackedParameter(int systemId, int parameterId) {
+    public synchronized void addTrackedParameter(int systemId, int parameterId) {
         @Nullable
         Set<Integer> systemTrackedParameters = trackedParameters.getOrDefault(systemId, new HashSet<>());
         if (listeners.get(systemId) == null) {
@@ -269,7 +269,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     @Override
-    public void removeTrackedParameter(int systemId, int parameterId) {
+    public synchronized void removeTrackedParameter(int systemId, int parameterId) {
         Set<Integer> systemTrackedParameters = trackedParameters.get(systemId);
         if (systemTrackedParameters == null) {
             logger.debug("No tracked parameters for system {}", systemId);

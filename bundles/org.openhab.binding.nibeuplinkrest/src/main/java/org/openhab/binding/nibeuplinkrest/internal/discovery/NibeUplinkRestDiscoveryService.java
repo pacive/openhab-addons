@@ -132,5 +132,26 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
                 .build();
 
         thingDiscovered(result);
+
+        categories.stream()
+                .filter((category) -> (category.getCategoryId().startsWith("SYSTEM")
+                        && !category.getCategoryId().equals("SYSTEM_INFO")))
+                .map((category) -> Integer.parseInt(category.getCategoryId().substring(7)))
+                .forEach(i -> thingDiscovered(createThermostatResult(bridgeUID, system.getSystemId(), i)));
+    }
+
+    private DiscoveryResult createThermostatResult(ThingUID bridgeUID, int systemId, int climateSystemNo) {
+        String thingID = systemId + "-thermostat-" + climateSystemNo;
+        ThingUID thingUID = new ThingUID(THING_TYPE_THERMOSTAT, bridgeUID, thingID);
+        String name = "System " + climateSystemNo + " Thermostat";
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(PROPERTY_ID, climateSystemNo);
+        properties.put(PROPERTY_SYSTEM_ID, systemId);
+        properties.put(PROPERTY_NAME, name);
+        properties.put(PROPERTY_CLIMATE_SYSTEMS, List.of(climateSystemNo));
+
+        return DiscoveryResultBuilder.create(thingUID).withBridge(bridgeUID).withLabel(name).withProperties(properties)
+                .withRepresentationProperty(PROPERTY_ID).build();
     }
 }

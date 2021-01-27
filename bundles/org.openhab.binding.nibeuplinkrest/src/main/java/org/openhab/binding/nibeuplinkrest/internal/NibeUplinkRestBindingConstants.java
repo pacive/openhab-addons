@@ -121,6 +121,7 @@ public class NibeUplinkRestBindingConstants {
 
     // Thing properties
     public static final String PROPERTY_SYSTEM_ID = "systemId";
+    public static final String PROPERTY_ID = "id";
     public static final String PROPERTY_NAME = "name";
     public static final String PROPERTY_PRODUCT_NAME = "productName";
     public static final String PROPERTY_SECURITY_LEVEL = "securityLevel";
@@ -130,6 +131,7 @@ public class NibeUplinkRestBindingConstants {
     public static final String PROPERTY_HAS_HOT_WATER = "hasHotWater";
     public static final String PROPERTY_HAS_VENTILATION = "hasVentilation";
     public static final String PROPERTY_SOFTWARE_VERSION = "softwareVersion";
+    public static final String PROPERTY_CLIMATE_SYSTEMS = "climateSystems";
 
     // OAuth endpoints
     private static final String BASE_URL = "https://api.nibeuplink.com/";
