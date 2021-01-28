@@ -42,8 +42,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
 
     private final NibeUplinkRestBridgeHandler bridgeHandler;
     private final ScheduledExecutorService scheduler;
-    private long updateInterval;
-    private long softwareUpdateCheckInterval;
+    private int updateInterval;
+    private int softwareUpdateCheckInterval;
 
     private final Map<Integer, NibeSystem> cachedSystems = new ConcurrentHashMap<>();
     private final Map<Integer, Map<String, Category>> cachedCategories = new ConcurrentHashMap<>();
@@ -63,8 +63,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     private final NibeUplinkRestRequestHandler requests;
 
     public NibeUplinkRestConnector(NibeUplinkRestBridgeHandler bridgeHandler, OAuthClientService oAuthClient,
-            HttpClient httpClient, ScheduledExecutorService scheduler, long updateInterval,
-            long softwareUpdateCheckInterval) {
+            HttpClient httpClient, ScheduledExecutorService scheduler, int updateInterval,
+            int softwareUpdateCheckInterval) {
         this.bridgeHandler = bridgeHandler;
         this.scheduler = scheduler;
         this.updateInterval = updateInterval;
@@ -80,8 +80,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         if (localRef != null) {
             localRef.cancel(false);
         }
-        standardRequestProducer = scheduler.scheduleWithFixedDelay(this::queueStandardRequests, 1, updateInterval,
-                TimeUnit.SECONDS);
+        standardRequestProducer = scheduler.scheduleWithFixedDelay(this::queueStandardRequests, updateInterval,
+                updateInterval, TimeUnit.SECONDS);
     }
 
     @Override
@@ -93,8 +93,8 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             localRef.cancel(false);
         }
         if (softwareUpdateCheckInterval > 0) {
-            softwareRequestProducer = scheduler.scheduleWithFixedDelay(this::queueSoftwareRequests, 0,
-                    softwareUpdateCheckInterval, TimeUnit.DAYS);
+            softwareRequestProducer = scheduler.scheduleWithFixedDelay(this::queueSoftwareRequests,
+                    softwareUpdateCheckInterval, softwareUpdateCheckInterval, TimeUnit.DAYS);
         }
     }
 

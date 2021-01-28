@@ -17,6 +17,7 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -28,6 +29,7 @@ import org.openhab.binding.nibeuplinkrest.internal.discovery.NibeUplinkRestDisco
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 import org.openhab.binding.nibeuplinkrest.internal.provider.NibeUplinkRestTypeFactory;
 import org.openhab.core.auth.client.oauth2.*;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ThingStatus;
@@ -109,6 +111,40 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
         nibeUplinkRestApi = null;
         oAuthClient.close();
         oAuthFactory.ungetOAuthService(thing.getUID().getAsString());
+    }
+
+    @Override
+    public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
+        if (!isModifyingCurrentConfig(configurationParameters)) {
+            return;
+        }
+
+        validateConfigurationParameters(configurationParameters);
+
+        Configuration configuration = editConfiguration();
+        for (Map.Entry<String, Object> configurationParameter : configurationParameters.entrySet()) {
+            configuration.put(configurationParameter.getKey(), configurationParameter.getValue());
+        }
+        NibeUplinkRestBridgeConfiguration newConfig = configuration.as(NibeUplinkRestBridgeConfiguration.class);
+        if (isInitialized()) {
+            if (newConfig.clientId.equals(config.clientId) && newConfig.clientSecret.equals(config.clientSecret)) {
+                if (newConfig.updateInterval != config.updateInterval) {
+                    nibeUplinkRestApi.setUpdateInterval(newConfig.updateInterval);
+                    config.updateInterval = newConfig.updateInterval;
+                }
+                if (newConfig.softwareUpdateCheckInterval != config.softwareUpdateCheckInterval) {
+                    nibeUplinkRestApi.setSoftwareUpdateCheckInterval(newConfig.softwareUpdateCheckInterval);
+                    config.softwareUpdateCheckInterval = newConfig.softwareUpdateCheckInterval;
+                }
+                updateConfiguration(configuration);
+            } else {
+                dispose();
+                updateConfiguration(configuration);
+                initialize();
+            }
+        } else {
+            super.handleConfigurationUpdate(configurationParameters);
+        }
     }
 
     /**

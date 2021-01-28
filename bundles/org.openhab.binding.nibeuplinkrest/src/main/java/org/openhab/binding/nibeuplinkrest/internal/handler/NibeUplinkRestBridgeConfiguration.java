@@ -23,6 +23,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public class NibeUplinkRestBridgeConfiguration {
     public String clientId = "";
     public String clientSecret = "";
-    public long updateInterval;
-    public long softwareUpdateCheckInterval;
+    public int updateInterval;
+    public int softwareUpdateCheckInterval;
 }
