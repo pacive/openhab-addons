@@ -18,9 +18,11 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.core.auth.client.oauth2.*;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -109,6 +111,40 @@ public class NibeUplinkRestBridgeHandler extends BaseBridgeHandler {
         nibeUplinkRestApi = null;
         oAuthClient.close();
         oAuthFactory.ungetOAuthService(thing.getUID().getAsString());
+    }
+
+    @Override
+    public void handleConfigurationUpdate(Map<String, Object> configurationParameters) {
+        if (!isModifyingCurrentConfig(configurationParameters)) {
+            return;
+        }
+
+        validateConfigurationParameters(configurationParameters);
+
+        Configuration configuration = editConfiguration();
+        for (Map.Entry<String, Object> configurationParameter : configurationParameters.entrySet()) {
+            configuration.put(configurationParameter.getKey(), configurationParameter.getValue());
+        }
+        NibeUplinkRestBridgeConfiguration newConfig = configuration.as(NibeUplinkRestBridgeConfiguration.class);
+        if (isInitialized()) {
+            if (newConfig.clientId.equals(config.clientId) && newConfig.clientSecret.equals(config.clientSecret)) {
+                if (newConfig.updateInterval != config.updateInterval) {
+                    nibeUplinkRestApi.setUpdateInterval(newConfig.updateInterval);
+                    config.updateInterval = newConfig.updateInterval;
+                }
+                if (newConfig.softwareUpdateCheckInterval != config.softwareUpdateCheckInterval) {
+                    nibeUplinkRestApi.setSoftwareUpdateCheckInterval(newConfig.softwareUpdateCheckInterval);
+                    config.softwareUpdateCheckInterval = newConfig.softwareUpdateCheckInterval;
+                }
+                updateConfiguration(configuration);
+            } else {
+                dispose();
+                updateConfiguration(configuration);
+                initialize();
+            }
+        } else {
+            super.handleConfigurationUpdate(configurationParameters);
+        }
     }
 
     /**
