@@ -215,7 +215,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void systemUpdated(NibeSystem system) {
-        logger.trace("Updating system {}", this.systemId);
+        logger.trace("Updating system info for system {}", this.systemId);
         updateState(CHANNEL_LAST_ACTIVITY,
                 new DateTimeType(system.getLastActivityDate().withZoneSameInstant(ZoneId.systemDefault())));
         updateState(CHANNEL_HAS_ALARMED, OnOffType.from(system.hasAlarmed()));
