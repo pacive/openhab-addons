@@ -150,14 +150,24 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
         Set<Item> connectedItems = itemChannelLinkRegistry.getLinkedItems(channelUID);
         if (!connectedItems.isEmpty()) {
             State state = connectedItems.iterator().next().getState();
+            logger.debug("Reading initial state of {}: {}", channelUID.getAsString(), state.toString());
+            @Nullable
+            Double newValue = null;
             if (state instanceof DecimalType) {
-                switch (channelUID.getId()) {
-                    case CHANNEL_THERMOSTAT_CURRENT:
-                        currentTemperature = ((DecimalType) state).doubleValue();
-                        break;
-                    case CHANNEL_THERMOSTAT_TARGET:
-                        targetTemperature = ((DecimalType) state).doubleValue();
+                newValue = ((DecimalType) state).doubleValue();
+            } else if (state instanceof QuantityType) {
+                @Nullable
+                QuantityType<?> celsius = ((QuantityType<?>) state).toUnit(SIUnits.CELSIUS);
+                if (celsius != null) {
+                    newValue = celsius.doubleValue();
                 }
+            }
+            switch (channelUID.getId()) {
+                case CHANNEL_THERMOSTAT_CURRENT:
+                    currentTemperature = newValue;
+                    break;
+                case CHANNEL_THERMOSTAT_TARGET:
+                    targetTemperature = newValue;
             }
         }
     }
