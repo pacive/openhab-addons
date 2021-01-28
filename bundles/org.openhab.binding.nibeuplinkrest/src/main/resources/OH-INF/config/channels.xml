@@ -5,9 +5,6 @@
 	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0
 	https://openhab.org/schemas/config-description-1.0.0.xsd">
 
-	<!-- The thing updates at intervals the High and Medium priority channels, defined in channel configuration file. This parameters
-		specify how often (time in seconds) these channels should be updated. -->
-
 	<config-description uri="channel-type:nibeuplinkrest:channels">
 		<parameter name="scalingFactor" type="integer">
 			<label>Scaling Factor</label>
