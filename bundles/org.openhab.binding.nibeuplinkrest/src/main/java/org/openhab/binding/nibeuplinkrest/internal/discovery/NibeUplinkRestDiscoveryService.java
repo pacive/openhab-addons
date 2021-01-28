@@ -149,7 +149,7 @@ public class NibeUplinkRestDiscoveryService extends AbstractDiscoveryService
         properties.put(PROPERTY_ID, climateSystemNo);
         properties.put(PROPERTY_SYSTEM_ID, systemId);
         properties.put(PROPERTY_NAME, name);
-        properties.put(PROPERTY_CLIMATE_SYSTEMS, List.of(climateSystemNo));
+        properties.put(PROPERTY_CLIMATE_SYSTEMS, Collections.singletonList(climateSystemNo));
 
         return DiscoveryResultBuilder.create(thingUID).withBridge(bridgeUID).withLabel(name).withProperties(properties)
                 .withRepresentationProperty(PROPERTY_ID).build();

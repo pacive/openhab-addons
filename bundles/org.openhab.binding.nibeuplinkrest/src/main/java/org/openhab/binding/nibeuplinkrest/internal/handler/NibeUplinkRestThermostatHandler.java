@@ -33,6 +33,8 @@ import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestApi;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles virtual thermostat Things connecting openHAB to Nibe uplink
@@ -41,6 +43,8 @@ import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
  */
 @NonNullByDefault
 public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
+
+    private final Logger logger = LoggerFactory.getLogger(NibeUplinkRestThermostatHandler.class);
 
     private @NonNullByDefault({}) NibeUplinkRestApi nibeUplinkRestApi;
     private @NonNullByDefault({}) NibeUplinkRestThermostatConfiguration config;
