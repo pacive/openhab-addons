@@ -33,6 +33,8 @@ import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeH
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonParseException;
+
 /**
  * @author Anders Alfredsson - Initial contribution
  */
@@ -563,28 +565,32 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         }
 
         // Callback
-        switch (requestType) {
-            case SYSTEM:
-                NibeSystem system = parseSystem(resp);
-                cachedSystems.put(systemId, system);
-                listener.systemUpdated(system);
-                break;
-            case STATUS:
-                listener.statusUpdated(parseStatus(resp));
-                break;
-            case PARAMETER_GET:
-                listener.parametersUpdated(parseParameterList(resp));
-                break;
-            case MODE_GET:
-                listener.modeUpdated(parseMode(resp));
-                break;
-            case SOFTWARE:
-                listener.softwareUpdateAvailable(parseSoftwareInfo(resp));
-                break;
-            case ALARM:
-                listener.alarmInfoUpdated(parseAlarmInfoList(resp).get(0));
-            default:
-                break;
+        try {
+            switch (requestType) {
+                case SYSTEM:
+                    NibeSystem system = parseSystem(resp);
+                    cachedSystems.put(systemId, system);
+                    listener.systemUpdated(system);
+                    break;
+                case STATUS:
+                    listener.statusUpdated(parseStatus(resp));
+                    break;
+                case PARAMETER_GET:
+                    listener.parametersUpdated(parseParameterList(resp));
+                    break;
+                case MODE_GET:
+                    listener.modeUpdated(parseMode(resp));
+                    break;
+                case SOFTWARE:
+                    listener.softwareUpdateAvailable(parseSoftwareInfo(resp));
+                    break;
+                case ALARM:
+                    listener.alarmInfoUpdated(parseAlarmInfoList(resp).get(0));
+                default:
+                    break;
+            }
+        } catch (JsonParseException e) {
+            logger.debug("Failed to parse json: {}", e.getMessage());
         }
     }
 }
