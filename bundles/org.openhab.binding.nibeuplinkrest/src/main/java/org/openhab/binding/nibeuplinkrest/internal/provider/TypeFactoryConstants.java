@@ -46,6 +46,7 @@ public class TypeFactoryConstants {
         PERCENT,
         FREQUENCY,
         COUNTER,
+        NUMBER,
         STRING,
         OTHER
     }
