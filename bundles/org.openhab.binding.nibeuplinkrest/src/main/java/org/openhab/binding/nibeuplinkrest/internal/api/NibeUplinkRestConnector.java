@@ -542,7 +542,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
                 bridgeHandler.signalServerError(e.getResponseCode());
                 cancelPolling();
                 // Put request back first in the queue to be retried when connection is restored
-                queuedRequests.addFirst(req);
+                queuedRequests.offerFirst(req);
                 startAliveCheck();
             } else {
                 logger.debug("Nibe Uplink responded with an error: {}", e.getMessage());
@@ -587,7 +587,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
                     break;
             }
         } catch (JsonParseException e) {
-            logger.debug("Failed to parse json: {}", e.getMessage());
+            logger.debug("Failed to parse json: {}\n{}", e.getMessage(), resp);
         }
     }
 }
