@@ -32,6 +32,8 @@ import org.openhab.core.auth.client.oauth2.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonParseException;
+
 /**
  * @author Anders Alfredsson - Initial contribution
  */
@@ -558,30 +560,34 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
         }
 
         // Callback
-        switch (requestType) {
-            case SYSTEM:
-                Optional<NibeSystem> system = parseSystem(resp);
-                if (system.isPresent()) {
-                    cachedSystems.put(systemId, system.get());
-                    listener.systemUpdated(system.get());
-                }
-                break;
-            case STATUS:
-                listener.statusUpdated(parseStatus(resp));
-                break;
-            case PARAMETER_GET:
-                parseParameterList(resp).ifPresent(listener::parametersUpdated);
-                break;
-            case MODE_GET:
-                parseMode(resp).ifPresent(listener::modeUpdated);
-                break;
-            case SOFTWARE:
-                parseSoftwareInfo(resp).ifPresent(listener::softwareUpdateAvailable);
-                break;
-            case ALARM:
-                parseAlarmInfoList(resp).ifPresent(alarmInfo -> listener.alarmInfoUpdated(alarmInfo.get(0)));
-            default:
-                break;
+        try {
+            switch (requestType) {
+                case SYSTEM:
+                    Optional<NibeSystem> system = parseSystem(resp);
+                    if (system.isPresent()) {
+                        cachedSystems.put(systemId, system.get());
+                        listener.systemUpdated(system.get());
+                    }
+                    break;
+                case STATUS:
+                    listener.statusUpdated(parseStatus(resp));
+                    break;
+                case PARAMETER_GET:
+                    parseParameterList(resp).ifPresent(listener::parametersUpdated);
+                    break;
+                case MODE_GET:
+                    parseMode(resp).ifPresent(listener::modeUpdated);
+                    break;
+                case SOFTWARE:
+                    parseSoftwareInfo(resp).ifPresent(listener::softwareUpdateAvailable);
+                    break;
+                case ALARM:
+                    parseAlarmInfoList(resp).ifPresent(alarmInfo -> listener.alarmInfoUpdated(alarmInfo.get(0)));
+                default:
+                    break;
+            }
+        } catch (JsonParseException e) {
+            logger.debug("Failed to parse json: {}", e.getMessage());
         }
     }
 }
