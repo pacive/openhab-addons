@@ -309,6 +309,9 @@ public class NibeUplinkRestTypeFactory {
      * @return
      */
     private ParameterType getParameterType(Parameter parameter) {
+        if (STATIC_PARAMETER_TYPE_MAPPINGS.containsKey(parameter.getParameterId())) {
+            return STATIC_PARAMETER_TYPE_MAPPINGS.getOrDefault(parameter.getParameterId(), ParameterType.OTHER);
+        }
         switch (parameter.getUnit()) {
             case "°C":
                 return ParameterType.TEMPERATURE;
@@ -329,10 +332,18 @@ public class NibeUplinkRestTypeFactory {
             case "kW":
                 return ParameterType.POWER;
         }
+
         if (parameter.getDisplayValue().equals("yes") || parameter.getDisplayValue().equals("no")) {
             return ParameterType.BOOLEAN;
         }
-        return STATIC_PARAMETER_TYPE_MAPPINGS.getOrDefault(parameter.getParameterId(), ParameterType.OTHER);
+
+        try {
+            Float.parseFloat(parameter.getDisplayValue());
+            return ParameterType.NUMBER;
+        } catch (NumberFormatException ignored) {
+
+        }
+        return ParameterType.OTHER;
     }
 
     /**
@@ -361,6 +372,7 @@ public class NibeUplinkRestTypeFactory {
             case TIME_H:
             case FREQUENCY:
             case PERCENT:
+            case NUMBER:
                 return calculateScalingFactor(parameter);
             default:
                 return NO_SCALING;
@@ -436,6 +448,7 @@ public class NibeUplinkRestTypeFactory {
         String unitSymbol = parameter.getUnit();
         switch (unitSymbol) {
             case "%":
+            case "":
                 return "Dimensionless";
             case "Hz":
                 return "Frequency";
