@@ -16,18 +16,34 @@ package org.openhab.binding.nibeuplinkrest.internal.api;
 import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingConstants.*;
 import static org.openhab.binding.nibeuplinkrest.internal.api.NibeUplinkRestResponseParser.*;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.openhab.binding.nibeuplinkrest.internal.api.RequestWrapper.RequestType;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.SystemConfig;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestHttpException;
 import org.openhab.binding.nibeuplinkrest.internal.handler.NibeUplinkRestBridgeHandler;
-import org.openhab.core.auth.client.oauth2.*;
+import org.openhab.core.auth.client.oauth2.OAuthClientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
