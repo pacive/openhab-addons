@@ -17,7 +17,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.AlarmInfo;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Parameter;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.SoftwareInfo;
 
 /**
  * Interface that specifies callback methods to inform the handler of updates

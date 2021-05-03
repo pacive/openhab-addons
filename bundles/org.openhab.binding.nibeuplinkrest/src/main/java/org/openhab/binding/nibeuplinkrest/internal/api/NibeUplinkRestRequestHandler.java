@@ -27,7 +27,7 @@ import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
 import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestHttpException;
-import org.openhab.core.auth.client.oauth2.*;
+import org.openhab.core.auth.client.oauth2.OAuthClientService;
 
 import com.google.gson.Gson;
 

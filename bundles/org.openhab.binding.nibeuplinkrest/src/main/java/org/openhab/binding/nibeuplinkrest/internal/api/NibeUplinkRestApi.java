@@ -17,7 +17,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.SystemConfig;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Thermostat;
 import org.openhab.binding.nibeuplinkrest.internal.exception.NibeUplinkRestException;
 
 /**
@@ -58,7 +62,6 @@ public interface NibeUplinkRestApi {
      * gets sent to the {@link NibeUplinkRestCallbackListener} registered for the systemId.
      *
      * @param systemId Id of the system to get
-     * @return A {@link NibeSystem} object with info on the system
      */
     void requestSystem(int systemId);
 
@@ -67,7 +70,6 @@ public interface NibeUplinkRestApi {
      * gets sent to the {@link NibeUplinkRestCallbackListener} registered for the systemId.
      *
      * @param systemId Id of the system to get
-     * @return A {@link NibeSystem} object with info on the system
      */
     void requestLatestAlarm(int systemId);
 
@@ -77,7 +79,6 @@ public interface NibeUplinkRestApi {
      * the systemId.
      *
      * @param systemId Id of the system
-     * @return A {@link SoftwareInfo} object holding infomration on the software
      */
     void requestSoftwareInfo(int systemId);
 

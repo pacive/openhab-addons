@@ -22,10 +22,23 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.nibeuplinkrest.internal.api.model.*;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.AlarmInfo;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Category;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Mode;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.NibeSystem;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.Parameter;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.SoftwareInfo;
+import org.openhab.binding.nibeuplinkrest.internal.api.model.SystemConfig;
 import org.openhab.binding.nibeuplinkrest.internal.util.StringConvert;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -171,8 +184,7 @@ public class NibeUplinkRestResponseParser {
      */
     public static Set<String> parseStatus(String json) {
         Set<String> activeComponents = new HashSet<>();
-        JsonParser parser = new JsonParser();
-        JsonArray items = parser.parse(json).getAsJsonArray();
+        JsonArray items = JsonParser.parseString(json).getAsJsonArray();
         items.forEach((item) -> {
             String title = item.getAsJsonObject().get("title").getAsString();
             activeComponents.add(StringConvert.toCamelCase(title));
