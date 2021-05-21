@@ -529,11 +529,6 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             logger.warn("Request queue nearly full, consider increasing update interval");
         }
 
-        // If mode has been reset to default, don't send.
-        if (requestType == RequestType.MODE_SET && modes.get(systemId) == null) {
-            return;
-        }
-
         logger.trace("Executing request of type {} for system {}", requestType, systemId);
         try {
             resp = requests.makeRequestWithRetry(req);
