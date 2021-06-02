@@ -61,7 +61,7 @@ public class RequestWrapper {
         THERMOSTAT
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(RequestWrapper.class);
+    private final Logger logger = LoggerFactory.getLogger(RequestWrapper.class);
 
     private static final String CONTENT_TYPE = "application/json";
     private static final String BEARER = "Bearer ";

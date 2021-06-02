@@ -357,7 +357,6 @@ public class NibeUplinkRestTypeFactory {
             Float.parseFloat(parameter.getDisplayValue());
             return ParameterType.NUMBER;
         } catch (NumberFormatException ignored) {
-
         }
         return ParameterType.OTHER;
     }
