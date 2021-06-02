@@ -82,8 +82,9 @@ public class NibeUplinkRestChannelGroupTypeProvider implements ChannelGroupTypeP
     public String getChannelFromID(String channelId) {
         for (ChannelGroupType groupType : channelGroupTypes.values()) {
             for (ChannelDefinition channel : groupType.getChannelDefinitions()) {
-                if (channel.getId().equals(channelId))
+                if (channel.getId().equals(channelId)) {
                     return groupType.getUID().getId() + "#" + channelId;
+                }
             }
         }
         return "";
