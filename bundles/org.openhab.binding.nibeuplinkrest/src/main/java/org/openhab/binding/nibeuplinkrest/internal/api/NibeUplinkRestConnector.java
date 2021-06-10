@@ -500,7 +500,9 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             } catch (NibeUplinkRestHttpException e) {
                 logger.trace("Server error: {}", e.getResponseCode());
             } catch (NibeUplinkRestException e) {
-                logger.debug("Request failed: {}", e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Request failed: {}", Optional.ofNullable(e.getCause()).orElse(e).getMessage());
+                }
             }
 
         }, 1, 1, TimeUnit.MINUTES);
@@ -547,7 +549,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
             return;
         } catch (NibeUplinkRestException e) {
             logger.debug("Failed to get data from Nibe Uplink: {}",
-                    e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+                    Optional.ofNullable(e.getCause()).orElse(e).getMessage());
             return;
         }
 
