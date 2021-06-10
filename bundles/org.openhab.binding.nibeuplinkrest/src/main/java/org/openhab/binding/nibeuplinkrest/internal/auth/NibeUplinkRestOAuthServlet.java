@@ -17,6 +17,7 @@ import static org.openhab.binding.nibeuplinkrest.internal.NibeUplinkRestBindingC
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -69,7 +70,7 @@ public class NibeUplinkRestOAuthServlet extends HttpServlet {
 
         logger.debug("Received GET request: {}", req.getRequestURI());
 
-        String servletBaseURL = req.getRequestURL().toString();
+        String servletBaseURL = Optional.ofNullable(req.getRequestURL()).orElseThrow(ServletException::new).toString();
         NibeUplinkRestOAuthServletTemplate indexTemplate = templates.get(SERVLET_TEMPLATE_INDEX);
 
         if (indexTemplate == null) {
