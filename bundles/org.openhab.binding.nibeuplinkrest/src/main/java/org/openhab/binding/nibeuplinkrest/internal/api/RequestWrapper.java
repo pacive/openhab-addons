@@ -96,6 +96,10 @@ public class RequestWrapper {
     }
 
     public ContentResponse send(HttpClient httpClient, OAuthClientService oAuthClient) throws NibeUplinkRestException {
+        if (logger.isTraceEnabled()) {
+            logger.trace("Sending {} request to {} {}", getMethod(), getURL(),
+                    this.body != null ? "with data " + body : "");
+        }
         Request req = httpClient.newRequest(getURL()).method(getMethod()).accept(CONTENT_TYPE).followRedirects(true)
                 .timeout(5, TimeUnit.SECONDS);
 
@@ -120,11 +124,6 @@ public class RequestWrapper {
         }
         req.header(HttpHeader.AUTHORIZATION, BEARER + token);
         try {
-            if (logger.isTraceEnabled()) {
-                logger.trace("Sending {} request to {} {}", req.getMethod(), req.getPath(),
-                        req.getContent() != null ? "with data " + new String(req.getContent().iterator().next().array())
-                                : "");
-            }
             return req.send();
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
             throw new NibeUplinkRestException("Failed to send HTTP request", e);
