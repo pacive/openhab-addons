@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -224,8 +224,10 @@ public class NibeUplinkRestTypeFactory {
             @Nullable
             ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeID);
             if (channelType != null) {
-                ChannelDefinition definition = new ChannelDefinitionBuilder(channelTypeID.getId(), channelTypeID)
-                        .withLabel(channelType.getLabel()).withDescription(channelType.getDescription()).build();
+                ChannelDefinition definition = new ChannelDefinitionBuilder(
+                        channelTypeID.getId().replace(STATUS_CHANNEL_TYPE_SUFFIX, ""), channelTypeID)
+                                .withLabel(channelType.getLabel()).withDescription(channelType.getDescription())
+                                .build();
                 definitions.add(definition);
             }
         });
@@ -354,7 +356,8 @@ public class NibeUplinkRestTypeFactory {
         }
 
         try {
-            Float.parseFloat(parameter.getDisplayValue());
+            String value = parameter.getDisplayValue().replace(parameter.getUnit(), "");
+            Float.parseFloat(value);
             return ParameterType.NUMBER;
         } catch (NumberFormatException ignored) {
         }
