@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -72,6 +72,7 @@ public class NibeUplinkRestBindingConstants {
     public static final String CHANNEL_MODE = CHANNEL_GROUP_CONTROL + CHANNEL_MODE_ID;
     public static final String CHANNEL_THERMOSTAT_CURRENT = "currentTemperature";
     public static final String CHANNEL_THERMOSTAT_TARGET = "targetTemperature";
+    public static final String STATUS_CHANNEL_TYPE_SUFFIX = "Active";
 
     // Channel group type UIDs
     public static final ChannelGroupTypeUID CHANNEL_GROUP_TYPE_DEFAULT_CONTROL = new ChannelGroupTypeUID(BINDING_ID,
@@ -101,15 +102,20 @@ public class NibeUplinkRestBindingConstants {
             CHANNEL_SOFTWARE_UPDATE_ID);
     public static final ChannelTypeUID CHANNEL_TYPE_LATEST_SOFTWARE = new ChannelTypeUID(BINDING_ID,
             CHANNEL_LATEST_SOFTWARE_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_COMPRESSOR = new ChannelTypeUID(BINDING_ID, CHANNEL_COMPRESSOR_ID);
+    public static final ChannelTypeUID CHANNEL_TYPE_COMPRESSOR = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_COMPRESSOR_ID + STATUS_CHANNEL_TYPE_SUFFIX);
     public static final ChannelTypeUID CHANNEL_TYPE_VENTILATION = new ChannelTypeUID(BINDING_ID,
-            CHANNEL_VENTILATION_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_ADDITION = new ChannelTypeUID(BINDING_ID, CHANNEL_ADDITION_ID);
+            CHANNEL_VENTILATION_ID + STATUS_CHANNEL_TYPE_SUFFIX);
+    public static final ChannelTypeUID CHANNEL_TYPE_ADDITION = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_ADDITION_ID + STATUS_CHANNEL_TYPE_SUFFIX);
     public static final ChannelTypeUID CHANNEL_TYPE_HEATING_MEDIUM_PUMP = new ChannelTypeUID(BINDING_ID,
-            CHANNEL_HEATING_MEDIUM_PUMP_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_HOT_WATER = new ChannelTypeUID(BINDING_ID, CHANNEL_HOT_WATER_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_HEATING = new ChannelTypeUID(BINDING_ID, CHANNEL_HEATING_ID);
-    public static final ChannelTypeUID CHANNEL_TYPE_COOLING = new ChannelTypeUID(BINDING_ID, CHANNEL_COOLING_ID);
+            CHANNEL_HEATING_MEDIUM_PUMP_ID + STATUS_CHANNEL_TYPE_SUFFIX);
+    public static final ChannelTypeUID CHANNEL_TYPE_HOT_WATER = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_HOT_WATER_ID + STATUS_CHANNEL_TYPE_SUFFIX);
+    public static final ChannelTypeUID CHANNEL_TYPE_HEATING = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_HEATING_ID + STATUS_CHANNEL_TYPE_SUFFIX);
+    public static final ChannelTypeUID CHANNEL_TYPE_COOLING = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_COOLING_ID + STATUS_CHANNEL_TYPE_SUFFIX);
 
     public static final String CHANNEL_PROPERTY_SCALING_FACTOR = "scalingFactor";
 

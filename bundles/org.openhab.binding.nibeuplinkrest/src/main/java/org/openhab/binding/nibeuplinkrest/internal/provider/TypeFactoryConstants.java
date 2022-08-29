@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2021 Contributors to the openHAB project
+ * Copyright (c) 2010-2022 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -52,11 +52,12 @@ public class TypeFactoryConstants {
     }
 
     // Regex pattern to extract a double value - stripping unit
-    public static final Pattern DOUBLE_PATTERN = Pattern.compile("(\\d+\\.?\\d*).*");
+    public static final Pattern DOUBLE_PATTERN = Pattern.compile("(-?\\d+\\.?\\d*).*");
 
     public static final int NO_SCALING = 1;
     public static final int SCALE_FACTOR_TEN = 10;
     public static final int SCALE_FACTOR_HUNDRED = 100;
+    public static final int SCALE_FACTOR_THOUSAND = 1000;
 
     // Map of static type mappings, for parameters that cannot be classified automatically
     public static final Map<Integer, ParameterType> STATIC_PARAMETER_TYPE_MAPPINGS = Map.ofEntries(
@@ -70,7 +71,7 @@ public class TypeFactoryConstants {
 
     // Static scale factor mappings for parameters that need it
     public static final Map<Integer, Integer> STATIC_SCALING_FACTORS = Map.of(43125, SCALE_FACTOR_TEN, 43136,
-            SCALE_FACTOR_TEN);
+            SCALE_FACTOR_TEN, 10069, SCALE_FACTOR_THOUSAND);
 
     // Parameter id mappings for the heating control channels
     public static final Map<String, List<String>> HEAT_CONTROL_PARAMETERS = Map.of(CHANNEL_PARALLEL_ADJUST_HEAT_ID,
