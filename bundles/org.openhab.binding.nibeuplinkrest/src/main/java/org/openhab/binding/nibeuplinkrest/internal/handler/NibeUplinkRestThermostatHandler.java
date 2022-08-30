@@ -116,8 +116,13 @@ public class NibeUplinkRestThermostatHandler extends BaseThingHandler {
 
     @Override
     public void handleRemoval() {
+        dispose();
+        updateStatus(ThingStatus.REMOVED);
+    }
+
+    @Override
+    public void dispose() {
         nibeUplinkRestApi.removeThermostat(config.systemId, config.id);
-        super.handleRemoval();
     }
 
     @Override
