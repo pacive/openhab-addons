@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.measure.Unit;
+import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -43,6 +44,8 @@ import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.unit.SIUnits;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
@@ -112,14 +115,14 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
             if (channelId.equals(CHANNEL_MODE_ID) && command instanceof StringType) {
                 nibeUplinkRestApi.setMode(systemId, Mode.from(command.toFullString()));
                 // All channels except for mode accept numbers as command
-            } else if (command instanceof DecimalType) {
+            } else if (command instanceof DecimalType || command instanceof QuantityType) {
                 try {
-                    Map<Integer, Integer> parameter = new HashMap<>();
+                    Map<Integer, Number> parameter = new HashMap<>();
                     Channel channel = thing.getChannel(channelUID);
                     if (channel == null) {
                         throw new NibeUplinkRestException("Channel doesn't exist");
                     }
-                    int outValue = transformOutgoing(channel, (Number) command);
+                    Number outValue = transformOutgoing((Number) command);
                     parameter.put(Integer.parseInt(channelId), outValue);
                     nibeUplinkRestApi.setParameters(systemId, parameter);
                 } catch (Exception e) {
@@ -293,7 +296,12 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     private State transformIncoming(Channel channel, Parameter parameter) {
         @Nullable
-        Unit<?> unit = UnitUtils.parseUnit(parameter.getUnit());
+        Unit<?> unit;
+        if ("l/m".equals(parameter.getUnit())) {
+            unit = Units.LITRE_PER_MINUTE;
+        } else {
+            unit = UnitUtils.parseUnit(parameter.getUnit());
+        }
         int scalingFactor = getScalingFactor(channel);
 
         double value = (double) parameter.getRawValue() / scalingFactor;
@@ -305,11 +313,16 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         }
     }
 
-    private int transformOutgoing(Channel channel, Number outgoingValue) {
-        double transformed = outgoingValue.doubleValue();
-        int scalingFactor = getScalingFactor(channel);
-
-        return (int) transformed * scalingFactor;
+    private Number transformOutgoing(Number outgoingValue) {
+        if (outgoingValue instanceof QuantityType<?>
+                && ((QuantityType<?>) outgoingValue).getDimension() instanceof Temperature) {
+            @Nullable
+            QuantityType<?> celsius = ((QuantityType<?>) outgoingValue).toUnit(SIUnits.CELSIUS);
+            if (celsius != null) {
+                return celsius.doubleValue();
+            }
+        }
+        return outgoingValue.doubleValue();
     }
 
     private int getScalingFactor(Channel channel) {
