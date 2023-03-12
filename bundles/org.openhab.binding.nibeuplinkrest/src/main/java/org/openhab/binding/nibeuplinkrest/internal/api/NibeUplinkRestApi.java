@@ -113,7 +113,7 @@ public interface NibeUplinkRestApi {
      * @param systemId Id of the system
      * @param parameters A {@link Map} of parameters and corresponding values to be set
      */
-    void setParameters(int systemId, Map<Integer, Integer> parameters) throws NibeUplinkRestException;
+    void setParameters(int systemId, Map<Integer, Number> parameters) throws NibeUplinkRestException;
 
     /**
      * Gets the system operating mode - Default, away or vacation. The request is placed at the head of the queue and

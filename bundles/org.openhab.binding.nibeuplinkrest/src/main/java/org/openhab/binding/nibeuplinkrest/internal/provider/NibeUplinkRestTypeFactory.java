@@ -281,15 +281,13 @@ public class NibeUplinkRestTypeFactory {
                 if (system.hasHeating() && parAdjustHeat != null && targetTempHeat != null) {
                     definitions.add(new ChannelDefinitionBuilder(
                             HEAT_CONTROL_PARAMETERS.get(CHANNEL_PARALLEL_ADJUST_HEAT_ID).get(index),
-                            CHANNEL_TYPE_PARALLEL_ADJUST_HEAT)
-                                    .withLabel(
-                                            String.format(HEAT_CONTROL_CHANNEL_LABEL, index, parAdjustHeat.getLabel()))
+                            CHANNEL_TYPE_PARALLEL_ADJUST_HEAT).withLabel(
+                                    String.format(HEAT_CONTROL_CHANNEL_LABEL, index + 1, parAdjustHeat.getLabel()))
                                     .withDescription(parAdjustHeat.getDescription()).build());
                     definitions.add(new ChannelDefinitionBuilder(
                             HEAT_CONTROL_PARAMETERS.get(CHANNEL_TARGET_TEMP_HEAT_ID).get(index),
-                            CHANNEL_TYPE_TARGET_TEMP_HEAT)
-                                    .withLabel(
-                                            String.format(HEAT_CONTROL_CHANNEL_LABEL, index, targetTempHeat.getLabel()))
+                            CHANNEL_TYPE_TARGET_TEMP_HEAT).withLabel(
+                                    String.format(HEAT_CONTROL_CHANNEL_LABEL, index + 1, targetTempHeat.getLabel()))
                                     .withDescription(targetTempHeat.getDescription())
                                     .withProperties(
                                             Map.of(CHANNEL_PROPERTY_SCALING_FACTOR, Integer.toString(SCALE_FACTOR_TEN)))
@@ -299,15 +297,13 @@ public class NibeUplinkRestTypeFactory {
                 if (system.hasCooling() && parAdjustCool != null && targetTempCool != null) {
                     definitions.add(new ChannelDefinitionBuilder(
                             HEAT_CONTROL_PARAMETERS.get(CHANNEL_PARALLEL_ADJUST_COOL_ID).get(index),
-                            CHANNEL_TYPE_PARALLEL_ADJUST_COOL)
-                                    .withLabel(
-                                            String.format(HEAT_CONTROL_CHANNEL_LABEL, index, parAdjustCool.getLabel()))
+                            CHANNEL_TYPE_PARALLEL_ADJUST_COOL).withLabel(
+                                    String.format(HEAT_CONTROL_CHANNEL_LABEL, index + 1, parAdjustCool.getLabel()))
                                     .withDescription(parAdjustCool.getDescription()).build());
                     definitions.add(new ChannelDefinitionBuilder(
                             HEAT_CONTROL_PARAMETERS.get(CHANNEL_TARGET_TEMP_COOL_ID).get(index),
-                            CHANNEL_TYPE_TARGET_TEMP_COOL)
-                                    .withLabel(
-                                            String.format(HEAT_CONTROL_CHANNEL_LABEL, index, targetTempCool.getLabel()))
+                            CHANNEL_TYPE_TARGET_TEMP_COOL).withLabel(
+                                    String.format(HEAT_CONTROL_CHANNEL_LABEL, index + 1, targetTempCool.getLabel()))
                                     .withDescription(targetTempCool.getDescription())
                                     .withProperties(
                                             Map.of(CHANNEL_PROPERTY_SCALING_FACTOR, Integer.toString(SCALE_FACTOR_TEN)))
@@ -385,10 +381,10 @@ public class NibeUplinkRestTypeFactory {
             case DEGREEMINUTES:
             case AIRFLOW:
                 return SCALE_FACTOR_TEN;
-            case TIME_FACTOR:
             case POWER:
                 return SCALE_FACTOR_HUNDRED;
             case CURRENT:
+            case TIME_FACTOR:
             case TIME_H:
             case FREQUENCY:
             case PERCENT:
@@ -470,8 +466,8 @@ public class NibeUplinkRestTypeFactory {
             case "%":
             case "":
                 return "Dimensionless";
-            case "Hz":
-                return "Frequency";
+            case "l/m":
+                return "VolumetricFlowRate";
             default:
                 Unit<?> unit = UnitUtils.parseUnit(unitSymbol);
                 if (unit == null) {
