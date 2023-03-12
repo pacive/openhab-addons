@@ -205,7 +205,7 @@ public class NibeUplinkRestConnector implements NibeUplinkRestApi {
     }
 
     @Override
-    public void setParameters(int systemId, Map<Integer, Integer> parameters) {
+    public void setParameters(int systemId, Map<Integer, Number> parameters) {
         logger.debug("Setting parameters: {}", parameters);
         RequestWrapper req = requests.createSetParametersRequest(systemId, parameters);
         if (!queuedRequests.offerFirst(req)) {
