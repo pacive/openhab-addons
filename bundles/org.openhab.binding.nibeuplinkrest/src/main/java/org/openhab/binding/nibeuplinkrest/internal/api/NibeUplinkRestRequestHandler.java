@@ -137,8 +137,8 @@ public class NibeUplinkRestRequestHandler {
      * @param parameters
      * @return
      */
-    public RequestWrapper createSetParametersRequest(int systemId, Map<Integer, Integer> parameters) {
-        Map<String, Map<Integer, Integer>> wrapper = Map.of("settings", parameters);
+    public RequestWrapper createSetParametersRequest(int systemId, Map<Integer, Number> parameters) {
+        Map<String, Map<Integer, Number>> wrapper = Map.of("settings", parameters);
         return new RequestWrapper(RequestType.PARAMETER_SET, systemId, serializer.toJson(wrapper));
     }
 
