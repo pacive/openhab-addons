@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--~
+	~ Copyright (c) 2010-2020 Contributors to the openHAB project
+	~
+	~ See the NOTICE file(s) distributed with this work for additional
+	~ information.
+	~
+	~ This program and the accompanying materials are made available under the
+	~ terms of the Eclipse Public License 2.0 which is available at
+	~ http://www.eclipse.org/legal/epl-2.0
+	~
+	~ SPDX-License-Identifier: EPL-2.0
+-->
+
+<addon:addon id="nibeuplinkrest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:addon="https://openhab.org/schemas/binding/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/addon/v1.0.0 https://openhab.org/schemas/addon-1.0.0.xsd">
+
+	<type>binding</type>
+	<name>NibeUplinkRest Binding</name>
+	<description>This binding connects to the official API for Nibe Uplink, to get status from and control a connected
+		heating system.</description>
+
+</addon:addon>
