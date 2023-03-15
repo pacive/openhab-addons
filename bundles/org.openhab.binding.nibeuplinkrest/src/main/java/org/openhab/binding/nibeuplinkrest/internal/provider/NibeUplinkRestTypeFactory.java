@@ -406,7 +406,11 @@ public class NibeUplinkRestTypeFactory {
             Matcher match = DOUBLE_PATTERN.matcher(parameter.getDisplayValue());
             if (match.matches()) {
                 result = Double.parseDouble(match.group(1));
-                return (int) Math.round(parameter.getRawValue() / result);
+                int factor = (int) Math.round(parameter.getRawValue() / result);
+                if (factor == 0) {
+                    return NO_SCALING;
+                }
+                return factor;
             }
         } catch (Exception e) {
         }
