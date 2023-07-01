@@ -226,8 +226,7 @@ public class NibeUplinkRestTypeFactory {
             if (channelType != null) {
                 ChannelDefinition definition = new ChannelDefinitionBuilder(
                         channelTypeID.getId().replace(STATUS_CHANNEL_TYPE_SUFFIX, ""), channelTypeID)
-                                .withLabel(channelType.getLabel()).withDescription(channelType.getDescription())
-                                .build();
+                        .withLabel(channelType.getLabel()).withDescription(channelType.getDescription()).build();
                 definitions.add(definition);
             }
         });
@@ -281,33 +280,31 @@ public class NibeUplinkRestTypeFactory {
                 if (system.hasHeating() && parAdjustHeat != null && targetTempHeat != null) {
                     definitions.add(new ChannelDefinitionBuilder(
                             HEAT_CONTROL_PARAMETERS.get(CHANNEL_PARALLEL_ADJUST_HEAT_ID).get(index),
-                            CHANNEL_TYPE_PARALLEL_ADJUST_HEAT).withLabel(
-                                    String.format(HEAT_CONTROL_CHANNEL_LABEL, index + 1, parAdjustHeat.getLabel()))
-                                    .withDescription(parAdjustHeat.getDescription()).build());
+                            CHANNEL_TYPE_PARALLEL_ADJUST_HEAT)
+                            .withLabel(String.format(HEAT_CONTROL_CHANNEL_LABEL, index + 1, parAdjustHeat.getLabel()))
+                            .withDescription(parAdjustHeat.getDescription()).build());
                     definitions.add(new ChannelDefinitionBuilder(
                             HEAT_CONTROL_PARAMETERS.get(CHANNEL_TARGET_TEMP_HEAT_ID).get(index),
-                            CHANNEL_TYPE_TARGET_TEMP_HEAT).withLabel(
-                                    String.format(HEAT_CONTROL_CHANNEL_LABEL, index + 1, targetTempHeat.getLabel()))
-                                    .withDescription(targetTempHeat.getDescription())
-                                    .withProperties(
-                                            Map.of(CHANNEL_PROPERTY_SCALING_FACTOR, Integer.toString(SCALE_FACTOR_TEN)))
-                                    .build());
+                            CHANNEL_TYPE_TARGET_TEMP_HEAT)
+                            .withLabel(String.format(HEAT_CONTROL_CHANNEL_LABEL, index + 1, targetTempHeat.getLabel()))
+                            .withDescription(targetTempHeat.getDescription())
+                            .withProperties(Map.of(CHANNEL_PROPERTY_SCALING_FACTOR, Integer.toString(SCALE_FACTOR_TEN)))
+                            .build());
                 }
                 // Add cooling control if the system has cooling
                 if (system.hasCooling() && parAdjustCool != null && targetTempCool != null) {
                     definitions.add(new ChannelDefinitionBuilder(
                             HEAT_CONTROL_PARAMETERS.get(CHANNEL_PARALLEL_ADJUST_COOL_ID).get(index),
-                            CHANNEL_TYPE_PARALLEL_ADJUST_COOL).withLabel(
-                                    String.format(HEAT_CONTROL_CHANNEL_LABEL, index + 1, parAdjustCool.getLabel()))
-                                    .withDescription(parAdjustCool.getDescription()).build());
+                            CHANNEL_TYPE_PARALLEL_ADJUST_COOL)
+                            .withLabel(String.format(HEAT_CONTROL_CHANNEL_LABEL, index + 1, parAdjustCool.getLabel()))
+                            .withDescription(parAdjustCool.getDescription()).build());
                     definitions.add(new ChannelDefinitionBuilder(
                             HEAT_CONTROL_PARAMETERS.get(CHANNEL_TARGET_TEMP_COOL_ID).get(index),
-                            CHANNEL_TYPE_TARGET_TEMP_COOL).withLabel(
-                                    String.format(HEAT_CONTROL_CHANNEL_LABEL, index + 1, targetTempCool.getLabel()))
-                                    .withDescription(targetTempCool.getDescription())
-                                    .withProperties(
-                                            Map.of(CHANNEL_PROPERTY_SCALING_FACTOR, Integer.toString(SCALE_FACTOR_TEN)))
-                                    .build());
+                            CHANNEL_TYPE_TARGET_TEMP_COOL)
+                            .withLabel(String.format(HEAT_CONTROL_CHANNEL_LABEL, index + 1, targetTempCool.getLabel()))
+                            .withDescription(targetTempCool.getDescription())
+                            .withProperties(Map.of(CHANNEL_PROPERTY_SCALING_FACTOR, Integer.toString(SCALE_FACTOR_TEN)))
+                            .build());
                 }
             }
         });

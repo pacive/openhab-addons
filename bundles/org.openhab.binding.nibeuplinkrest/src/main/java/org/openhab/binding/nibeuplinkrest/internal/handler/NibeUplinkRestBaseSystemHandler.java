@@ -251,7 +251,10 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
 
     @Override
     public void statusUpdated(Set<String> activeComponents) {
-        logger.trace("Updating status channels for system {}", this.systemId);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Updating status channels for system {}. Active components: {}", this.systemId,
+                    String.join(", ", activeComponents));
+        }
         thing.getChannelsOfGroup(CHANNEL_GROUP_STATUS_ID).stream()
                 .filter(c -> Objects.equals(c.getAcceptedItemType(), CoreItemFactory.SWITCH)
                         && !c.getUID().getId().equals(CHANNEL_HAS_ALARMED)
