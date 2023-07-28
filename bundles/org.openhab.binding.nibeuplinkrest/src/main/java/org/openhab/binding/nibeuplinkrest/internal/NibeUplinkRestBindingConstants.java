@@ -45,6 +45,8 @@ public class NibeUplinkRestBindingConstants {
     public static final String CHANNEL_HOT_WATER_ID = "hotWater";
     public static final String CHANNEL_HEATING_ID = "heating";
     public static final String CHANNEL_COOLING_ID = "cooling";
+    public static final String CHANNEL_COOLING_PASSIVE_ID = "coolingpassive";
+    public static final String CHANNEL_BRINE_PUMP_ID = "brinePump";
     public static final String CHANNEL_LAST_ACTIVITY_ID = "lastActivity";
     public static final String CHANNEL_HAS_ALARMED_ID = "hasAlarmed";
     public static final String CHANNEL_ALARM_INFO_ID = "alarmInfo";
@@ -64,6 +66,8 @@ public class NibeUplinkRestBindingConstants {
     public static final String CHANNEL_HOT_WATER = CHANNEL_GROUP_STATUS + CHANNEL_HOT_WATER_ID;
     public static final String CHANNEL_HEATING = CHANNEL_GROUP_STATUS + CHANNEL_HEATING_ID;
     public static final String CHANNEL_COOLING = CHANNEL_GROUP_STATUS + CHANNEL_COOLING_ID;
+    public static final String CHANNEL_COOLING_PASSIVE = CHANNEL_GROUP_STATUS + CHANNEL_COOLING_PASSIVE_ID;
+    public static final String CHANNEL_BRINE_PUMP = CHANNEL_GROUP_STATUS + CHANNEL_BRINE_PUMP_ID;
     public static final String CHANNEL_LAST_ACTIVITY = CHANNEL_GROUP_STATUS + CHANNEL_LAST_ACTIVITY_ID;
     public static final String CHANNEL_HAS_ALARMED = CHANNEL_GROUP_STATUS + CHANNEL_HAS_ALARMED_ID;
     public static final String CHANNEL_ALARM_INFO = CHANNEL_GROUP_STATUS + CHANNEL_ALARM_INFO_ID;
@@ -116,6 +120,12 @@ public class NibeUplinkRestBindingConstants {
             CHANNEL_HEATING_ID + STATUS_CHANNEL_TYPE_SUFFIX);
     public static final ChannelTypeUID CHANNEL_TYPE_COOLING = new ChannelTypeUID(BINDING_ID,
             CHANNEL_COOLING_ID + STATUS_CHANNEL_TYPE_SUFFIX);
+
+    public static final ChannelTypeUID CHANNEL_TYPE_COOLING_PASSIVE = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_COOLING_PASSIVE_ID + STATUS_CHANNEL_TYPE_SUFFIX);
+
+    public static final ChannelTypeUID CHANNEL_TYPE_BRINE_PUMP = new ChannelTypeUID(BINDING_ID,
+            CHANNEL_BRINE_PUMP_ID + STATUS_CHANNEL_TYPE_SUFFIX);
 
     public static final String CHANNEL_PROPERTY_SCALING_FACTOR = "scalingFactor";
 

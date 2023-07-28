@@ -149,8 +149,20 @@
 	</channel-type>
 	<channel-type id="coolingActive">
 		<item-type>Switch</item-type>
-		<label>Heating</label>
+		<label>Cooling</label>
 		<description>Whether the system is currently working on cooling</description>
+		<state readOnly="true"/>
+	</channel-type>
+	<channel-type id="coolingpassiveActive">
+		<item-type>Switch</item-type>
+		<label>Passive cooling</label>
+		<description>Whether the system is currently passively cooling</description>
+		<state readOnly="true"/>
+	</channel-type>
+	<channel-type id="brinePumpActive">
+		<item-type>Switch</item-type>
+		<label>Brine pump</label>
+		<description>Status of the brine pump</description>
 		<state readOnly="true"/>
 	</channel-type>
 

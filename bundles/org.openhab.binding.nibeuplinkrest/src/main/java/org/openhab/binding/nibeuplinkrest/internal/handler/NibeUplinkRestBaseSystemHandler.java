@@ -213,7 +213,7 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
                         state = new StringType(p.getDisplayValue());
                         break;
                     case CoreItemFactory.NUMBER:
-                        state = new DecimalType(p.getRawValue());
+                        state = new DecimalType((Number) p.getRawValue());
                         break;
                     default:
                         if (itemType.startsWith(CoreItemFactory.NUMBER)) {
@@ -307,12 +307,12 @@ public class NibeUplinkRestBaseSystemHandler extends BaseThingHandler implements
         }
         int scalingFactor = getScalingFactor(channel);
 
-        double value = (double) parameter.getRawValue() / scalingFactor;
+        Double value = (double) parameter.getRawValue() / scalingFactor;
 
         if (unit == null) {
-            return new DecimalType(value);
+            return new DecimalType((Number) value);
         } else {
-            return new QuantityType<>(value, unit);
+            return new QuantityType<>((Number) value, unit);
         }
     }
 

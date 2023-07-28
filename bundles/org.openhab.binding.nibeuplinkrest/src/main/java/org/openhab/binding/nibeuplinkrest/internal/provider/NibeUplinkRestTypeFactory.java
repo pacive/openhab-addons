@@ -217,7 +217,8 @@ public class NibeUplinkRestTypeFactory {
                     || ((channelTypeID.equals(CHANNEL_TYPE_HEATING_MEDIUM_PUMP)
                             || channelTypeID.equals(CHANNEL_TYPE_HEATING)) && !system.hasHeating())
                     || (channelTypeID.equals(CHANNEL_TYPE_HOT_WATER) && !system.hasHotWater())
-                    || (channelTypeID.equals(CHANNEL_TYPE_COOLING) && !system.hasCooling())) {
+                    || (channelTypeID.equals(CHANNEL_TYPE_COOLING)
+                            || channelTypeID.equals(CHANNEL_TYPE_COOLING_PASSIVE) && !system.hasCooling())) {
                 return;
             }
 
