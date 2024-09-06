@@ -133,13 +133,21 @@ public class MyUplinkGenericDeviceHandler extends BaseThingHandler
     @Override
     public MyUplinkCommand buildMyUplinkCommand(Command command, Channel channel) {
         var deviceId = getConfig().get(MyUplinkBindingConstants.THING_CONFIG_ID).toString();
-        var systemId = getConfig().get(THING_CONFIG_SYSTEM_ID).toString();
+        String systemId = "";
+        if (getConfig().containsKey(THING_CONFIG_SYSTEM_ID)) {
+            systemId = getConfig().get(THING_CONFIG_SYSTEM_ID).toString();
+        }
+
         var channelTypeId = Utils.getChannelTypeId(channel);
         return switch (channelTypeId) {
             case CHANNEL_TYPE_RW_COMMAND ->
                 new SetPointsAdvanced(this, channel, command, deviceId, this::updateOnlineStatus);
-            case CHANNEL_TYPE_RW_MODE ->
-                new SetSmartHomeMode(this, channel, command, systemId, this::updateOnlineStatus);
+            case CHANNEL_TYPE_RW_MODE -> {
+                if (systemId.isBlank()) {
+                    throw new UnsupportedOperationException("systemId not configured");
+                }
+                yield new SetSmartHomeMode(this, channel, command, systemId, this::updateOnlineStatus);
+            }
             default -> new SetPoints(this, channel, command, deviceId, this::updateOnlineStatus);
         };
     }
@@ -157,13 +165,18 @@ public class MyUplinkGenericDeviceHandler extends BaseThingHandler
      */
     void pollingRun() {
         String deviceId = getConfig().get(THING_CONFIG_ID).toString();
-        String systemId = getConfig().get(THING_CONFIG_SYSTEM_ID).toString();
+        String systemId = "";
+        if (getConfig().containsKey(THING_CONFIG_SYSTEM_ID)) {
+            systemId = getConfig().get(THING_CONFIG_SYSTEM_ID).toString();
+        }
         logger.debug("polling device data for {}", deviceId);
 
         // proceed if device is online
         if (getThing().getStatus() == ThingStatus.ONLINE) {
             enqueueCommand(new GetPoints(this, deviceId, this::updateOnlineStatus));
-            enqueueCommand(new GetSmartHomeMode(this, systemId, this::updateOnlineStatus));
+            if (!systemId.isBlank()) {
+                enqueueCommand(new GetSmartHomeMode(this, systemId, this::updateOnlineStatus));
+            }
         }
         enqueueCommand(new GetSystems(this, this::updatePropertiesAndOnlineStatus));
     }
