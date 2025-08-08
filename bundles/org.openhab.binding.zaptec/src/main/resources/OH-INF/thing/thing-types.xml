@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="zaptec"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<bridge-type id="account">
+		<label>Zaptec Account</label>
+		<description>Zaptec account to be used to communicate with the API</description>
+
+		<config-description>
+			<parameter name="username" type="text" required="true">
+				<label>Username</label>
+				<description>Account username</description>
+			</parameter>
+			<parameter name="password" type="text" required="true">
+				<context>password</context>
+				<label>Password</label>
+				<description>Account password</description>
+			</parameter>
+		</config-description>
+	</bridge-type>
+
+	<thing-type id="installation">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="account"/>
+		</supported-bridge-type-refs>
+
+		<label>Zaptec Installation</label>
+		<description>A Zaptec installation containing one or more chargers</description>
+	</thing-type>
+
+	<thing-type id="charger">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="account"/>
+		</supported-bridge-type-refs>
+
+		<label>Zaptec Charger</label>
+		<description>A Zaptec charger</description>
+
+		<properties>
+			<property name="Id">Internal id</property>
+		</properties>
+		<representation-property>deviceId</representation-property>
+
+		<config-description>
+			<parameter name="deviceId" type="text" required="true">
+				<label>Serial number</label>
+				<description>Device serial number</description>
+			</parameter>
+		</config-description>
+	</thing-type>
+</thing:thing-descriptions>
