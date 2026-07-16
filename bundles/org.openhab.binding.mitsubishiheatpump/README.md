@@ -1,6 +1,6 @@
-# MitsubishiHeatpump Binding
+# Mitsubishi Heatpump Binding
 
-This binding allows local control of supported Mitsubishi air-ro-air heat pumps. It is based on reverse engineering of
+This binding allows local control of supported Wi-Fi connected Mitsubishi air-to-air heat pumps. It is based on reverse engineering of
 the communication protocol by [https://github.com/muart-group](https://github.com/muart-group) and
 [https://github.com/pymitsubishi](https://github.com/pymitsubishi).
 
@@ -38,7 +38,7 @@ The binding supports channels for controlling different aspects of the heatpump,
 | remoteTemp     | Number:Temperature | W          | Use an external temp sensor instead of the built-in |
 
 If you have a temperature sensor connected to openHAB that you would like to use with the heatpump, connect it to the
-remoteTemp channel using the _follow_ profile.
+`remoteTemp` channel using the _follow_ profile.
 
 ## Full Example
 

@@ -62,6 +62,15 @@
 			<tag>Control</tag>
 			<tag>Mode</tag>
 		</tags>
+		<state>
+			<options>
+				<option value="1">Heat</option>
+				<option value="2">Dehumidify</option>
+				<option value="3">Cool</option>
+				<option value="7">Fan</option>
+				<option value="8">Auto</option>
+			</options>
+		</state>
 		<command>
 			<options>
 				<option value="1">Heat</option>
@@ -92,6 +101,16 @@
 			<tag>Control</tag>
 			<tag>Airflow</tag>
 		</tags>
+		<state>
+			<options>
+				<option value="0">Auto</option>
+				<option value="1">Quiet</option>
+				<option value="2">Low</option>
+				<option value="3">Medium</option>
+				<option value="5">High</option>
+				<option value="6">Very High</option>
+			</options>
+		</state>
 		<command>
 			<options>
 				<option value="0">Auto</option>
@@ -112,6 +131,17 @@
 			<tag>Control</tag>
 			<tag>Airflow</tag>
 		</tags>
+		<state>
+			<options>
+				<option value="0">Auto</option>
+				<option value="1">Position 1 (0°)</option>
+				<option value="2">Position 2</option>
+				<option value="3">Position 3 (45°)</option>
+				<option value="4">Position 4</option>
+				<option value="5">Position 5 (90°)</option>
+				<option value="7">Swing Mode</option>
+			</options>
+		</state>
 		<command>
 			<options>
 				<option value="0">Auto</option>
@@ -133,6 +163,21 @@
 			<tag>Control</tag>
 			<tag>Airflow</tag>
 		</tags>
+		<state>
+			<options>
+				<option value="0">Auto</option>
+				<option value="1">Full left</option>
+				<option value="2">Left</option>
+				<option value="3">Center</option>
+				<option value="4">Right</option>
+				<option value="5">Full Right</option>
+				<option value="6">Split (Left/Center)</option>
+				<option value="7">Split (Center/Right)</option>
+				<option value="8">Split (Left/Right)</option>
+				<option value="9">Split (Left/Center/Right)</option>
+				<option value="12">Swing Mode</option>
+			</options>
+		</state>
 		<command>
 			<options>
 				<option value="0">Auto</option>
