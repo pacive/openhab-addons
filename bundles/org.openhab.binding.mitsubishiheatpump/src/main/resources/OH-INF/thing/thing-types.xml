@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="mitsubishiheatpump"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<thing-type id="heatpump">
+		<label>Heatpump</label>
+		<description>A Mitsubishi heatpump with local control capability</description>
+		<semantic-equipment-tag>AirConditioner</semantic-equipment-tag>
+
+		<channels>
+			<channel id="power" typeId="power"/>
+			<channel id="mode" typeId="mode"/>
+			<channel id="setpoint" typeId="setpoint"/>
+			<channel id="fan" typeId="fan"/>
+			<channel id="verticalVane" typeId="verticalVane"/>
+			<channel id="horizontalVane" typeId="horizontalVane"/>
+			<channel id="indoorTemp" typeId="measuredTemp">
+				<label>Indoor Temperature</label>
+				<description>Temperature measured by indoor unit</description>
+			</channel>
+			<channel id="outdoorTemp" typeId="measuredTemp">
+				<label>Outdoor Temperature</label>
+				<description>Temperature measured by outdoor unit</description>
+			</channel>
+			<channel id="remoteTemp" typeId="remoteTemp"/>
+			<channel id="runtime" typeId="runtime"/>
+		</channels>
+
+		<config-description>
+			<parameter name="hostname" type="text" required="true">
+				<context>network-address</context>
+				<label>Hostname</label>
+				<description>Hostname or IP address of the device</description>
+			</parameter>
+			<parameter name="refreshInterval" type="integer" unit="s" min="1">
+				<label>Refresh Interval</label>
+				<description>Interval the device is polled in sec.</description>
+				<default>300</default>
+				<advanced>true</advanced>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+
+	<channel-type id="power">
+		<item-type>Switch</item-type>
+		<label>Power</label>
+		<description>Heatpump power</description>
+		<tags>
+			<tag>Control</tag>
+			<tag>Power</tag>
+		</tags>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="mode">
+		<item-type>Number</item-type>
+		<label>Mode</label>
+		<description>Heatpump mode selection</description>
+		<tags>
+			<tag>Control</tag>
+			<tag>Mode</tag>
+		</tags>
+		<command>
+			<options>
+				<option value="1">Heat</option>
+				<option value="2">Dehumidify</option>
+				<option value="3">Cool</option>
+				<option value="7">Fan</option>
+				<option value="8">Auto</option>
+			</options>
+		</command>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="setpoint">
+		<item-type unitHint="°C">Number:Temperature</item-type>
+		<label>Setpoint Temperature</label>
+		<description>Heatpump temperature setpoint</description>
+		<tags>
+			<tag>Setpoint</tag>
+			<tag>Temperature</tag>
+		</tags>
+		<state min="16" max="31.5" step="0.5" pattern="%.1f %unit%"/>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="fan">
+		<item-type>Number</item-type>
+		<label>Fan Mode</label>
+		<description>Heatpump fan mode selection</description>
+		<tags>
+			<tag>Control</tag>
+			<tag>Airflow</tag>
+		</tags>
+		<command>
+			<options>
+				<option value="0">Auto</option>
+				<option value="1">Quiet</option>
+				<option value="2">Low</option>
+				<option value="3">Medium</option>
+				<option value="5">High</option>
+				<option value="6">Very High</option>
+			</options>
+		</command>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="verticalVane">
+		<item-type>Number</item-type>
+		<label>Vertical Vane</label>
+		<description>Vertical vane direction</description>
+		<tags>
+			<tag>Control</tag>
+			<tag>Airflow</tag>
+		</tags>
+		<command>
+			<options>
+				<option value="0">Auto</option>
+				<option value="1">Position 1 (0°)</option>
+				<option value="2">Position 2</option>
+				<option value="3">Position 3 (45°)</option>
+				<option value="4">Position 4</option>
+				<option value="5">Position 5 (90°)</option>
+				<option value="7">Swing Mode</option>
+			</options>
+		</command>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="horizontalVane">
+		<item-type>Number</item-type>
+		<label>Horizontal Vane</label>
+		<description>Horizontal vane direction</description>
+		<tags>
+			<tag>Control</tag>
+			<tag>Airflow</tag>
+		</tags>
+		<command>
+			<options>
+				<option value="0">Auto</option>
+				<option value="1">Full left</option>
+				<option value="2">Left</option>
+				<option value="3">Center</option>
+				<option value="4">Right</option>
+				<option value="5">Full Right</option>
+				<option value="6">Split (Left/Center)</option>
+				<option value="7">Split (Center/Right)</option>
+				<option value="8">Split (Left/Right)</option>
+				<option value="9">Split (Left/Center/Right)</option>
+				<option value="12">Swing Mode</option>
+			</options>
+		</command>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="remoteTemp" advanced="true">
+		<item-type unitHint="°C">Number:Temperature</item-type>
+		<label>Remote Temperature</label>
+		<description>External temperature reading</description>
+		<tags>
+			<tag>Measurement</tag>
+			<tag>Temperature</tag>
+		</tags>
+		<state min="-64" max="63.5" step="0.5" pattern="%.1f %unit%"/>
+		<autoUpdatePolicy>default</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="measuredTemp">
+		<item-type unitHint="°C">Number:Temperature</item-type>
+		<label>Measured Temperature</label>
+		<description>Temperature measured by unit</description>
+		<tags>
+			<tag>Measurement</tag>
+			<tag>Temperature</tag>
+		</tags>
+		<state min="-64" max="63.5" step="0.5" pattern="%.1f %unit%" readOnly="true"/>
+		<autoUpdatePolicy>default</autoUpdatePolicy>
+	</channel-type>
+	<channel-type id="runtime">
+		<item-type unitHint="min">Number:Time</item-type>
+		<label>Runtime</label>
+		<description>Total running time</description>
+		<tags>
+			<tag>Measurement</tag>
+			<tag>Duration</tag>
+		</tags>
+		<state pattern="%d %unit%" readOnly="true"/>
+		<autoUpdatePolicy>default</autoUpdatePolicy>
+	</channel-type>
+
+</thing:thing-descriptions>
