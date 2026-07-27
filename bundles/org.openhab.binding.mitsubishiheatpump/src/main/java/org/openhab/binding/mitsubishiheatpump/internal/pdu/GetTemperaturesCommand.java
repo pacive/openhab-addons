@@ -17,14 +17,14 @@ import java.util.Arrays;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.mitsubishiheatpump.internal.exception.SerialProtocolException;
 import org.openhab.binding.mitsubishiheatpump.internal.types.EnhancedTemperature;
-import org.openhab.binding.mitsubishiheatpump.internal.types.LegacyRoomTemperature;
+import org.openhab.binding.mitsubishiheatpump.internal.types.LegacyHPRoomTemperature;
 import org.openhab.binding.mitsubishiheatpump.internal.types.TimeType;
 
 @NonNullByDefault
 public class GetTemperaturesCommand implements MitsubishiHeatpumpCommand {
     public static final byte COMMAND_ID = 0x03;
 
-    private final LegacyRoomTemperature legacyRoomTemperature;
+    private final LegacyHPRoomTemperature legacyHPRoomTemperature;
     private final EnhancedTemperature outdoorUnitTemperature;
     private final EnhancedTemperature currentTemperature;
     private final TimeType runtime;
@@ -33,7 +33,7 @@ public class GetTemperaturesCommand implements MitsubishiHeatpumpCommand {
         if (data.length != DEFAULT_LENGTH) {
             throw new SerialProtocolException("Data of unexpected length");
         }
-        this.legacyRoomTemperature = new LegacyRoomTemperature(data[3]);
+        this.legacyHPRoomTemperature = new LegacyHPRoomTemperature(data[3]);
         this.outdoorUnitTemperature = new EnhancedTemperature(data[5]);
         this.currentTemperature = new EnhancedTemperature(data[6]);
         this.runtime = new TimeType(Arrays.copyOfRange(data, 11, 14));
@@ -46,7 +46,7 @@ public class GetTemperaturesCommand implements MitsubishiHeatpumpCommand {
     public byte[] serialize() {
         byte[] data = new byte[DEFAULT_LENGTH];
         data[0] = COMMAND_ID;
-        data[3] = legacyRoomTemperature.serialize()[0];
+        data[3] = legacyHPRoomTemperature.serialize()[0];
         data[5] = outdoorUnitTemperature.serialize()[0];
         data[6] = currentTemperature.serialize()[0];
         System.arraycopy(runtime.serialize(), 0, data, 11, 3);
@@ -54,8 +54,8 @@ public class GetTemperaturesCommand implements MitsubishiHeatpumpCommand {
         return data;
     }
 
-    public LegacyRoomTemperature getLegacyRoomTemperature() {
-        return legacyRoomTemperature;
+    public LegacyHPRoomTemperature getLegacyRoomTemperature() {
+        return legacyHPRoomTemperature;
     }
 
     public EnhancedTemperature getOutdoorUnitTemperature() {
@@ -68,5 +68,11 @@ public class GetTemperaturesCommand implements MitsubishiHeatpumpCommand {
 
     public TimeType getRuntime() {
         return runtime;
+    }
+
+    @Override
+    public String toString() {
+        return "GetTemperaturesCommand{legacyRoomTemperature=" + legacyHPRoomTemperature + ", outdoorUnitTemperature="
+                + outdoorUnitTemperature + ", currentTemperature=" + currentTemperature + ", runtime=" + runtime + '}';
     }
 }

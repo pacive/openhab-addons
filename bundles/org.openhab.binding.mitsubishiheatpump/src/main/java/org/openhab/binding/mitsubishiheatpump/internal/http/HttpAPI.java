@@ -69,6 +69,7 @@ public class HttpAPI {
                     + cryptoHelper.encryptPayload(
                             XML_COMMAND_HEADER + XML_CODE_HEADER + pdu.asHex() + XML_CODE_FOOTER + XML_COMMAND_FOOTER)
                     + XML_FOOTER;
+            logger.trace("Sending packet: {}", pdu);
             sendRequest(xml);
         } catch (HttpProtocolException e) {
             logger.warn("Error creating request");

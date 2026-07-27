@@ -62,9 +62,9 @@ public class GetSettingsCommand implements MitsubishiHeatpumpCommand {
         data[5] = legacySetpointTemperature.serialize()[0];
         data[6] = fanMode.serialize()[0];
         data[7] = verticalVane.serialize()[0];
-        data[11] = remoteProhibitFlags.serialize()[0];
-        data[13] = horizontalVane.serialize()[0];
-        data[14] = targetTemperature.serialize()[0];
+        data[8] = remoteProhibitFlags.serialize()[0];
+        data[10] = horizontalVane.serialize()[0];
+        data[11] = targetTemperature.serialize()[0];
 
         return data;
     }
@@ -99,5 +99,13 @@ public class GetSettingsCommand implements MitsubishiHeatpumpCommand {
 
     public EnhancedTemperature getTargetTemperature() {
         return targetTemperature;
+    }
+
+    @Override
+    public String toString() {
+        return "GetSettingsCommand{power=" + power + ", operatingMode=" + operatingMode + ", legacySetpointTemperature="
+                + legacySetpointTemperature + ", fanMode=" + fanMode + ", verticalVane=" + verticalVane
+                + ", remoteProhibitFlags=" + remoteProhibitFlags + ", horizontalVane=" + horizontalVane
+                + ", targetTemperature=" + targetTemperature + '}';
     }
 }

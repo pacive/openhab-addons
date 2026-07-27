@@ -71,4 +71,9 @@ public abstract class AbstractType {
     public State asState() {
         return new DecimalType(getValue());
     }
+
+    @Override
+    public String toString() {
+        return getValue().toString();
+    }
 }

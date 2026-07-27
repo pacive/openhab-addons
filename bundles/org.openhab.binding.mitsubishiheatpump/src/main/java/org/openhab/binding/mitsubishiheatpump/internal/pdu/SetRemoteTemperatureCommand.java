@@ -15,7 +15,7 @@ package org.openhab.binding.mitsubishiheatpump.internal.pdu;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.mitsubishiheatpump.internal.exception.SerialProtocolException;
 import org.openhab.binding.mitsubishiheatpump.internal.types.EnhancedTemperature;
-import org.openhab.binding.mitsubishiheatpump.internal.types.LegacyRoomTemperature;
+import org.openhab.binding.mitsubishiheatpump.internal.types.LegacyTSRoomTemperature;
 import org.openhab.binding.mitsubishiheatpump.internal.types.RemoteTempSetting;
 
 @NonNullByDefault
@@ -23,26 +23,17 @@ public class SetRemoteTemperatureCommand implements MitsubishiHeatpumpCommand {
     public static final byte COMMAND_ID = 0x07;
 
     private RemoteTempSetting remoteTempSetting;
-    private LegacyRoomTemperature legacyRoomTemperature;
+    private LegacyTSRoomTemperature legacyTSRoomTemperature;
     private EnhancedTemperature enhancedTemperature;
 
     public SetRemoteTemperatureCommand() {
         this.remoteTempSetting = RemoteTempSetting.INTERNAL;
         try {
-            this.legacyRoomTemperature = new LegacyRoomTemperature(0);
+            this.legacyTSRoomTemperature = new LegacyTSRoomTemperature(0);
             this.enhancedTemperature = new EnhancedTemperature(0);
         } catch (SerialProtocolException e) {
             throw new ExceptionInInitializerError("Failed to initialize");
         }
-    }
-
-    public SetRemoteTemperatureCommand(byte[] data) throws SerialProtocolException {
-        if (data.length != DEFAULT_LENGTH) {
-            throw new SerialProtocolException("Data of unexpected length");
-        }
-        this.remoteTempSetting = new RemoteTempSetting(data[1]);
-        this.legacyRoomTemperature = new LegacyRoomTemperature(data[2]);
-        this.enhancedTemperature = new EnhancedTemperature(data[3]);
     }
 
     public byte getId() {
@@ -53,19 +44,25 @@ public class SetRemoteTemperatureCommand implements MitsubishiHeatpumpCommand {
         byte[] data = new byte[DEFAULT_LENGTH];
         data[0] = COMMAND_ID;
         data[1] = remoteTempSetting.serialize()[0];
-        data[2] = legacyRoomTemperature.serialize()[0];
+        data[2] = legacyTSRoomTemperature.serialize()[0];
         data[3] = enhancedTemperature.serialize()[0];
 
         return data;
     }
 
-    public void setLegacyRoomTemperature(LegacyRoomTemperature legacyRoomTemperature) {
-        this.legacyRoomTemperature = legacyRoomTemperature;
+    public void setLegacyRoomTemperature(LegacyTSRoomTemperature legacyTSRoomTemperature) {
+        this.legacyTSRoomTemperature = legacyTSRoomTemperature;
         this.remoteTempSetting = RemoteTempSetting.EXTERNAL;
     }
 
     public void setEnhancedTemperature(EnhancedTemperature enhancedTemperature) {
         this.enhancedTemperature = enhancedTemperature;
         this.remoteTempSetting = RemoteTempSetting.EXTERNAL;
+    }
+
+    @Override
+    public String toString() {
+        return "SetRemoteTemperatureCommand{remoteTempSetting=" + remoteTempSetting + ", legacyRoomTemperature="
+                + legacyTSRoomTemperature + ", enhancedTemperature=" + enhancedTemperature + '}';
     }
 }

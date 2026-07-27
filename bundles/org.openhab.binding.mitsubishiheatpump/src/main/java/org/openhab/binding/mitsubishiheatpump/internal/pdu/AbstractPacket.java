@@ -24,22 +24,24 @@ import org.openhab.binding.mitsubishiheatpump.internal.util.Util;
 
 @NonNullByDefault
 public abstract class AbstractPacket {
+    protected final byte[] rawData;
     protected final MitsubishiHeatpumpCommand command;
 
     protected AbstractPacket(byte[] data) throws SerialProtocolException {
+        this.rawData = data;
         this.command = createCommand(Arrays.copyOfRange(data, 5, data.length - 1));
     }
 
     protected AbstractPacket(MitsubishiHeatpumpCommand command) {
+        this.rawData = new byte[] {};
         this.command = command;
     }
 
     protected MitsubishiHeatpumpCommand createCommand(byte[] data) throws SerialProtocolException {
         return switch (data[0]) {
-            case 0x01 -> new SetSettingsCommand(data);
             case 0x02 -> new GetSettingsCommand(data);
             case 0x03 -> new GetTemperaturesCommand(data);
-            case 0x07 -> new SetRemoteTemperatureCommand(data);
+            case (byte) 0xc9 -> new BaseCapabilitiesCommand(data);
             default -> new GenericCommand(data);
         };
     }
@@ -59,12 +61,21 @@ public abstract class AbstractPacket {
     }
 
     public String asHex() {
-        return HexFormat.of().formatHex(serialize());
+        if (rawData.length > 0) {
+            return HexFormat.of().formatHex(rawData);
+        } else {
+            return HexFormat.of().formatHex(serialize());
+        }
     }
 
     protected abstract byte getId();
 
     public MitsubishiHeatpumpCommand getCommand() {
         return command;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "->" + this.command + " (" + asHex() + ")";
     }
 }

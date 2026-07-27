@@ -31,4 +31,9 @@ public class GenericCommand implements MitsubishiHeatpumpCommand {
     public byte getId() {
         return 0;
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
 }

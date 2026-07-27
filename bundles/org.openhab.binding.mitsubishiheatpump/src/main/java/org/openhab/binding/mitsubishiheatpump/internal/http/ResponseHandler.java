@@ -67,7 +67,12 @@ public class ResponseHandler extends BufferingResponseListener {
     @Override
     public synchronized void onComplete(Result result) {
         try {
-            handleResponse(getInnerContent());
+            logger.trace("HTTP response: {} {}", result.getResponse().getStatus(), result.getResponse().getReason());
+            if (result.isSucceeded()) {
+                handleResponse(getInnerContent());
+            } else {
+                logger.warn("HTTP request failed");
+            }
         } catch (MitsibishiHeatpumpException e) {
             logger.warn("Error during handling of response: {}", e.getMessage());
             logger.debug("", e);

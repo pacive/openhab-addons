@@ -12,8 +12,6 @@
  */
 package org.openhab.binding.mitsubishiheatpump.internal.pdu;
 
-import java.util.Arrays;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.mitsubishiheatpump.internal.exception.SerialProtocolException;
 import org.openhab.binding.mitsubishiheatpump.internal.types.EnhancedTemperature;
@@ -54,21 +52,6 @@ public class SetSettingsCommand implements MitsubishiHeatpumpCommand {
         } catch (SerialProtocolException e) {
             throw new ExceptionInInitializerError("Failed to initialize");
         }
-    }
-
-    public SetSettingsCommand(byte[] data) throws SerialProtocolException {
-        if (data.length != DEFAULT_LENGTH) {
-            throw new SerialProtocolException("Data of unexpected length");
-        }
-        this.updateFlags = new UpdateFlags(Arrays.copyOfRange(data, 1, 3));
-        this.power = new Power(data[3]);
-        this.operatingMode = new OperatingMode(data[4]);
-        this.legacySetpointTemperature = new LegacySetpointTemperature(data[5]);
-        this.fanMode = new FanMode(data[6]);
-        this.verticalVane = new VerticalVane(data[7]);
-        this.remoteProhibitFlags = new RemoteProhibitFlags(data[11]);
-        this.horizontalVane = new HorizontalVane(data[13]);
-        this.targetTemperature = new EnhancedTemperature(data[14]);
     }
 
     public byte getId() {
@@ -129,5 +112,13 @@ public class SetSettingsCommand implements MitsubishiHeatpumpCommand {
     public void setTargetTemperature(EnhancedTemperature targetTemperature) {
         this.targetTemperature = targetTemperature;
         this.updateFlags.withFlags(UpdateFlags.UPDATE_TEMP);
+    }
+
+    @Override
+    public String toString() {
+        return "SetSettingsCommand{updateFlags=" + updateFlags + ", power=" + power + ", operatingMode=" + operatingMode
+                + ", legacySetpointTemperature=" + legacySetpointTemperature + ", fanMode=" + fanMode
+                + ", verticalVane=" + verticalVane + ", remoteProhibitFlags=" + remoteProhibitFlags
+                + ", horizontalVane=" + horizontalVane + ", targetTemperature=" + targetTemperature + '}';
     }
 }

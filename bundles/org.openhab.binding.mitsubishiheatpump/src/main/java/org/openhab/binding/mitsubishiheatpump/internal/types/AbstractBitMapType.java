@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.mitsubishiheatpump.internal.types;
 
+import java.util.HexFormat;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.mitsubishiheatpump.internal.exception.SerialProtocolException;
 
@@ -48,5 +50,10 @@ public abstract class AbstractBitMapType extends AbstractType {
 
     public void withFlags(AbstractBitMapType other) {
         or(other);
+    }
+
+    @Override
+    public String toString() {
+        return HexFormat.of().formatHex(serialize());
     }
 }

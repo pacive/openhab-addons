@@ -19,20 +19,12 @@ import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.types.State;
 
 @NonNullByDefault
-public class LegacyRoomTemperature extends AbstractRangeType implements MitsubishiHeatpumpType {
+public class LegacyHPRoomTemperature extends AbstractRangeType implements MitsubishiHeatpumpType {
     private static final int MIN = 0x00;
     private static final int MAX = 0x1f;
 
-    public LegacyRoomTemperature(int rawValue) throws SerialProtocolException {
-        super(rawValue);
-    }
-
-    public LegacyRoomTemperature(byte value) throws SerialProtocolException {
+    public LegacyHPRoomTemperature(byte value) throws SerialProtocolException {
         super(value);
-    }
-
-    public LegacyRoomTemperature(float value) throws SerialProtocolException {
-        super(convertToRaw(value));
     }
 
     protected int max() {
@@ -45,11 +37,11 @@ public class LegacyRoomTemperature extends AbstractRangeType implements Mitsubis
 
     @Override
     public Number getValue() {
-        return 8f + ((float) getRawValue()) / 2;
+        return 10f + getRawValue();
     }
 
     private static int convertToRaw(float value) {
-        return (int) (value * 2 - 16);
+        return (int) (value - 10);
     }
 
     @Override

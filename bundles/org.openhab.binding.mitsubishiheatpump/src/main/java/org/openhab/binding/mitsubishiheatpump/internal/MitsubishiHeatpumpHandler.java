@@ -94,6 +94,7 @@ public class MitsubishiHeatpumpHandler extends BaseThingHandler {
                     sendPacket(ThingHandlerHelper.createSetRemoteTempPDU(command));
                     break;
             }
+            scheduler.schedule(() -> sendPacket(ThingHandlerHelper.createGetSettingsPDU()), 5, TimeUnit.SECONDS);
         } catch (SerialProtocolException e) {
             logger.warn("Failed to send command {}", e.getMessage());
             logger.debug("", e);
@@ -172,8 +173,7 @@ public class MitsubishiHeatpumpHandler extends BaseThingHandler {
 
     public synchronized void onPDU(MitsubishiHeatpumpPDU pdu) {
         MitsubishiHeatpumpCommand command = pdu.getCommand();
-        logger.trace("Received {}({}): {}", pdu.getClass().getSimpleName(), command.getClass().getSimpleName(),
-                pdu.asHex());
+        logger.trace("Received {}", pdu);
         if (pdu instanceof GenericPacket) {
             return;
         }
