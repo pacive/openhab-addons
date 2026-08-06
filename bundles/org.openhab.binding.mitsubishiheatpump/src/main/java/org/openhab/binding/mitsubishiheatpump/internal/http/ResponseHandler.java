@@ -67,7 +67,8 @@ public class ResponseHandler extends BufferingResponseListener {
     @Override
     public synchronized void onComplete(Result result) {
         try {
-            logger.trace("HTTP response: {} {}", result.getResponse().getStatus(), result.getResponse().getReason());
+            logger.trace("HTTP response: {} {}\n{}", result.getResponse().getStatus(), result.getResponse().getReason(),
+                    result.getResponse().getHeaders());
             if (result.isSucceeded()) {
                 handleResponse(getInnerContent());
             } else {

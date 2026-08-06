@@ -10,18 +10,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.mitsubishiheatpump.internal.pdu;
+package org.openhab.binding.mitsubishiheatpump.internal.pdu.command;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.mitsubishiheatpump.internal.pdu.command.MitsubishiHeatpumpCommand;
 
 @NonNullByDefault
-public interface MitsubishiHeatpumpPDU {
+public interface MitsubishiHeatpumpCommand {
+    int DEFAULT_LENGTH = 16;
+
     byte[] serialize();
 
     byte getId();
-
-    String asHex();
-
-    MitsubishiHeatpumpCommand getCommand();
 }

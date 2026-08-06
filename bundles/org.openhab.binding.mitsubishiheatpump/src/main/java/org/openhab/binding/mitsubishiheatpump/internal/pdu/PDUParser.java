@@ -19,6 +19,12 @@ import java.util.HexFormat;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.mitsubishiheatpump.internal.exception.SerialProtocolException;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.packet.GenericPacket;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.packet.GetRequestPacket;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.packet.GetResponsePacket;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.packet.IdentifyResponsePacket;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.packet.SetRequestPacket;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.packet.SetResponsePacket;
 import org.openhab.binding.mitsubishiheatpump.internal.util.Util;
 
 @NonNullByDefault
@@ -34,6 +40,7 @@ public class PDUParser {
             case 0x61 -> new SetResponsePacket(data);
             case 0x42 -> new GetRequestPacket(data);
             case 0x62 -> new GetResponsePacket(data);
+            case 0x7b -> new IdentifyResponsePacket(data);
             default -> new GenericPacket(data);
         };
     }

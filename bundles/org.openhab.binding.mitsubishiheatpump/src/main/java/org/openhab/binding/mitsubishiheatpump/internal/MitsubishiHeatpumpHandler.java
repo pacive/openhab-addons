@@ -25,13 +25,15 @@ import org.eclipse.jetty.client.HttpClient;
 import org.openhab.binding.mitsubishiheatpump.internal.exception.ConfigurationException;
 import org.openhab.binding.mitsubishiheatpump.internal.exception.SerialProtocolException;
 import org.openhab.binding.mitsubishiheatpump.internal.http.HttpAPI;
-import org.openhab.binding.mitsubishiheatpump.internal.pdu.GenericPacket;
-import org.openhab.binding.mitsubishiheatpump.internal.pdu.GetSettingsCommand;
-import org.openhab.binding.mitsubishiheatpump.internal.pdu.GetTemperaturesCommand;
-import org.openhab.binding.mitsubishiheatpump.internal.pdu.MitsubishiHeatpumpCommand;
 import org.openhab.binding.mitsubishiheatpump.internal.pdu.MitsubishiHeatpumpPDU;
-import org.openhab.binding.mitsubishiheatpump.internal.pdu.SetRemoteTemperatureCommand;
-import org.openhab.binding.mitsubishiheatpump.internal.pdu.SetRequestPacket;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.command.BaseCapabilitiesCommand;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.command.GetSettingsCommand;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.command.GetTemperaturesCommand;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.command.MitsubishiHeatpumpCommand;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.command.SetRemoteTemperatureCommand;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.packet.GenericPacket;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.packet.SetRequestPacket;
+import org.openhab.binding.mitsubishiheatpump.internal.pdu.types.CapabilitiesFlags;
 import org.openhab.binding.mitsubishiheatpump.internal.util.CryptoHelper;
 import org.openhab.binding.mitsubishiheatpump.internal.util.ThingHandlerHelper;
 import org.openhab.core.thing.ChannelUID;
@@ -167,7 +169,10 @@ public class MitsubishiHeatpumpHandler extends BaseThingHandler {
     }
 
     public synchronized void onDeviceInfoResponse(Map<String, String> deviceInfo) {
-        updateProperties(deviceInfo);
+        logger.trace("Received device info: {}", deviceInfo);
+        Map<String, String> properties = editProperties();
+        properties.putAll(deviceInfo);
+        updateProperties(properties);
         updateStatus(ThingStatus.ONLINE);
     }
 
@@ -192,8 +197,36 @@ public class MitsubishiHeatpumpHandler extends BaseThingHandler {
                 updateState(CHANNEL_INDOOR_TEMP, gtc.getCurrentTemperature().asState());
                 updateState(CHANNEL_RUNTIME, gtc.getRuntime().asState());
             }
+            case BaseCapabilitiesCommand bcc -> {
+                addCapabilitiesToProperties(bcc);
+            }
             default -> {
             }
         }
+    }
+
+    private void addCapabilitiesToProperties(BaseCapabilitiesCommand bcc) {
+        Map<String, String> properties = editProperties();
+        CapabilitiesFlags capabilitiesFlags = bcc.getCapabilitiesFlags();
+        properties.put("supportsVerticalVane", String.valueOf(capabilitiesFlags.supportsVerticalVane()));
+        properties.put("supportsVaneSwing", String.valueOf(capabilitiesFlags.supportsVaneSwing()));
+        properties.put("supportsEnhancedTemperature", String.valueOf(capabilitiesFlags.supportsEnhancedTemperature()));
+        properties.put("supportsInstallerSettings", String.valueOf(capabilitiesFlags.supportsInstallerSettings()));
+        properties.put("supportsTestMode", String.valueOf(capabilitiesFlags.supportsTestMode()));
+        properties.put("supportsDryTemp", String.valueOf(capabilitiesFlags.supportsDryTemp()));
+        properties.put("supportsOutsideTemp", String.valueOf(capabilitiesFlags.supportsOutsideTemp()));
+        properties.put("hasStatusDisplay", String.valueOf(capabilitiesFlags.hasStatusDisplay()));
+        properties.put("isHeatDisabled", String.valueOf(capabilitiesFlags.isHeatDisabled()));
+        properties.put("isDryFunctionDisabled", String.valueOf(capabilitiesFlags.isDryFunctionDisabled()));
+        properties.put("isFanFunctionDisabled", String.valueOf(capabilitiesFlags.isFanFunctionDisabled()));
+        properties.put("isAutoFanSpeedDisabled", String.valueOf(capabilitiesFlags.isAutoFanSpeedDisabled()));
+        properties.put("fanSpeedConfigurationValue", String.valueOf(capabilitiesFlags.getFanSpeedConfiguration()));
+        properties.put("minCoolSetpoint", bcc.getMinCoolSetpoint().asState().toString());
+        properties.put("maxCoolSetpoint", bcc.getMaxCoolSetpoint().asState().toString());
+        properties.put("minHeatSetpoint", bcc.getMinHeatSetpoint().asState().toString());
+        properties.put("maxHeatSetpoint", bcc.getMaxHeatSetpoint().asState().toString());
+        properties.put("minAutoSetpoint", bcc.getMinAutoSetpoint().asState().toString());
+        properties.put("maxAutoSetpoint", bcc.getMaxAutoSetpoint().asState().toString());
+        updateProperties(properties);
     }
 }
